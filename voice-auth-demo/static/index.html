@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Authenticity Engine</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M5 11a7 7 0 0 0 14 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>Voice Authenticity Engine</h1>
+        <p class="subtitle">SIH26104 &middot; Voice cloning detection &middot; Demo prototype</p>
+      </div>
+    </div>
+    <div class="status-chip" id="serverStatus">
+      <span class="dot"></span> Local &middot; offline
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============================= SIDEBAR ============================= -->
+  <aside class="panel glass sidebar">
+    <section class="sidebar-section">
+      <h2>Call context</h2>
+      <p class="hint">Simulates metadata a telecom/bank integration would already have.</p>
+
+      <label class="switch-row">
+        <span>Unknown / unverified number</span>
+        <span class="switch"><input type="checkbox" id="toggleUnknown" checked><i></i></span>
+      </label>
+      <label class="switch-row">
+        <span>Requests a financial transaction</span>
+        <span class="switch"><input type="checkbox" id="toggleTransaction" checked><i></i></span>
+      </label>
+      <label class="switch-row">
+        <span>High-pressure / urgency language</span>
+        <span class="switch"><input type="checkbox" id="toggleUrgency"><i></i></span>
+      </label>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="sidebar-section">
+      <h2>Action thresholds</h2>
+      <p class="hint">Set per-deployment by the bank/telecom in production.</p>
+
+      <div class="slider-row">
+        <div class="slider-label"><span>Allow below</span><span class="slider-value" id="allowMaxLabel">30</span></div>
+        <input type="range" id="allowMax" min="0" max="100" value="30">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>Flag below (else Block)</span><span class="slider-value" id="flagMaxLabel">65</span></div>
+        <input type="range" id="flagMax" min="0" max="100" value="65">
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <p class="footnote">
+      Acoustic scoring uses classical DSP markers (jitter, shimmer, spectral
+      flatness, etc.) as an explainable, GPU-free stand-in for the WavLM
+      classifier described in the deck.
+    </p>
+  </aside>
+
+  <!-- ============================== MAIN ================================ -->
+  <section class="main-col">
+
+    <div class="panel glass">
+      <h2 class="section-title">1&ensp;Provide a call audio sample</h2>
+
+      <div class="segmented" id="sourceTabs">
+        <button class="seg-btn active" data-tab="record">Record live</button>
+        <button class="seg-btn" data-tab="upload">Upload a file</button>
+        <button class="seg-btn" data-tab="synthetic">Synthetic sample</button>
+      </div>
+
+      <div class="tab-panel" data-panel="record">
+        <p class="hint">Record a few seconds of your own voice — your genuine control sample.</p>
+        <div class="record-row">
+          <button class="record-btn" id="recordBtn">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="7" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="record-meta">
+            <div class="record-timer" id="recordTimer">00:00</div>
+            <div class="record-wave" id="recordWave"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="upload">
+        <p class="hint">Upload a WAV / FLAC clip.</p>
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept="audio/*" hidden>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 16V4m0 0-4 4m4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span id="dropzoneLabel">Click to choose a file, or drop it here</span>
+        </label>
+      </div>
+
+      <div class="tab-panel hidden" data-panel="synthetic">
+        <p class="hint">
+          Offline TTS-generated clip — a stand-in for a cloned/synthetic voice,
+          since a real deepfake sample can't be played safely in a public demo.
+        </p>
+        <button class="secondary-btn" id="loadSampleBtn">Load bundled sample</button>
+      </div>
+
+      <div class="player-row hidden" id="playerRow">
+        <audio id="player" controls></audio>
+        <button class="primary-btn" id="analyzeBtn">Analyze this clip</button>
+      </div>
+
+      <canvas id="waveCanvas" class="waveform hidden" height="72"></canvas>
+    </div>
+
+    <!-- ------------------------- pipeline progress ------------------------ -->
+    <div class="panel glass hidden" id="pipelinePanel">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p class="progress-label" id="progressLabel">Ingesting audio…</p>
+    </div>
+
+    <!-- ----------------------------- results ------------------------------ -->
+    <div class="results hidden" id="results">
+
+      <div class="panel glass score-grid">
+        <div class="score-block">
+          <span class="score-caption">Acoustic authenticity risk</span>
+          <div class="gauge">
+            <svg viewBox="0 0 120 120">
+              <circle class="gauge-track" cx="60" cy="60" r="52"/>
+              <circle class="gauge-fill" id="acousticRing" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="gauge-value" id="acousticValue">0</div>
+          </div>
+          <span class="score-note">Higher = more signs of synthetic speech</span>
+        </div>
+
+        <div class="score-block">
+          <span class="score-caption">Composite risk score</span>
+          <div class="gauge">
+            <svg viewBox="0 0 120 120">
+              <circle class="gauge-track" cx="60" cy="60" r="52"/>
+              <circle class="gauge-fill" id="compositeRing" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="gauge-value" id="compositeValue">0</div>
+          </div>
+          <span class="score-note">Acoustic (75%) + call metadata (25%)</span>
+        </div>
+
+        <div class="score-block action-block">
+          <span class="score-caption">Recommended action</span>
+          <div class="action-badge" id="actionBadge">
+            <svg class="action-icon" id="actionIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+            <span id="actionLabel">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel glass">
+        <h2 class="section-title">2&ensp;Why this score?</h2>
+        <div class="explain-grid">
+          <div class="feature-bars" id="featureBars"></div>
+          <div class="metadata-list" id="metadataList"></div>
+        </div>
+        <details class="raw-details">
+          <summary>Raw feature values</summary>
+          <pre id="rawFeatures"></pre>
+        </details>
+      </div>
+
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 18V6l8 6-8 6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <p>Record, upload, or load the bundled sample to run the pipeline.</p>
+    </div>
+
+    <details class="panel limitations">
+      <summary>Known limitations of this demo</summary>
+      <ul>
+        <li>Uses classical DSP features, not a WavLM classifier fine-tuned on ASVspoof/WaveFake.</li>
+        <li>Thresholds are hand-set from literature, not fitted on a labeled dataset — no EER/FPR benchmark implied.</li>
+        <li>Single-clip analysis, not true streaming inference.</li>
+        <li>Very short (&lt;1s) or heavily denoised/post-processed audio won't score reliably.</li>
+      </ul>
+    </details>
+
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
