@@ -486,6 +486,35 @@ input[type="range"]::-moz-range-thumb {
   color: var(--ink-secondary);
 }
 
+/* --------------------------------- LIVE chip -------------------------------- */
+
+.live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--block-tint);
+  color: var(--block);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: fade-up .3s ease both;
+  align-self: flex-start;
+}
+.live-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--block);
+  animation: live-pulse 1.1s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.8); }
+}
+
 /* --------------------------------- results --------------------------------- */
 
 .results { display: flex; flex-direction: column; gap: 20px; }

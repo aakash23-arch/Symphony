@@ -8,18 +8,24 @@
   const state = {
     activeTab: "record",
     audioBlob: null,
-    audioBuffer: null,   // decoded AudioBuffer for viz
+    audioBuffer: null,
     useSample: false,
+    // recording + WebSocket streaming
     analyserNode: null,
     audioCtx: null,
     sourceNode: null,
+    processorNode: null,
     stream: null,
     rafHandle: null,
     recording: false,
+    streaming: false,     // true when a WebSocket stream is active
+    ws: null,             // WebSocket instance
+    chunkInterval: null,  // setInterval handle for flushing PCM chunks
+    pcmChunks: [],      // flushed to WebSocket every 500ms (gets cleared)
+    allChunks: [],      // full recording — never cleared until next record session
+    pcmSampleRate: 44100,
     recordStart: 0,
     timerHandle: null,
-    pcmChunks: [],
-    pcmSampleRate: 44100,
   };
 
   // ------------------------------- tabs ---------------------------------
@@ -28,10 +34,9 @@
     btn.addEventListener("click", () => {
       document.querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      const tab = btn.dataset.tab;
-      state.activeTab = tab;
+      state.activeTab = btn.dataset.tab;
       document.querySelectorAll(".tab-panel").forEach((p) => {
-        p.classList.toggle("hidden", p.dataset.panel !== tab);
+        p.classList.toggle("hidden", p.dataset.panel !== state.activeTab);
       });
     });
   });
@@ -48,14 +53,10 @@
   const flagMaxEl  = el("flagMax");
 
   function updateSliderGradient(input, a, f) {
-    const total = 100;
-    const aPct  = (a / total) * 100;
-    const fPct  = (f / total) * 100;
     const g = `linear-gradient(to right,
-      var(--allow) 0%, var(--allow) ${aPct}%,
-      var(--flag)  ${aPct}%, var(--flag) ${fPct}%,
-      var(--block) ${fPct}%, var(--block) 100%)`;
-    input.style.setProperty("--slider-gradient", g);
+      var(--allow) 0%, var(--allow) ${a}%,
+      var(--flag)  ${a}%, var(--flag) ${f}%,
+      var(--block) ${f}%, var(--block) 100%)`;
     input.style.background = g;
   }
 
@@ -67,18 +68,37 @@
     el("flagMaxLabel").textContent  = f;
     updateSliderGradient(allowMaxEl, a, f);
     updateSliderGradient(flagMaxEl,  a, f);
+    // If a stream is live, propagate the new thresholds immediately
+    sendMetadataUpdate();
   }
   allowMaxEl.addEventListener("input", syncThresholds);
   flagMaxEl.addEventListener("input",  syncThresholds);
   syncThresholds();
 
-  // ------------------------------ recording (AnalyserNode) -------------
+  // Send metadata updates over WS whenever toggles change
+  ["toggleUnknown", "toggleTransaction", "toggleUrgency"].forEach((id) => {
+    el(id).addEventListener("change", sendMetadataUpdate);
+  });
+
+  function sendMetadataUpdate() {
+    if (!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
+    state.ws.send(JSON.stringify({
+      type:               "metadata",
+      unknownNumber:      el("toggleUnknown").checked,
+      transactionRequest: el("toggleTransaction").checked,
+      highUrgency:        el("toggleUrgency").checked,
+      allowMax:           parseFloat(allowMaxEl.value),
+      flagMax:            parseFloat(flagMaxEl.value),
+    }));
+  }
+
+  // ------------------------------ recording (AnalyserNode) + WebSocket --
 
   const recordBtn   = el("recordBtn");
   const recordTimer = el("recordTimer");
   const recordWave  = el("recordWave");
 
-  // build bar scaffold
+  // Build bar scaffold
   const BAR_COUNT = 40;
   for (let i = 0; i < BAR_COUNT; i++) {
     const s = document.createElement("span");
@@ -98,29 +118,86 @@
     state.rafHandle = requestAnimationFrame(animateBars);
   }
 
-  function floatTo16WAV(samples, sampleRate) {
-    const buffer = new ArrayBuffer(44 + samples.length * 2);
-    const view   = new DataView(buffer);
-    const str    = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
-    str(0, "RIFF");
-    view.setUint32(4, 36 + samples.length * 2, true);
-    str(8, "WAVE"); str(12, "fmt ");
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1,  true);
-    view.setUint16(22, 1,  true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true);
-    view.setUint16(32, 2,  true);
-    view.setUint16(34, 16, true);
-    str(36, "data");
-    view.setUint32(40, samples.length * 2, true);
-    let offset = 44;
-    for (let i = 0; i < samples.length; i++, offset += 2) {
-      const s = Math.max(-1, Math.min(1, samples[i]));
-      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    }
-    return new Blob([view], { type: "audio/wav" });
+  // ---- WebSocket helpers -----------------------------------------------
+
+  function openStreamSocket(sampleRate) {
+    const wsUrl = `ws://${location.host}/api/stream`;
+    const ws = new WebSocket(wsUrl);
+    ws.binaryType = "arraybuffer";
+
+    ws.addEventListener("open", () => {
+      // Send init message with sample rate and current metadata/threshold state
+      ws.send(JSON.stringify({
+        type:               "init",
+        sampleRate,
+        unknownNumber:      el("toggleUnknown").checked,
+        transactionRequest: el("toggleTransaction").checked,
+        highUrgency:        el("toggleUrgency").checked,
+        allowMax:           parseFloat(allowMaxEl.value),
+        flagMax:            parseFloat(flagMaxEl.value),
+      }));
+      state.streaming = true;
+      setLiveMode(true);
+    });
+
+    ws.addEventListener("message", (evt) => {
+      try {
+        const data = JSON.parse(evt.data);
+        renderResults(data, true /* liveMode */);
+      } catch (e) { /* ignore bad frames */ }
+    });
+
+    ws.addEventListener("close", () => {
+      state.streaming = false;
+      setLiveMode(false);
+    });
+
+    ws.addEventListener("error", () => {
+      console.warn("WebSocket error — streaming unavailable.");
+      state.streaming = false;
+      setLiveMode(false);
+    });
+
+    return ws;
   }
+
+  // Toggle the LIVE chip and lock the Analyze button during streaming
+  function setLiveMode(on) {
+    el("liveChip").classList.toggle("hidden", !on);
+    el("results").classList.toggle("hidden", !on);
+    el("emptyState").classList.add("hidden");
+    if (on) {
+      el("analyzeBtn").disabled = true;
+      el("analyzeBtn").textContent = "Streaming…";
+    } else {
+      el("analyzeBtn").disabled = false;
+      el("analyzeBtn").textContent = "Analyze this clip";
+    }
+  }
+
+  // ---- Flush accumulated PCM chunks over the WebSocket every 500ms ----
+
+  function startChunkInterval() {
+    state.chunkInterval = setInterval(() => {
+      if (!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
+      if (state.pcmChunks.length === 0) return;
+
+      const total  = state.pcmChunks.reduce((n, c) => n + c.length, 0);
+      const merged = new Float32Array(total);
+      let off = 0;
+      for (const c of state.pcmChunks) { merged.set(c, off); off += c.length; }
+      state.pcmChunks = []; // reset accumulator
+
+      // Convert Float32 → Int16 and send as binary
+      const int16 = new Int16Array(merged.length);
+      for (let i = 0; i < merged.length; i++) {
+        int16[i] = Math.max(-32768, Math.min(32767, merged[i] * 32767));
+      }
+      state.ws.send(int16.buffer);
+    }, 500);
+  }
+
+  // ---- Main recording start/stop --------------------------------------
 
   async function startRecording() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -132,16 +209,19 @@
     analyser.fftSize = 128;
     analyser.smoothingTimeConstant = 0.8;
 
-    // ScriptProcessor for capturing PCM (deprecated but still universal)
+    // ScriptProcessor captures raw PCM (deprecated but universally supported)
     const processor = audioCtx.createScriptProcessor(4096, 1, 1);
     const mute      = audioCtx.createGain();
-    mute.gain.value  = 0;
+    mute.gain.value = 0;
 
-    state.pcmChunks    = [];
+    state.pcmChunks     = [];
+    state.allChunks     = [];   // start fresh for this recording session
     state.pcmSampleRate = audioCtx.sampleRate;
 
     processor.onaudioprocess = (e) => {
-      state.pcmChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+      const data = new Float32Array(e.inputBuffer.getChannelData(0));
+      state.pcmChunks.push(data);
+      state.allChunks.push(data); // keep full copy — never cleared by the WS flush
     };
 
     source.connect(analyser);
@@ -149,13 +229,13 @@
     processor.connect(mute);
     mute.connect(audioCtx.destination);
 
-    state.audioCtx    = audioCtx;
-    state.analyserNode = analyser;
-    state.sourceNode  = source;
+    state.audioCtx      = audioCtx;
+    state.analyserNode  = analyser;
+    state.sourceNode    = source;
     state.processorNode = processor;
-    state.stream      = stream;
-    state.recording   = true;
-    state.recordStart = Date.now();
+    state.stream        = stream;
+    state.recording     = true;
+    state.recordStart   = Date.now();
 
     recordBtn.classList.add("recording");
     state.timerHandle = setInterval(() => {
@@ -165,29 +245,61 @@
       recordTimer.textContent = `${mm}:${ss}`;
     }, 200);
 
-    // start live bar animation via rAF
+    // Start live bar animation
     state.rafHandle = requestAnimationFrame(animateBars);
+
+    // Open the streaming WebSocket
+    state.ws = openStreamSocket(audioCtx.sampleRate);
+    startChunkInterval();
+  }
+
+  function floatTo16WAV(samples, sampleRate) {
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view   = new DataView(buffer);
+    const str    = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+    str(0, "RIFF");
+    view.setUint32(4, 36 + samples.length * 2, true);
+    str(8, "WAVE"); str(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    str(36, "data");
+    view.setUint32(40, samples.length * 2, true);
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++, offset += 2) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return new Blob([view], { type: "audio/wav" });
   }
 
   function stopRecording() {
     if (!state.recording) return;
     state.recording = false;
     clearInterval(state.timerHandle);
+    clearInterval(state.chunkInterval);
     cancelAnimationFrame(state.rafHandle);
     recordBtn.classList.remove("recording");
-
-    // reset bars
     bars.forEach((b) => (b.style.height = "4px"));
 
     state.processorNode.disconnect();
     state.sourceNode.disconnect();
     state.stream.getTracks().forEach((t) => t.stop());
 
+    // Close the WebSocket gracefully
+    if (state.ws && state.ws.readyState === WebSocket.OPEN) state.ws.close();
+    state.ws = null;
+
+    // Build the final WAV from the FULL recording (allChunks, never cleared by WS flush)
     const sampleRate = state.pcmSampleRate;
-    const total  = state.pcmChunks.reduce((n, c) => n + c.length, 0);
+    const total  = state.allChunks.reduce((n, c) => n + c.length, 0);
     const merged = new Float32Array(total);
     let off = 0;
-    for (const c of state.pcmChunks) { merged.set(c, off); off += c.length; }
+    for (const c of state.allChunks) { merged.set(c, off); off += c.length; }
 
     const blob = floatTo16WAV(merged, sampleRate);
     state.audioCtx.close();
@@ -227,8 +339,8 @@
 
   // ------------------------------ shared clip handling ----------------------
 
-  const player    = el("player");
-  const playerRow = el("playerRow");
+  const player     = el("player");
+  const playerRow  = el("playerRow");
   const waveCanvas = el("waveCanvas");
 
   async function handleNewClip(blobOrFile, label) {
@@ -240,7 +352,6 @@
     player.src = url;
     playerRow.classList.remove("hidden");
 
-    // decode for waveform + spectrogram
     try {
       const arrayBuf = await blobOrFile.arrayBuffer();
       const AudioContextCls = window.AudioContext || window.webkitAudioContext;
@@ -249,16 +360,18 @@
       state.audioBuffer = audioBuffer;
       drawWaveformCanvas(waveCanvas, audioBuffer.getChannelData(0));
       ctx.close();
-
-      // show clip info chip with what we know now (duration from decoded buffer)
       showClipInfo({ label, duration: audioBuffer.duration, sr: audioBuffer.sampleRate });
     } catch (e) {
       waveCanvas.classList.add("hidden");
       el("clipInfo").classList.add("hidden");
     }
 
-    el("results").classList.add("hidden");
-    el("emptyState").classList.add("hidden");
+    // Only reset results if not in the middle of a stream
+    if (!state.streaming) {
+      el("results").classList.add("hidden");
+      el("emptyState").classList.remove("hidden");
+      setLiveMode(false);
+    }
   }
 
   function showClipInfo({ label, duration, sr }) {
@@ -266,7 +379,7 @@
     chip.innerHTML = `
       <strong>${label}</strong>
       <span class="chip-sep"></span>
-      ${duration ? `<span>${duration.toFixed(1)}s</span><span class="chip-sep"></span>` : ""}
+      ${duration !== undefined ? `<span>${Number(duration).toFixed(1)}s</span><span class="chip-sep"></span>` : ""}
       ${sr ? `<span>${(sr / 1000).toFixed(1)} kHz</span>` : ""}
     `;
     chip.classList.remove("hidden");
@@ -317,23 +430,17 @@
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, width, height);
 
-    const data      = audioBuffer.getChannelData(0);
-    const fftSize   = 256;
-    const hopSize   = Math.floor(data.length / width);
-    const numFrames = width;
+    const data    = audioBuffer.getChannelData(0);
+    const fftSize = 256;
+    const hopSize = Math.floor(data.length / width);
+    const numBins = fftSize / 2;
 
-    // Hann window
     const window_ = new Float32Array(fftSize);
     for (let i = 0; i < fftSize; i++) {
       window_[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
     }
 
-    // Simple DFT magnitude per column (fast enough for short clips in demo)
-    // For performance we only compute magnitudes for the lower half (numBins)
-    const numBins = fftSize / 2;
-
     const colormap = (v) => {
-      // viridis-inspired: dark purple → blue → teal → green → yellow
       v = Math.max(0, Math.min(1, v));
       const r = Math.round(Math.max(0, Math.min(255, 255 * (0.8 + 0.8 * (v - 0.7)))));
       const g = Math.round(Math.max(0, Math.min(255, 255 * (1.5 * v - 0.2))));
@@ -345,15 +452,11 @@
     const re    = new Float32Array(fftSize);
     const im    = new Float32Array(fftSize);
 
-    for (let col = 0; col < numFrames; col++) {
+    for (let col = 0; col < width; col++) {
       const start = col * hopSize;
-
-      // fill frame with windowed samples
       for (let i = 0; i < fftSize; i++) {
         frame[i] = (data[start + i] ?? 0) * window_[i];
       }
-
-      // DFT (O(N²) — fine for fftSize=256 × ~600 columns)
       for (let k = 0; k < numBins; k++) {
         let r = 0, im_ = 0;
         for (let n = 0; n < fftSize; n++) {
@@ -361,16 +464,12 @@
           r   += frame[n] * Math.cos(angle);
           im_ -= frame[n] * Math.sin(angle);
         }
-        re[k] = r;
-        im[k] = im_;
+        re[k] = r; im[k] = im_;
       }
-
-      // draw column from bottom (low freq) to top (high freq)
       const binH = height / numBins;
       for (let k = 0; k < numBins; k++) {
-        const mag = Math.sqrt(re[k] * re[k] + im[k] * im[k]);
-        const db  = 20 * Math.log10(mag + 1e-6);
-        // map roughly -80..0 dB → 0..1
+        const mag  = Math.sqrt(re[k] * re[k] + im[k] * im[k]);
+        const db   = 20 * Math.log10(mag + 1e-6);
         const norm = Math.max(0, Math.min(1, (db + 80) / 80));
         ctx.fillStyle = colormap(norm);
         ctx.fillRect(col, height - (k + 1) * binH, 1, binH + 0.5);
@@ -378,7 +477,7 @@
     }
   }
 
-  // -------------------------------- analyze ----------------------------------
+  // -------------------------------- analyze (REST) -------------------------
 
   el("analyzeBtn").addEventListener("click", runPipeline);
 
@@ -410,7 +509,7 @@
       form.append("audio", state.audioBlob, "clip.wav");
       form.append("use_sample", "false");
     }
-    form.append("unknown_number",     el("toggleUnknown").checked);
+    form.append("unknown_number",      el("toggleUnknown").checked);
     form.append("transaction_request", el("toggleTransaction").checked);
     form.append("high_urgency",        el("toggleUrgency").checked);
     form.append("allow_max", allowMaxEl.value);
@@ -434,7 +533,11 @@
     progressFill.style.width = "0%";
     el("analyzeBtn").disabled = false;
 
-    renderResults(data);
+    renderResults(data, false);
+
+    if (data.duration_sec !== undefined) {
+      showClipInfo({ label: state.sourceLabel || "Analyzed clip", duration: data.duration_sec, sr: data.sample_rate });
+    }
   }
 
   // -------------------------------- rendering --------------------------------
@@ -445,51 +548,55 @@
     return "var(--allow)";
   }
 
-  // Animated counter: counts el from current value to target over `duration` ms
-  function animateCounter(domEl, target, duration = 650) {
+  // Animated counter — fast in live mode, slow otherwise
+  function animateCounter(domEl, target, liveMode) {
+    const duration  = liveMode ? 150 : 650;
     const start     = parseInt(domEl.textContent, 10) || 0;
     const startTime = performance.now();
     function step(now) {
-      const t = Math.min(1, (now - startTime) / duration);
-      // ease-out cubic
-      const ease = 1 - Math.pow(1 - t, 3);
+      const t    = Math.min(1, (now - startTime) / duration);
+      const ease = liveMode ? t : 1 - Math.pow(1 - t, 3); // linear for live, ease-out cubic otherwise
       domEl.textContent = Math.round(start + (target - start) * ease);
       if (t < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
 
-  function setGauge(ringId, valueId, value) {
+  function setGauge(ringId, valueId, value, liveMode) {
     const ring   = el(ringId);
     const offset = CIRC - (Math.min(100, Math.max(0, value)) / 100) * CIRC;
     ring.style.stroke = scoreColor(value);
     requestAnimationFrame(() => { ring.style.strokeDashoffset = offset; });
-    animateCounter(el(valueId), Math.round(value));
+    animateCounter(el(valueId), Math.round(value), liveMode);
   }
 
   const ACTION_META = {
-    ALLOW:            { label: "Allow",               cls: "allow", icon: '<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' },
+    ALLOW:             { label: "Allow",              cls: "allow", icon: '<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' },
     FLAG_FOR_CALLBACK: { label: "Flag for callback",  cls: "flag",  icon: '<path d="M12 9v4m0 4h.01M10.3 3.9 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' },
-    BLOCK:            { label: "Block",               cls: "block", icon: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="m6 6 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
+    BLOCK:             { label: "Block",              cls: "block", icon: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="m6 6 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' },
   };
 
-  function renderResults(data) {
+  // Track last action to only re-animate badge when it actually changes
+  let _lastAction = null;
+
+  function renderResults(data, liveMode = false) {
     el("emptyState").classList.add("hidden");
-    const resultsEl = el("results");
-    resultsEl.classList.remove("hidden");
+    el("results").classList.remove("hidden");
 
-    setGauge("acousticRing",  "acousticValue",  data.acoustic_risk);
-    setGauge("compositeRing", "compositeValue", data.composite_risk);
+    setGauge("acousticRing",  "acousticValue",  data.acoustic_risk,  liveMode);
+    setGauge("compositeRing", "compositeValue", data.composite_risk, liveMode);
 
-    // Action badge with entrance animation
+    // Action badge — animate entrance only on change (avoid thrashing during stream)
     const meta  = ACTION_META[data.action];
     const badge = el("actionBadge");
     badge.className = "action-badge " + meta.cls;
-    // re-trigger animation by removing then adding the class
-    badge.classList.remove("entering");
-    void badge.offsetWidth; // reflow
-    badge.classList.add("entering");
-    el("actionIcon").innerHTML = meta.icon;
+    if (data.action !== _lastAction || !liveMode) {
+      badge.classList.remove("entering");
+      void badge.offsetWidth;
+      badge.classList.add("entering");
+      _lastAction = data.action;
+    }
+    el("actionIcon").innerHTML  = meta.icon;
     el("actionLabel").textContent = meta.label;
 
     // Feature contribution bars
@@ -519,36 +626,16 @@
       metaWrap.appendChild(row);
     });
 
-    el("rawFeatures").textContent = JSON.stringify(data.raw_features, null, 2);
-
-    // Update clip info chip with API-returned duration/sr (more accurate than decoded)
-    if (data.duration_sec !== undefined) {
-      showClipInfo({
-        label: state.sourceLabel || "Analyzed clip",
-        duration: data.duration_sec,
-        sr: data.sample_rate,
-      });
+    // Raw features (skip in live mode to reduce DOM churn)
+    if (!liveMode && data.raw_features) {
+      el("rawFeatures").textContent = JSON.stringify(data.raw_features, null, 2);
     }
 
-    // Draw spectrogram + result waveform if we have a decoded AudioBuffer
-    if (state.audioBuffer) {
-      const wc = el("waveResultCanvas");
-      drawWaveformCanvas(wc, state.audioBuffer.getChannelData(0));
-      const sc = el("spectroCanvas");
-      // defer slightly so layout is settled and clientWidth is accurate
-      requestAnimationFrame(() => drawSpectrogram(sc, state.audioBuffer));
+    // Visualizations — only draw for full-clip analysis (not during streaming)
+    if (!liveMode && state.audioBuffer) {
+      drawWaveformCanvas(el("waveResultCanvas"), state.audioBuffer.getChannelData(0));
+      requestAnimationFrame(() => drawSpectrogram(el("spectroCanvas"), state.audioBuffer));
     }
-  }
-
-  function showClipInfo({ label, duration, sr }) {
-    const chip = el("clipInfo");
-    chip.innerHTML = `
-      <strong>${label}</strong>
-      <span class="chip-sep"></span>
-      ${duration !== undefined ? `<span>${Number(duration).toFixed(1)}s</span><span class="chip-sep"></span>` : ""}
-      ${sr ? `<span>${(sr / 1000).toFixed(1)} kHz</span>` : ""}
-    `;
-    chip.classList.remove("hidden");
   }
 
 })();
