@@ -112,6 +112,8 @@ h1, h2, h3, p, ul { margin: 0; }
   margin-top: 1px;
 }
 
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
 .status-chip {
   display: flex;
   align-items: center;
@@ -132,6 +134,26 @@ h1, h2, h3, p, ul { margin: 0; }
   box-shadow: 0 0 0 3px var(--allow-tint);
 }
 
+/* Mobile sidebar toggle button */
+.sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.sidebar-toggle svg { width: 18px; height: 18px; }
+
+@media (max-width: 900px) {
+  .sidebar-toggle { display: flex; }
+}
+
 /* -------------------------------- layout -------------------------------- */
 
 .layout {
@@ -146,6 +168,11 @@ h1, h2, h3, p, ul { margin: 0; }
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    display: none;
+    position: static !important;
+  }
+  .sidebar.open { display: flex; }
 }
 
 .panel {
@@ -253,6 +280,8 @@ input[type="range"] {
   border-radius: 999px;
   background: var(--track-bg);
   outline: none;
+  /* gradient injected by JS via --slider-gradient */
+  background: var(--slider-gradient, var(--track-bg));
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -335,7 +364,6 @@ input[type="range"]::-moz-range-thumb {
 .record-btn.recording {
   animation: pulse 1.4s ease-in-out infinite;
 }
-.record-btn.recording svg circle { rx: 3; }
 
 @keyframes pulse {
   0%, 100% { box-shadow: 0 0 0 0 var(--block-tint); }
@@ -362,9 +390,9 @@ input[type="range"]::-moz-range-thumb {
 .record-wave span {
   width: 3px;
   border-radius: 2px;
-  background: var(--ink-tertiary);
+  background: var(--accent);
   height: 4px;
-  transition: height .08s ease;
+  transition: height .06s ease;
 }
 
 /* -------------------------------- dropzone -------------------------------- */
@@ -414,6 +442,27 @@ input[type="range"]::-moz-range-thumb {
 
 .waveform { width: 100%; margin-top: 14px; border-radius: var(--radius-sm); }
 
+/* -------------------------------- clip info chip -------------------------------- */
+
+.clip-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--track-bg);
+  font-size: 12px;
+  color: var(--ink-secondary);
+  animation: fade-up .3s ease both;
+}
+.clip-info-chip .chip-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--card-border);
+}
+.clip-info-chip strong { color: var(--ink); font-weight: 600; }
+
 .hidden { display: none !important; }
 
 /* ------------------------------ progress panel ----------------------------- */
@@ -427,7 +476,7 @@ input[type="range"]::-moz-range-thumb {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent), #00c7ff);
   border-radius: 999px;
   transition: width .3s ease;
 }
@@ -480,7 +529,7 @@ input[type="range"]::-moz-range-thumb {
   stroke-linecap: round;
   stroke-dasharray: 326.7;
   stroke-dashoffset: 326.7;
-  transition: stroke-dashoffset .7s cubic-bezier(.4,0,.2,1), stroke .3s ease;
+  transition: stroke-dashoffset .7s cubic-bezier(.4,0,.2,1), stroke .4s ease;
 }
 .gauge-value {
   position: absolute;
@@ -491,10 +540,12 @@ input[type="range"]::-moz-range-thumb {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .action-block { justify-content: center; }
 
+/* Action badge with entrance animation */
 .action-badge {
   display: flex;
   align-items: center;
@@ -503,11 +554,19 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
+  transform-origin: center;
+}
+.action-badge.entering {
+  animation: badge-in .45s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+@keyframes badge-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
 }
 .action-icon { width: 20px; height: 20px; flex-shrink: 0; }
 
 .action-badge.allow { background: var(--allow-tint); color: var(--allow); }
-.action-badge.flag { background: var(--flag-tint); color: var(--flag); }
+.action-badge.flag  { background: var(--flag-tint);  color: var(--flag); }
 .action-badge.block { background: var(--block-tint); color: var(--block); }
 
 /* ------------------------------ explainability ------------------------------ */
@@ -579,6 +638,37 @@ input[type="range"]::-moz-range-thumb {
   border-radius: var(--radius-sm);
   overflow-x: auto;
   color: var(--ink-secondary);
+  line-height: 1.6;
+}
+
+/* -------------------------------- spectrogram -------------------------------- */
+
+.spectrogram-wrap {
+  margin-top: 20px;
+}
+
+.spectrogram-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 700px) { .viz-grid { grid-template-columns: 1fr; } }
+
+.viz-block { display: flex; flex-direction: column; gap: 8px; }
+
+.viz-block canvas {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  display: block;
 }
 
 /* --------------------------------- empty state ------------------------------- */
@@ -612,4 +702,15 @@ input[type="range"]::-moz-range-thumb {
   font-size: 13px;
   color: var(--ink-tertiary);
   line-height: 1.5;
+}
+
+/* --------------------------------- animations -------------------------------- */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.results-enter {
+  animation: fade-up .35s ease both;
 }

@@ -21,8 +21,15 @@
         <p class="subtitle">SIH26104 &middot; Voice cloning detection &middot; Demo prototype</p>
       </div>
     </div>
-    <div class="status-chip" id="serverStatus">
-      <span class="dot"></span> Local &middot; offline
+    <div class="topbar-right">
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle settings">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="status-chip" id="serverStatus">
+        <span class="dot"></span> Local &middot; offline
+      </div>
     </div>
   </div>
 </header>
@@ -30,7 +37,7 @@
 <main class="layout">
 
   <!-- ============================= SIDEBAR ============================= -->
-  <aside class="panel glass sidebar">
+  <aside class="panel glass sidebar" id="sidebar">
     <section class="sidebar-section">
       <h2>Call context</h2>
       <p class="hint">Simulates metadata a telecom/bank integration would already have.</p>
@@ -127,6 +134,9 @@
       </div>
 
       <canvas id="waveCanvas" class="waveform hidden" height="72"></canvas>
+
+      <!-- Clip info chip — populated by JS after a clip loads -->
+      <div class="clip-info-chip hidden" id="clipInfo"></div>
     </div>
 
     <!-- ------------------------- pipeline progress ------------------------ -->
@@ -184,6 +194,21 @@
           <summary>Raw feature values</summary>
           <pre id="rawFeatures"></pre>
         </details>
+      </div>
+
+      <!-- Spectrogram + waveform visualization -->
+      <div class="panel glass spectrogram-wrap" id="spectroPanel">
+        <h2 class="section-title">3&ensp;Signal visualizations</h2>
+        <div class="viz-grid">
+          <div class="viz-block">
+            <div class="spectrogram-label">Waveform</div>
+            <canvas id="waveResultCanvas" height="100"></canvas>
+          </div>
+          <div class="viz-block">
+            <div class="spectrogram-label">Spectrogram (log-frequency)</div>
+            <canvas id="spectroCanvas" height="100"></canvas>
+          </div>
+        </div>
       </div>
 
     </div>
