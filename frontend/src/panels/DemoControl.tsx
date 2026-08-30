@@ -252,10 +252,8 @@ export const DemoControl: React.FC = () => {
   return (
     <section
       aria-label="Demo Mode Control Panel"
-      className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-surface/90 p-5 shadow-xl shadow-black/25 backdrop-blur-sm transition-all"
+      className="relative overflow-hidden border border-border bg-surface p-5 transition-all"
     >
-      {/* Decorative top illumination line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
 
       {/* Hidden select dropdown to ensure 100% automated test suite compatibility */}
       <select
@@ -278,15 +276,15 @@ export const DemoControl: React.FC = () => {
       {/* Editorial Header Strip */}
       <div className="flex flex-col gap-4 pb-4 border-b border-border/80 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border bg-surface text-fg-primary">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold tracking-widest uppercase text-amber-400">
+              <span className="font-mono text-xs font-bold tracking-widest uppercase text-fg-primary">
                 SCENARIO COMMAND MATRIX
               </span>
-              <span className="rounded bg-amber-500/15 px-2 py-0.5 font-mono text-[0.625rem] font-semibold text-amber-300 ring-1 ring-amber-500/30">
+              <span className="border border-border bg-surface px-2 py-0.5 font-mono text-[0.625rem] font-semibold text-fg-primary">
                 L1–L5 INGRESS
               </span>
             </div>
@@ -302,7 +300,7 @@ export const DemoControl: React.FC = () => {
             <button
               type="button"
               onClick={reset}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3.5 py-2 text-xs font-semibold text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg"
+              className="inline-flex items-center gap-1.5 border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg-primary"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Reset Session
@@ -315,8 +313,8 @@ export const DemoControl: React.FC = () => {
               disabled={busy}
               onClick={() => void stopSession()}
               className={cn(
-                'inline-flex items-center gap-2 rounded-xl border border-red-500/50 bg-red-500/15 px-5 py-2',
-                'text-xs font-bold text-red-300 shadow-md shadow-red-500/10 transition-all hover:bg-red-500/25 hover:text-red-200',
+                'inline-flex items-center gap-2 border border-red-500 bg-surface px-5 py-2',
+                'text-xs font-bold text-red-600 transition-all hover:bg-red-50 hover:text-red-700',
                 'disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
@@ -330,15 +328,15 @@ export const DemoControl: React.FC = () => {
               data-testid="start-demo"
               onClick={handleStart}
               className={cn(
-                'inline-flex items-center gap-2 rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-500/25 to-amber-600/25 px-5 py-2',
-                'text-xs font-bold text-amber-200 shadow-md shadow-amber-500/10 transition-all hover:from-amber-500/35 hover:to-amber-600/35 hover:border-amber-400 hover:text-white',
+                'inline-flex items-center gap-2 border border-fg-primary bg-fg-primary px-5 py-2',
+                'text-xs font-bold text-white transition-all hover:bg-fg-secondary hover:border-fg-secondary',
                 'disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
               {busy ? (
                 <Spinner />
               ) : scenario.id === 'live-mic' ? (
-                <Mic className="h-3.5 w-3.5 text-amber-300 animate-pulse" aria-hidden="true" />
+                <Mic className="h-3.5 w-3.5 text-white animate-pulse" aria-hidden="true" />
               ) : (
                 <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
               )}
@@ -369,10 +367,10 @@ export const DemoControl: React.FC = () => {
                   disabled={running || busy}
                   onClick={() => setSelectedId(item.id)}
                   className={cn(
-                    'group relative flex w-full flex-col rounded-xl border p-3 text-left transition-all duration-150',
+                    'group relative flex w-full flex-col border p-3 text-left transition-all duration-150',
                     active
-                      ? 'border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/30'
-                      : 'border-border/80 bg-surface-elevated/40 hover:border-border-strong hover:bg-surface-elevated',
+                      ? 'border-fg-primary bg-surface ring-1 ring-fg-primary'
+                      : 'border-border bg-surface hover:border-fg-primary hover:bg-surface-elevated',
                     (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-50',
                   )}
                 >
@@ -380,17 +378,17 @@ export const DemoControl: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          'flex h-5 w-5 items-center justify-center rounded-md font-mono text-[0.625rem] font-bold',
+                          'flex h-5 w-5 items-center justify-center font-mono text-[0.625rem] font-bold',
                           active
-                            ? 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/40'
-                            : 'bg-surface text-fg-tertiary',
+                            ? 'bg-fg-primary text-white'
+                            : 'border border-border bg-surface text-fg-tertiary',
                         )}
                       >
                         {item.sectionIndex}
                       </span>
                       <span className="font-semibold text-xs text-fg flex items-center gap-1.5">
                         {item.id === 'live-mic' ? (
-                          <Mic className="h-3.5 w-3.5 text-accent" />
+                          <Mic className="h-3.5 w-3.5 text-fg-primary" />
                         ) : null}
                         {item.name}
                       </span>
@@ -420,13 +418,13 @@ export const DemoControl: React.FC = () => {
         </div>
 
         {/* Right: Detailed Scenario Inspector Card */}
-        <div className="flex flex-col justify-between rounded-xl border border-border/80 bg-surface-elevated/50 p-4 lg:col-span-7">
+        <div className="flex flex-col justify-between border border-border bg-surface p-4 lg:col-span-7">
           <div className="space-y-3">
             {/* Header info */}
             <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/60">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-micro text-accent font-bold">
+                  <span className="font-mono text-micro text-fg-primary font-bold">
                     SPEC {scenario.sectionIndex}
                   </span>
                   <h3 className="text-sm font-bold text-fg">{scenario.name}</h3>
@@ -434,9 +432,9 @@ export const DemoControl: React.FC = () => {
                 <p className="mt-0.5 text-xs text-fg-secondary">{scenario.summary}</p>
               </div>
 
-              <div className="flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1 ring-1 ring-border/80">
+              <div className="flex items-center gap-1.5 border border-border bg-surface px-2.5 py-1">
                 {scenario.id === 'live-mic' ? (
-                  <Mic className="h-3.5 w-3.5 text-accent animate-pulse" />
+                  <Mic className="h-3.5 w-3.5 text-fg-primary animate-pulse" />
                 ) : (
                   <Volume2 className="h-3.5 w-3.5 text-fg-tertiary" />
                 )}
@@ -448,17 +446,17 @@ export const DemoControl: React.FC = () => {
 
             {/* Context Parameter Chips */}
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-              <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
+              <div className="border border-border p-2.5">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">Caller Vector</span>
                 <p className="mt-0.5 truncate text-xs font-semibold text-fg">{scenario.callerName}</p>
                 <p className="font-mono text-micro text-fg-tertiary">{scenario.callerRef}</p>
               </div>
 
-              <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
+              <div className="border border-border p-2.5">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">
                   Transaction Amount
                 </span>
-                <p className="mt-0.5 font-mono text-xs font-bold text-amber-300">
+                <p className="mt-0.5 font-mono text-xs font-bold text-fg-primary">
                   {scenario.id === 'live-mic' ? '₹5,00,000.00' : '₹25,00,000.00'}
                 </p>
                 <p className="truncate text-micro text-fg-tertiary">
@@ -466,7 +464,7 @@ export const DemoControl: React.FC = () => {
                 </p>
               </div>
 
-              <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
+              <div className="border border-border p-2.5">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">
                   Target Outcome
                 </span>
@@ -485,7 +483,7 @@ export const DemoControl: React.FC = () => {
             </div>
 
             {/* Sensitivity Policy Tuning */}
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface/60 px-3 py-2 border border-border/50">
+            <div className="flex flex-wrap items-center justify-between gap-2 border border-border px-3 py-2">
               <div className="flex items-center gap-2">
                 <Sliders className="h-3.5 w-3.5 text-fg-tertiary" />
                 <span className="font-mono text-micro uppercase text-fg-secondary">
@@ -500,10 +498,10 @@ export const DemoControl: React.FC = () => {
                     disabled={running || busy}
                     onClick={() => setPolicyProfile(mode)}
                     className={cn(
-                      'rounded-md px-2.5 py-1 font-mono text-[0.6875rem] transition-all',
+                      'px-2.5 py-1 font-mono text-[0.6875rem] transition-all',
                       policyProfile === mode
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold shadow-sm'
-                        : 'bg-surface text-fg-tertiary hover:text-fg border border-border/60',
+                        ? 'bg-fg-primary text-white font-bold'
+                        : 'bg-surface text-fg-tertiary hover:text-fg border border-border',
                       (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-40',
                     )}
                   >
@@ -515,8 +513,8 @@ export const DemoControl: React.FC = () => {
           </div>
 
           {/* Environmental Disclaimer Note */}
-          <div className="mt-3 flex items-start gap-2 rounded-lg border border-border/40 bg-background/60 px-3 py-2 text-[0.6875rem] text-fg-tertiary">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400/80 mt-0.5" />
+          <div className="mt-3 flex items-start gap-2 border border-border bg-surface px-3 py-2 text-[0.6875rem] text-fg-tertiary">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-600 mt-0.5" />
             <span>
               <strong>Simulation Safeguard:</strong> The scenario runner supplies audio ingestion and caller parameters only. All risk calculations, neural scores, and transaction actions are strictly computed by the real-time pipeline.
             </span>

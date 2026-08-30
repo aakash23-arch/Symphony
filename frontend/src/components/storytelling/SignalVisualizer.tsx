@@ -88,7 +88,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       // 1. Draw subtle background grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)';
       ctx.lineWidth = 1;
       const vLines = 8;
       for (let i = 1; i < vLines; i++) {
@@ -103,7 +103,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
 
       // 2. Center baseline
       const midY = height / 2;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
       ctx.beginPath();
       ctx.moveTo(0, midY);
       ctx.lineTo(width, midY);
@@ -116,14 +116,14 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
 
       const strokeColor =
         activeState === 'PROCESSING'
-          ? '#818CF8'
+          ? '#000000' // Black Accent
           : activeState === 'LISTENING'
-          ? '#38BDF8'
+          ? '#0284C7' // Sky-600
           : activeState === 'COMPLETE'
-          ? '#34D399'
+          ? '#059669' // Emerald-600
           : activeState === 'DISCONNECTED'
-          ? '#EF4444'
-          : '#64748B';
+          ? '#DC2626' // Red-600
+          : '#94A3B8'; // Slate-400
 
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = isDynamic ? 2.5 : 1.5;
@@ -163,10 +163,10 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
         grad.addColorStop(
           0,
           activeState === 'PROCESSING'
-            ? 'rgba(99, 102, 241, 0.15)'
+            ? 'rgba(0, 0, 0, 0.08)'
             : activeState === 'COMPLETE'
-            ? 'rgba(52, 211, 153, 0.12)'
-            : 'rgba(56, 189, 248, 0.10)',
+            ? 'rgba(5, 150, 105, 0.08)'
+            : 'rgba(2, 132, 199, 0.08)',
         );
         grad.addColorStop(1, 'transparent');
         ctx.fillStyle = grad;
@@ -190,7 +190,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
     <div
       ref={containerRef}
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-border/80 bg-surface/95 p-5 shadow-2xl backdrop-blur-md transition-all',
+        'relative overflow-hidden border border-border bg-surface p-5 transition-all',
         className,
       )}
     >
@@ -198,7 +198,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3 font-mono text-micro-label uppercase text-fg-tertiary">
         <div className="flex items-center gap-2">
           {activeState === 'PROCESSING' && (
-            <Activity className="h-4 w-4 text-accent animate-pulse-dot" />
+            <Activity className="h-4 w-4 text-fg-primary animate-pulse-dot" />
           )}
           {activeState === 'LISTENING' && (
             <Radio className="h-4 w-4 text-sky-400 animate-pulse" />
@@ -218,7 +218,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
           <span
             className={cn(
               'font-semibold',
-              activeState === 'PROCESSING' && 'text-accent',
+              activeState === 'PROCESSING' && 'text-fg-primary',
               activeState === 'LISTENING' && 'text-sky-400',
               activeState === 'COMPLETE' && 'text-emerald-400',
               activeState === 'DISCONNECTED' && 'text-rose-400',
@@ -235,7 +235,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
             <span className="text-border-strong">/</span>
             <span>MONO</span>
             <span className="text-border-strong">/</span>
-            <span className="text-accent font-bold">16-BIT LINEAR</span>
+            <span className="text-fg-primary font-bold">16-BIT LINEAR</span>
           </div>
         )}
       </div>
@@ -272,7 +272,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
             return (
               <div
                 key={i}
-                className="flex-1 rounded-t-sm bg-surface-elevated overflow-hidden"
+                className="flex-1 bg-surface-elevated overflow-hidden"
                 style={{ height: '100%' }}
               >
                 <div
@@ -283,7 +283,7 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
                         ? 'bg-rose-500/80'
                         : i > 12
                         ? 'bg-amber-400/80'
-                        : 'bg-accent'
+                        : 'bg-fg-primary'
                       : activeState === 'LISTENING'
                       ? 'bg-sky-400/60'
                       : activeState === 'COMPLETE'

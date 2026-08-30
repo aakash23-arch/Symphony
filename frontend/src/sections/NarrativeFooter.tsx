@@ -7,7 +7,7 @@ export const NarrativeFooter: React.FC = () => {
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15 text-accent">
+            <div className="flex h-8 w-8 items-center justify-center border border-border bg-surface text-fg-primary">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
@@ -25,7 +25,7 @@ export const NarrativeFooter: React.FC = () => {
 
         {/* Mandatory Simulation Environment & Privacy Disclaimers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-[0.6875rem] text-fg-muted leading-relaxed">
-          <div className="rounded-xl border border-border/40 bg-surface/60 p-3.5">
+          <div className="border border-border bg-surface p-3.5">
             <span className="text-fg-tertiary font-bold uppercase block mb-1">
               DEMO / SIMULATION ENVIRONMENT
             </span>
@@ -34,7 +34,7 @@ export const NarrativeFooter: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/40 bg-surface/60 p-3.5">
+          <div className="border border-border bg-surface p-3.5">
             <span className="text-fg-tertiary font-bold uppercase block mb-1">
               RAW AUDIO PRIVACY &amp; ISOLATION
             </span>

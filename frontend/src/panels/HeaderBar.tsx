@@ -1,159 +1,129 @@
 import React from 'react';
-import { Activity, Radio, Shield } from 'lucide-react';
-
+import { ArrowUpRight, LayoutDashboard, Sparkles } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot';
-import { cn } from '../lib/cn';
 import { useSession } from '../state/useSession';
 
-/**
- * Editorial Header Bar.
- *
- * Carries the product identity, real-time connection status, backend health telemetry,
- * and the mandated demo environment disclaimer strip.
- */
-export const HeaderBar: React.FC = () => {
-  const { state, health, healthError, stopSession, reset, busy } = useSession();
+export interface HeaderBarProps {
+  viewMode?: 'narrative' | 'console';
+  onToggleView?: (mode: 'narrative' | 'console') => void;
+}
 
+/**
+ * Symphony Minimalist Editorial Header.
+ *
+ * Provides monochrome SignalIQ branding, discrete live connection indicator,
+ * dual-mode switching between Editorial Narrative & Operational Testing Console,
+ * and direct testing action triggers.
+ */
+export const HeaderBar: React.FC<HeaderBarProps> = ({
+  viewMode = 'narrative',
+  onToggleView,
+}) => {
+  const { state, stopSession, reset, busy } = useSession();
   const isStreaming = Boolean(state.sessionId && state.sourceType);
 
   const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    el?.scrollIntoView({ behavior: 'smooth' });
+    if (viewMode === 'console' && onToggleView) {
+      onToggleView('narrative');
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleOpenConsole = () => {
+    if (onToggleView) {
+      onToggleView('console');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      scrollTo('live-detection');
+    }
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-surface/95 backdrop-blur-md">
-      <div className="flex flex-wrap items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-3">
-        {/* Product Brand & Identity */}
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent ring-1 ring-accent/30 shadow-inner">
-            <Shield className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold tracking-widest text-accent uppercase">
-                SYMPHONY
-              </span>
-              <span className="text-border-strong">/</span>
-              <h1 className="text-sm font-bold tracking-tight text-fg">
-                VoiceShield
-              </h1>
-              <span className="rounded bg-accent/10 px-2 py-0.5 font-mono text-[0.625rem] font-medium text-accent ring-1 ring-accent/20">
-                L1–L5 ENGINE
-              </span>
-            </div>
-            <p className="font-mono text-[0.6875rem] text-fg-tertiary uppercase tracking-wider">
-              REAL-TIME VOICE SECURITY &amp; IMPERSONATION DEFENSE
-            </p>
-          </div>
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md transition-all">
+      <div className="max-w-[1600px] mx-auto flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4">
+        {/* Left: Brand Mark */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (onToggleView) onToggleView('narrative');
+              scrollTo('hero');
+            }}
+            className="flex items-center gap-2.5 text-left focus:outline-none group"
+          >
+            <span className="font-sans text-base sm:text-lg font-black tracking-tight text-fg">
+              SYMPHONY
+            </span>
+            <span className="hidden sm:inline-block border-l border-border pl-2.5 font-mono text-[0.625rem] font-semibold text-fg-tertiary tracking-widest uppercase">
+              VOICE INTEGRITY &amp; DEFENSE
+            </span>
+          </button>
         </div>
 
-        {/* Quick Section Navigation Links */}
-        <nav className="hidden xl:flex items-center gap-1 font-mono text-micro-label uppercase text-fg-tertiary">
-          <button
-            type="button"
-            onClick={() => scrollTo('hero')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Overview
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('problem')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Threat
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('pipeline')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Pipeline
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('forensics')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Forensics
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('live-console')}
-            className="px-3 py-1.5 rounded-lg bg-accent/15 text-accent font-bold hover:bg-accent/25 transition-colors border border-accent/30"
-          >
-            Live Console
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('scenarios')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Scenarios
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo('architecture')}
-            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
-          >
-            Architecture
-          </button>
-        </nav>
-
-        {/* Live Diagnostics & Quick Controls */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          {/* Connection Status Indicator */}
-          <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
-
-          {/* Visible Demo Status / Active Ingress Mode Indicator */}
-          <div className="flex items-center gap-1.5 rounded-md bg-surface-elevated/80 px-2.5 py-1 font-mono text-micro uppercase tracking-wider text-fg-secondary ring-1 ring-border/60">
-            <span
-              className={cn(
-                'h-1.5 w-1.5 rounded-full',
-                state.sourceType === 'mic'
-                  ? 'bg-rose-400 animate-pulse-dot'
-                  : state.sourceType
-                  ? 'bg-amber-400'
-                  : 'bg-accent/70',
-              )}
-            />
-            <span
-              className={cn(
-                state.sourceType === 'mic'
-                  ? 'font-bold text-rose-300'
-                  : state.sourceType
-                  ? 'text-amber-300 font-semibold'
-                  : 'text-fg-secondary',
-              )}
+        {/* Center: Editorial Nav / View Switcher */}
+        {viewMode === 'narrative' ? (
+          <nav className="hidden lg:flex items-center gap-6 font-mono text-micro-label uppercase text-fg-tertiary">
+            <button
+              type="button"
+              onClick={() => scrollTo('problem')}
+              className="hover:text-fg transition-colors"
             >
-              {state.sourceType === 'mic'
-                ? 'LIVE MICROPHONE'
-                : state.sourceType
-                ? 'DEMO / SIMULATION'
-                : 'DEMO ENVIRONMENT'}
-            </span>
+              Threat
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo('signal')}
+              className="hover:text-fg transition-colors"
+            >
+              Signal
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo('how-it-works')}
+              className="hover:text-fg transition-colors"
+            >
+              How It Works
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo('protection')}
+              className="hover:text-fg transition-colors"
+            >
+              Protection
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTo('faq')}
+              className="hover:text-fg transition-colors"
+            >
+              FAQ
+            </button>
+          </nav>
+        ) : (
+          <div className="hidden sm:flex items-center gap-2 font-mono text-micro-label uppercase text-fg-tertiary">
+            <span className="font-bold text-fg">OPERATIONAL TESTING TERMINAL</span>
+            <span className="text-border-strong">/</span>
+            <span>REAL-TIME TELEMETRY &amp; EXPERT INFERENCE</span>
           </div>
+        )}
 
-          {/* Backend Health Diagnostics */}
-          <div className="hidden sm:flex items-center gap-1.5 font-mono text-micro uppercase tracking-wider text-fg-tertiary">
-            <Activity className="h-3.5 w-3.5 text-fg-tertiary" aria-hidden="true" />
-            <span>Backend: </span>
-            {healthError ? (
-              <span className="font-bold text-band-high">unreachable</span>
-            ) : health ? (
-              <span
-                className={
-                  health.status === 'healthy'
-                    ? 'font-bold text-band-low'
-                    : 'font-bold text-band-medium'
-                }
-              >
-                {health.status}
-              </span>
-            ) : (
-              <span className="text-fg-tertiary">checking</span>
-            )}
+        {/* Right: Mode Switcher & Primary Action */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 font-mono text-micro-label text-fg-tertiary">
+            <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
+            <span className="hidden md:inline uppercase">
+              {state.sourceType === 'mic'
+                ? 'MIC ACTIVE'
+                : isStreaming
+                ? 'STREAMING'
+                : 'STANDBY'}
+            </span>
           </div>
 
           {/* Quick Active Session Reset / Stop */}
@@ -164,7 +134,7 @@ export const HeaderBar: React.FC = () => {
                   type="button"
                   disabled={busy}
                   onClick={() => void stopSession()}
-                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-2.5 py-1 font-mono text-micro uppercase font-bold text-red-400 hover:bg-red-500/20 disabled:opacity-50"
+                  className="border border-red-500 bg-surface px-2 py-1 font-mono text-[0.625rem] uppercase font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
                 >
                   Stop
                 </button>
@@ -172,28 +142,45 @@ export const HeaderBar: React.FC = () => {
                 <button
                   type="button"
                   onClick={reset}
-                  className="rounded-lg border border-border bg-surface-elevated px-2.5 py-1 font-mono text-micro uppercase font-bold text-fg-secondary hover:text-fg"
+                  className="border border-border bg-surface px-2 py-1 font-mono text-[0.625rem] uppercase font-bold text-fg-secondary hover:text-fg"
                 >
                   Reset
                 </button>
               )}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Mandatory Demo Environment Banner */}
-      <div className="flex items-center justify-between border-t border-amber-500/25 bg-amber-500/[0.08] px-4 sm:px-6 lg:px-8 py-1.5 font-mono text-micro uppercase tracking-wider text-amber-300">
-        <p>
-          Demo mode — controlled test audio, simulated transaction context. Not a real call and not a
-          real banking integration.
-        </p>
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-[0.625rem] text-amber-400/80">
-          <Radio className="h-3 w-3 animate-pulse" />
-          <span>SIH26104 DEFENSE SPEC</span>
-        </span>
+          {/* Dedicated View Switcher & Action */}
+          {onToggleView && (
+            <button
+              type="button"
+              onClick={() => onToggleView(viewMode === 'narrative' ? 'console' : 'narrative')}
+              className="inline-flex items-center gap-1.5 border border-border bg-surface px-3 py-1.5 sm:py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-fg hover:border-fg transition-all"
+            >
+              {viewMode === 'narrative' ? (
+                <>
+                  <LayoutDashboard className="h-3.5 w-3.5 text-fg-secondary" />
+                  <span className="hidden sm:inline">DASHBOARD</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5 text-fg-secondary" />
+                  <span className="hidden sm:inline">NARRATIVE</span>
+                </>
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleOpenConsole}
+            className="inline-flex items-center gap-1.5 border border-fg bg-fg px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-background hover:bg-fg/90 transition-all shadow-sm"
+          >
+            <span>RUN DETECTION</span>
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </header>
   );
 };
-

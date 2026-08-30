@@ -43,8 +43,8 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
       {/* Triggering Vectors Row */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {/* Factor 1: High Stakes Amount */}
-        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
-          <span className="text-micro-label text-amber-400 uppercase font-bold block">
+        <div className="border border-amber-500 bg-surface p-4">
+          <span className="text-micro-label text-amber-600 uppercase font-bold block">
             01 · TRANSACTION AMOUNT
           </span>
           <p className="mt-1 text-lg font-bold text-fg">{amountDisplay}</p>
@@ -54,22 +54,22 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
         </div>
 
         {/* Factor 2: Payee Novelty */}
-        <div className="rounded-xl border border-border/80 bg-surface/90 p-4">
+        <div className="border border-border bg-surface p-4">
           <span className="text-micro-label text-fg-tertiary uppercase font-bold block">
             02 · BENEFICIARY NOVELTY
           </span>
           <p className="mt-1 text-xs font-bold text-fg truncate">{payeeDisplay}</p>
-          <p className="mt-0.5 text-[0.6875rem] text-amber-400 font-bold uppercase">
+          <p className="mt-0.5 text-[0.6875rem] text-amber-600 font-bold uppercase">
             STATUS: {novelty} PAYEE
           </p>
         </div>
 
         {/* Factor 3: Voice Acoustic Risk */}
-        <div className="rounded-xl border border-border/80 bg-surface/90 p-4">
+        <div className="border border-border bg-surface p-4">
           <span className="text-micro-label text-fg-tertiary uppercase font-bold block">
             03 · VOICE ACOUSTIC RISK
           </span>
-          <p className="mt-1 text-base font-bold text-accent">
+          <p className="mt-1 text-base font-bold text-fg-primary">
             {decision ? `Score: ${decision.risk.risk_score.toFixed(2)} (${decision.risk.risk_band})` : 'HIGH THREAT DETECTED'}
           </p>
           <p className="mt-0.5 text-[0.6875rem] text-fg-secondary font-sans">
@@ -81,19 +81,19 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
       {/* Intervention Decision Directive */}
       <div
         className={cn(
-          'relative rounded-2xl border p-5 transition-all shadow-xl',
+          'relative border p-5 transition-all',
           isHeld
-            ? 'border-amber-500/60 bg-amber-500/15 ring-2 ring-amber-500/40'
+            ? 'border-amber-600 bg-amber-50 ring-1 ring-amber-600'
             : isApproved
-            ? 'border-emerald-500/60 bg-emerald-500/15'
+            ? 'border-emerald-600 bg-emerald-50'
             : isRejected
-            ? 'border-rose-500/60 bg-rose-500/15'
-            : 'border-accent/50 bg-accent/10',
+            ? 'border-rose-600 bg-rose-50'
+            : 'border-fg-primary bg-surface',
         )}
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <span className="text-micro-label uppercase tracking-widest text-accent font-bold block">
+            <span className="text-micro-label uppercase tracking-widest text-fg-primary font-bold block">
               MANDATED INTERVENTION DIRECTIVE
             </span>
             <h4 className="text-base font-bold text-fg mt-0.5">
@@ -118,13 +118,13 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
                 placeholder="Audit Ref (e.g. CB-CFO-88)"
                 value={auditRef}
                 onChange={(e) => setAuditRef(e.target.value)}
-                className="rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-xs text-fg focus:outline-none focus:border-accent"
+                className="border border-border bg-surface px-3 py-1.5 font-mono text-xs text-fg focus:outline-none focus:border-fg-primary"
               />
               <button
                 type="button"
                 disabled={busy || !auditRef.trim()}
                 onClick={() => releaseTransaction(auditRef, true)}
-                className="rounded-lg bg-emerald-600 px-3.5 py-1.5 font-mono text-xs font-bold text-white shadow-md hover:bg-emerald-500 disabled:opacity-50 transition-all"
+                className="border border-emerald-600 bg-emerald-600 px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50 transition-all"
               >
                 Release &amp; Approve
               </button>
@@ -132,7 +132,7 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
                 type="button"
                 disabled={busy || !auditRef.trim()}
                 onClick={() => releaseTransaction(auditRef, false)}
-                className="rounded-lg bg-rose-600 px-3.5 py-1.5 font-mono text-xs font-bold text-white shadow-md hover:bg-rose-500 disabled:opacity-50 transition-all"
+                className="border border-rose-600 bg-rose-600 px-3.5 py-1.5 font-mono text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50 transition-all"
               >
                 Reject &amp; Terminate
               </button>
@@ -144,7 +144,7 @@ export const TransactionInterventionFlow: React.FC<TransactionInterventionFlowPr
               type="button"
               disabled={busy}
               onClick={() => holdTransaction('Enforced by security operator')}
-              className="rounded-xl border border-amber-500/50 bg-amber-500/20 px-4 py-2 font-mono text-xs font-bold text-amber-300 hover:bg-amber-500/30 transition-all disabled:opacity-50"
+              className="border border-amber-600 bg-amber-600 px-4 py-2 font-mono text-xs font-bold text-white hover:bg-amber-700 transition-all disabled:opacity-50"
             >
               Apply Immediate Hold
             </button>

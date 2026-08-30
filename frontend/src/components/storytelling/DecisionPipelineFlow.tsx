@@ -97,28 +97,28 @@ export const DecisionPipelineFlow: React.FC<DecisionPipelineFlowProps> = ({ clas
             <div
               key={st.name}
               className={cn(
-                'relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-300',
+                'relative flex flex-col justify-between border p-4 transition-all duration-300',
                 isCurrent
-                  ? 'border-accent bg-accent/15 ring-2 ring-accent/40 shadow-xl scale-[1.02]'
+                  ? 'border-fg-primary bg-surface ring-1 ring-fg-primary scale-[1.02]'
                   : isPassed
-                  ? 'border-emerald-500/40 bg-emerald-500/5'
-                  : 'border-border/60 bg-surface/70 opacity-60',
+                  ? 'border-emerald-600 bg-emerald-50'
+                  : 'border-border bg-surface opacity-60',
               )}
             >
               <div>
                 <div className="flex items-center justify-between text-micro-label text-fg-tertiary pb-2 border-b border-border/40">
-                  <span className="font-bold text-accent">0{st.id}</span>
+                  <span className="font-bold text-fg-primary">0{st.id}</span>
                   {idx < stages.length - 1 ? (
                     <ArrowRight className="h-3.5 w-3.5 hidden sm:block text-fg-muted" />
                   ) : null}
                 </div>
 
                 <div className="mt-2 flex items-center gap-2">
-                  <Icon className={cn('h-4 w-4', isPassed ? 'text-accent' : 'text-fg-muted')} />
+                  <Icon className={cn('h-4 w-4', isPassed ? 'text-fg-primary' : 'text-fg-muted')} />
                   <p className="text-xs font-bold text-fg uppercase tracking-wider">{st.name}</p>
                 </div>
 
-                <p className="mt-1 text-micro-label text-accent font-semibold">{st.label}</p>
+                <p className="mt-1 text-micro-label text-fg-primary font-semibold">{st.label}</p>
                 <p className="mt-1 font-bold text-xs text-fg">{st.metric}</p>
                 <p className="mt-2 text-[0.6875rem] text-fg-tertiary font-sans leading-snug">
                   {st.desc}
@@ -127,9 +127,9 @@ export const DecisionPipelineFlow: React.FC<DecisionPipelineFlowProps> = ({ clas
 
               <div className="mt-4 border-t border-border/40 pt-2 text-[0.625rem] uppercase">
                 {isCurrent ? (
-                  <span className="text-accent font-bold animate-pulse">● EXECUTING NOW</span>
+                  <span className="text-fg-primary font-bold animate-pulse">● EXECUTING NOW</span>
                 ) : isPassed ? (
-                  <span className="text-emerald-400 font-semibold">✓ COMPLETED</span>
+                  <span className="text-emerald-600 font-semibold">✓ COMPLETED</span>
                 ) : (
                   <span className="text-fg-muted">PENDING</span>
                 )}

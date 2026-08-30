@@ -25,16 +25,16 @@ export const TechnicalDisclosure: React.FC<TechnicalDisclosureProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={cn('rounded-xl border border-border/80 bg-surface-elevated/40 overflow-hidden', className)}>
+    <div className={cn('border border-border bg-surface overflow-hidden transition-colors hover:border-fg-primary', className)}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between p-3.5 text-left transition-colors hover:bg-surface-elevated/80 focus:outline-none"
+        className="flex w-full items-center justify-between p-3.5 text-left transition-colors hover:bg-surface-elevated focus:outline-none"
         aria-expanded={isOpen}
       >
         <div className="flex items-center gap-2.5">
           {isOpen ? (
-            <ChevronDown className="h-4 w-4 shrink-0 text-accent" />
+            <ChevronDown className="h-4 w-4 shrink-0 text-fg-primary" />
           ) : (
             <ChevronRight className="h-4 w-4 shrink-0 text-fg-tertiary" />
           )}
@@ -51,14 +51,14 @@ export const TechnicalDisclosure: React.FC<TechnicalDisclosureProps> = ({
         </div>
 
         {tag ? (
-          <span className="rounded bg-surface-elevated px-2 py-0.5 font-mono text-micro-label uppercase text-fg-tertiary border border-border/60">
+          <span className="border border-border bg-surface px-2 py-0.5 font-mono text-micro-label uppercase text-fg-tertiary">
             {tag}
           </span>
         ) : null}
       </button>
 
       {isOpen ? (
-        <div className="border-t border-border/60 p-3.5 bg-background/50 text-xs text-fg-secondary">
+        <div className="border-t border-border p-3.5 bg-surface text-xs text-fg-secondary">
           {children}
         </div>
       ) : null}

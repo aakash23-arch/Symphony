@@ -42,16 +42,16 @@ export const ScenarioMatrixSection: React.FC = () => {
               <div
                 key={sc.id}
                 className={cn(
-                  'flex flex-col justify-between rounded-2xl border p-5 transition-all bg-surface/90 shadow-md backdrop-blur-sm',
+                  'flex flex-col justify-between border p-5 transition-all bg-surface',
                   isLive
-                    ? 'border-accent bg-accent/10 ring-2 ring-accent/40 shadow-xl scale-[1.02]'
-                    : 'border-border/80 hover:border-border-strong',
+                    ? 'border-fg-primary border-[3px] bg-surface-elevated/20 scale-[1.02]'
+                    : 'border-border hover:border-fg-primary',
                 )}
               >
                 <div>
-                  <div className="flex items-center justify-between font-mono text-micro-label text-fg-tertiary pb-2 border-b border-border/50">
-                    <span className="font-bold text-accent">SCENARIO {sc.sectionIndex}</span>
-                    <span className="rounded bg-surface-elevated px-2 py-0.5 text-[0.625rem] text-fg-secondary">
+                  <div className="flex items-center justify-between font-mono text-micro-label text-fg-tertiary pb-2 border-b border-border">
+                    <span className="font-bold text-fg-primary">SCENARIO {sc.sectionIndex}</span>
+                    <span className="border border-border bg-surface px-2 py-0.5 text-[0.625rem] text-fg-secondary">
                       {sc.badge}
                     </span>
                   </div>
@@ -66,7 +66,7 @@ export const ScenarioMatrixSection: React.FC = () => {
                       INPUT: <strong className="text-fg">{sc.fixture === 'live_mic' ? 'Live Microphone PCM' : '16 kHz Clean PSTN'}</strong>
                     </p>
                     <p>
-                      EXPECTED: <strong className="text-accent">{sc.expectedOutcome.label}</strong>
+                      EXPECTED: <strong className="text-fg-primary">{sc.expectedOutcome.label}</strong>
                     </p>
                   </div>
                 </div>
@@ -77,10 +77,10 @@ export const ScenarioMatrixSection: React.FC = () => {
                     disabled={busy}
                     onClick={() => handleSelectScenario(sc)}
                     className={cn(
-                      'w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 font-mono text-xs font-bold transition-all disabled:opacity-50',
+                      'w-full flex items-center justify-center gap-2 py-3 px-3 font-mono text-xs font-bold transition-all disabled:opacity-50',
                       isLive
-                        ? 'bg-accent text-white shadow-md shadow-accent/30'
-                        : 'border border-border bg-surface-elevated text-fg-secondary hover:text-fg hover:border-border-strong',
+                        ? 'bg-fg-primary text-white'
+                        : 'border border-border bg-surface text-fg-secondary hover:text-fg-primary hover:border-fg-primary',
                     )}
                   >
                     {sc.fixture === 'live_mic' ? <Mic className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current" />}

@@ -71,11 +71,11 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
       aria-labelledby="dossier-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md print:fixed print:inset-0 print:bg-white print:p-0"
     >
-      <div className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-border-strong bg-surface p-7 shadow-2xl print:max-h-none print:w-full print:border-none print:bg-white print:p-8 print:text-black print:shadow-none">
+      <div className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-border bg-surface p-7 shadow-2xl print:max-h-none print:w-full print:border-none print:bg-white print:p-8 print:text-black print:shadow-none">
         {/* Header Bar with Seal */}
         <div className="flex items-start justify-between border-b border-border/80 pb-5 print:border-neutral-300">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-accent ring-1 ring-accent/30 print:bg-neutral-100 print:text-black">
+            <div className="flex h-12 w-12 items-center justify-center border border-border bg-surface text-fg-primary print:bg-neutral-100 print:text-black">
               {band === 'LOW' ? (
                 <ShieldCheck className="h-7 w-7 text-band-low print:text-emerald-700" />
               ) : band === 'HIGH' || band === 'CRITICAL' ? (
@@ -89,7 +89,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
                 <h2 id="dossier-title" className="text-xl font-bold tracking-tight text-fg print:text-black">
                   VoiceShield Forensic Evidence Dossier
                 </h2>
-                <span className="rounded bg-accent/10 px-2 py-0.5 font-mono text-[0.625rem] font-bold text-accent print:border print:border-neutral-300">
+                <span className="border border-border bg-surface px-2 py-0.5 font-mono text-[0.625rem] font-bold text-fg-primary print:border print:border-neutral-300">
                   DEFENSE AUDIT
                 </span>
               </div>
@@ -104,7 +104,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadJSON}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-semibold text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg"
+              className="inline-flex items-center gap-1.5 border border-border bg-surface px-3 py-2 text-xs font-semibold text-fg-secondary transition-all hover:border-fg-primary hover:text-fg-primary"
               title="Download raw JSON record"
             >
               <Download className="h-3.5 w-3.5" />
@@ -113,7 +113,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-2 text-xs font-bold text-accent transition-all hover:bg-accent/20"
+              className="inline-flex items-center gap-1.5 border border-fg-primary bg-fg-primary px-3.5 py-2 text-xs font-bold text-white transition-all hover:bg-fg-secondary"
               title="Print or Save as PDF"
             >
               <Printer className="h-3.5 w-3.5" />
@@ -122,7 +122,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl p-2 text-fg-tertiary transition-colors hover:bg-surface-hover hover:text-fg"
+              className="p-2 text-fg-tertiary transition-colors hover:text-fg-primary"
               aria-label="Close dossier"
             >
               <X className="h-5 w-5" />
@@ -131,8 +131,8 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
         </div>
 
         {/* Executive Verdict Grid */}
-        <div className="mt-5 grid grid-cols-2 gap-3.5 rounded-2xl border border-border/80 bg-surface-elevated/60 p-4 sm:grid-cols-4 print:border-neutral-200 print:bg-neutral-50">
-          <div className="rounded-xl bg-surface/60 p-3 border border-border/40">
+        <div className="mt-5 grid grid-cols-2 gap-3.5 border border-border bg-surface p-4 sm:grid-cols-4 print:border-neutral-200 print:bg-neutral-50">
+          <div className="p-3 border border-border">
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-500">
               Policy Action
             </span>
@@ -142,7 +142,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <p className="font-mono text-micro text-fg-tertiary">{band} RISK</p>
           </div>
 
-          <div className="rounded-xl bg-surface/60 p-3 border border-border/40">
+          <div className="p-3 border border-border">
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-500">
               Composite Threat Score
             </span>
@@ -152,7 +152,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <p className="font-mono text-micro text-fg-tertiary">SCALE 0.00–1.00</p>
           </div>
 
-          <div className="rounded-xl bg-surface/60 p-3 border border-border/40">
+          <div className="p-3 border border-border">
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-500">
               Transaction State
             </span>
@@ -162,11 +162,11 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <p className="font-mono text-micro text-fg-tertiary">TIER {decision?.transaction_tier ?? 0}</p>
           </div>
 
-          <div className="rounded-xl bg-surface/60 p-3 border border-border/40">
+          <div className="p-3 border border-border">
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-500">
               Triggered Policy Rule
             </span>
-            <p className="mt-1 font-mono text-xs font-bold text-accent print:text-neutral-800">
+            <p className="mt-1 font-mono text-xs font-bold text-fg-primary print:text-neutral-800">
               {policyId}
             </p>
             <p className="font-mono text-micro text-fg-tertiary">v{decision?.policy_version ?? '1.0'}</p>
@@ -174,7 +174,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
         </div>
 
         {/* Cryptographic SHA-256 Tamper-Evident Chain Box */}
-        <div className="mt-4 rounded-2xl border border-border/80 bg-background/80 p-4 print:border-neutral-200 print:bg-neutral-50">
+        <div className="mt-4 border border-border bg-surface p-4 print:border-neutral-200 print:bg-neutral-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Lock className="h-4 w-4 text-emerald-400" />
@@ -182,7 +182,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
                 Cryptographic Audit Trace (SHA-256 Chain)
               </span>
             </div>
-            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-[0.625rem] font-bold text-emerald-400 print:text-emerald-800 border border-emerald-500/30">
+            <span className="border border-emerald-500 bg-emerald-500/10 px-2 py-0.5 font-mono text-[0.625rem] font-bold text-emerald-600 print:text-emerald-800">
               {evidence?.hash_chained ? 'VERIFIED CRYPTOGRAPHIC CHAIN' : 'IN-SESSION AUDIT TRACE'}
             </span>
           </div>
@@ -200,7 +200,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
 
         {/* Linked Transaction & Caller Profile */}
         {transaction ? (
-          <div className="mt-4 rounded-2xl border border-border/80 bg-surface-elevated/40 p-4 print:border-neutral-300">
+          <div className="mt-4 border border-border bg-surface p-4 print:border-neutral-300">
             <h3 className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-600">
               Financial Context &amp; Payee Verification
             </h3>
@@ -232,8 +232,8 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
         ) : null}
 
         {/* Neural Expert Model Scorecard (L3) */}
-        <div className="mt-4 rounded-2xl border border-border/80 bg-surface-elevated/40 p-4 print:border-neutral-300">
-          <div className="flex items-center justify-between pb-2 border-b border-border/60">
+        <div className="mt-4 border border-border bg-surface p-4 print:border-neutral-300">
+          <div className="flex items-center justify-between pb-2 border-b border-border">
             <h3 className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-600">
               Neural Expert Ensemble Scorecard (L3)
             </h3>
@@ -257,10 +257,10 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
                   const p = expert?.p ?? null;
                   return (
                     <tr key={id} className="text-fg-secondary print:text-black">
-                      <td className="py-2 font-bold text-accent print:text-black">{id}</td>
+                      <td className="py-2 font-bold text-fg-primary print:text-black">{id}</td>
                       <td className="py-2 text-fg">{expertNames[id] ?? 'Expert Model'}</td>
                       <td className="py-2">
-                        <span className="rounded bg-surface-elevated px-2 py-0.5 text-[0.6875rem] text-fg-secondary print:border print:border-neutral-300">
+                        <span className="border border-border bg-surface px-2 py-0.5 text-[0.6875rem] text-fg-secondary print:border print:border-neutral-300">
                           {status}
                         </span>
                       </td>
@@ -277,7 +277,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
 
         {/* Explainability Attribution Breakdown */}
         {evidence && evidence.top_factors.length > 0 ? (
-          <div className="mt-4 rounded-2xl border border-border/80 bg-surface-elevated/40 p-4 print:border-neutral-300">
+          <div className="mt-4 border border-border bg-surface p-4 print:border-neutral-300">
             <h3 className="font-mono text-micro uppercase tracking-wider text-fg-tertiary print:text-neutral-600">
               Explainability Factor Attribution
             </h3>
@@ -285,7 +285,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
               {evidence.top_factors.map((factor) => (
                 <li
                   key={factor.factor}
-                  className="flex items-center justify-between rounded-lg bg-surface/50 px-3 py-1.5 font-mono text-fg-secondary print:text-black"
+                  className="flex items-center justify-between border-b border-border/50 py-2 font-mono text-fg-secondary print:text-black last:border-0"
                 >
                   <span>{humanise(factor.factor)}</span>
                   <span
