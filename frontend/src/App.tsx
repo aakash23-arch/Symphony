@@ -1,78 +1,70 @@
 import React from 'react';
 
-import { ErrorState } from './components/PanelStates';
-import { CallPanel } from './panels/CallPanel';
-import { DemoControl } from './panels/DemoControl';
-import { EvidencePanel } from './panels/EvidencePanel';
+import { ScrollProgress } from './design-system/ScrollProgress';
 import { HeaderBar } from './panels/HeaderBar';
-import { RecommendationPanel } from './panels/RecommendationPanel';
-import { RiskPanel } from './panels/RiskPanel';
-import { TimelinePanel } from './panels/TimelinePanel';
-import { TransactionPanel } from './panels/TransactionPanel';
+import {
+  HeroSection,
+  ProblemSection,
+  RawSignalSection,
+  PipelineSection,
+  ForensicLayerSection,
+  BeliefTrajectorySection,
+  ContextDecisionSection,
+  LiveDetectionSection,
+  PolicyActionSection,
+  ProtectionSection,
+  AssuranceSection,
+  ScenarioMatrixSection,
+  TechnicalArchitectureSection,
+  ClosingSection,
+  NarrativeFooter,
+} from './sections';
 import { SessionProvider } from './state/SessionProvider';
-import { useSession } from './state/useSession';
 
 /**
- * Editorial Dashboard Layout.
+ * Symphony Editorial Product Narrative & Live Detection Console.
  *
- * Storytelling Flow:
- *  - Section 00: Scenario Matrix & Live Audio Ingress
- *  - Section 01: Intake & Context (Call & Transaction)
- *  - Section 02: Composite Risk & Policy Directives (Risk & Recommendation)
- *  - Section 03: Forensic Evidence & Neural Scorecard (Evidence & Dossier)
- *  - Section 04: Forensic Event History (Timeline)
- *
- * Column order preserves strict accessibility and mobile priority:
- * Risk & Recommendation come first in DOM order so operators see decisions first on small screens.
+ * Storytelling Hierarchy:
+ *  - Section 00: Hero (Voice sounds real — that doesn't mean it is)
+ *  - Section 01: The Problem (A voice is no longer proof of identity)
+ *  - Section 02: Raw Signal (Every call starts as data)
+ *  - Section 03: The Five-Layer Symphony Pipeline (L1–L5 stages)
+ *  - Section 04: The Forensic Layer (One signal, multiple questions — E1–E6 ensemble)
+ *  - Section 05: The Signal Becomes a Belief (Temporal trajectory & convergence)
+ *  - Section 06: Context Changes the Decision (Voice + Call + Transaction fusion)
+ *  - Section 07: Live Detection Console (Operational real-time defense console)
+ *  - Section 08: The Decision (The output is an action — policy directives)
+ *  - Section 09: Protection (Real-time financial hold & verification sequence)
+ *  - Section 10: Assurance (Cryptographic SHA-256 evidence chain & dossier)
+ *  - Section 11: Demo Scenarios (Interactive test vectors & live mic)
+ *  - Section 12: Technical Architecture (End-to-end processing topology)
+ *  - Section 13: Closing (Don't trust voice alone — trust the signal behind it)
+ *  - Footer: Brand, simulation disclaimer, and raw audio privacy notice
  */
 const Dashboard: React.FC = () => {
-  const { state } = useSession();
-
   return (
     <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-accent/30 selection:text-white">
+      <ScrollProgress />
       <HeaderBar />
 
-      <main className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] w-full mx-auto">
-        <DemoControl />
-
-        {state.error ? (
-          <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 shadow-lg shadow-red-500/5">
-            <ErrorState code={state.error.code} message={state.error.message} />
-          </div>
-        ) : null}
-
-        {/* 3-Column Editorial Grid */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-          {/* Decision & Intelligence Column: Leads in DOM order for mobile operators */}
-          <div className="order-1 space-y-6 lg:order-2 lg:col-span-6">
-            <RiskPanel />
-            <RecommendationPanel />
-            <EvidencePanel />
-          </div>
-
-          {/* Context & Telemetry Column */}
-          <div className="order-2 space-y-6 lg:order-1 lg:col-span-3">
-            <CallPanel />
-            <TransactionPanel />
-          </div>
-
-          {/* Event History Ledger Column */}
-          <div className="order-3 lg:order-3 lg:col-span-3">
-            <TimelinePanel />
-          </div>
-        </div>
+      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 max-w-[1600px] w-full mx-auto space-y-16">
+        <HeroSection />
+        <ProblemSection />
+        <RawSignalSection />
+        <PipelineSection />
+        <ForensicLayerSection />
+        <BeliefTrajectorySection />
+        <ContextDecisionSection />
+        <LiveDetectionSection />
+        <PolicyActionSection />
+        <ProtectionSection />
+        <AssuranceSection />
+        <ScenarioMatrixSection />
+        <TechnicalArchitectureSection />
+        <ClosingSection />
       </main>
 
-      <footer className="border-t border-border/80 bg-surface/90 px-6 py-3.5 backdrop-blur-sm mt-8">
-        <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2">
-          <p className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
-            Raw audio is confined to the ingestion boundary — no PCM is exposed through this interface.
-          </p>
-          <p className="font-mono text-micro text-fg-tertiary">
-            Symphony VoiceShield Defense Architecture
-          </p>
-        </div>
-      </footer>
+      <NarrativeFooter />
     </div>
   );
 };
@@ -82,4 +74,5 @@ export const App: React.FC = () => (
     <Dashboard />
   </SessionProvider>
 );
+
 

@@ -13,6 +13,11 @@ import { useSession } from '../state/useSession';
 export const HeaderBar: React.FC = () => {
   const { state, health, healthError } = useSession();
 
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    el?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-surface/95 backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5">
@@ -35,6 +40,59 @@ export const HeaderBar: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Quick Section Navigation Links */}
+        <nav className="hidden lg:flex items-center gap-1 font-mono text-micro-label uppercase text-fg-tertiary">
+          <button
+            type="button"
+            onClick={() => scrollTo('hero')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('problem')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Threat
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('pipeline')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Pipeline
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('forensics')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Forensics
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('live-console')}
+            className="px-3 py-1.5 rounded-lg bg-accent/15 text-accent font-bold hover:bg-accent/25 transition-colors border border-accent/30"
+          >
+            Live Console
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('scenarios')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Scenarios
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollTo('architecture')}
+            className="px-2.5 py-1.5 rounded-lg hover:text-fg hover:bg-surface-elevated transition-colors"
+          >
+            Architecture
+          </button>
+        </nav>
 
         {/* Live System Diagnostics */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
