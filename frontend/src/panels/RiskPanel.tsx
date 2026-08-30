@@ -40,6 +40,9 @@ export const RiskPanel: React.FC = () => {
           message="No active session."
           hint="Risk is produced by the pipeline once audio is flowing."
         />
+        <p className="mt-4 border-t border-border/60 pt-2.5 text-[0.6875rem] text-fg-tertiary">
+          {scoreDisclaimer('UNCALIBRATED_RISK_SCORE')}
+        </p>
       </Panel>
     );
   }
@@ -53,6 +56,9 @@ export const RiskPanel: React.FC = () => {
         subtitle="Multi-Modal Threat Level"
       >
         <ErrorState code={state.error.code} message={state.error.message} />
+        <p className="mt-4 border-t border-border/60 pt-2.5 text-[0.6875rem] text-fg-tertiary">
+          {scoreDisclaimer('UNCALIBRATED_RISK_SCORE')}
+        </p>
       </Panel>
     );
   }
@@ -87,6 +93,9 @@ export const RiskPanel: React.FC = () => {
           </p>
           <p className="mt-3 font-mono text-micro text-fg-tertiary border-t border-border/40 pt-2">
             frames seen {state.framesSeen} · scored {state.framesScored}
+          </p>
+          <p className="mt-2 text-[0.6875rem] text-fg-tertiary">
+            {scoreDisclaimer('UNCALIBRATED_RISK_SCORE')}
           </p>
         </div>
       </Panel>
