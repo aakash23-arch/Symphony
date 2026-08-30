@@ -39,7 +39,7 @@ export const TimelinePanel: React.FC = () => {
       bodyClassName="flex min-h-0 flex-col"
     >
       {state.seqGapDetected ? (
-        <div className="mb-2.5 flex items-center gap-1.5 rounded-lg border border-band-medium/40 bg-band-medium/10 px-2.5 py-1.5 font-mono text-micro uppercase text-band-medium">
+        <div className="mb-2.5 flex items-center gap-1.5 border border-band-medium bg-surface px-2.5 py-1.5 font-mono text-micro uppercase text-band-medium">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <span>Event gap detected — resyncing from server</span>
         </div>
@@ -60,7 +60,7 @@ export const TimelinePanel: React.FC = () => {
             <li
               key={entry.seq}
               className={cn(
-                'rounded-lg border border-border/60 bg-surface-elevated/30 p-2.5 border-l-4 transition-all hover:bg-surface-elevated/60',
+                'border border-border bg-surface p-3 border-l-4 transition-all',
                 severityTone(entry.severity),
               )}
             >

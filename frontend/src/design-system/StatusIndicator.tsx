@@ -131,7 +131,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     return (
       <div
         className={cn(
-          'flex items-center justify-between gap-3 rounded-xl border p-3 font-mono transition-all',
+          'flex items-center justify-between gap-3 border p-3 font-mono transition-all',
           config.bg,
           config.border,
           normStatus === 'CRITICAL' && 'animate-pulse-edge',
@@ -162,7 +162,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-micro-label uppercase tracking-wider',
+        'inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-micro-label uppercase tracking-wider',
         config.bg,
         config.border,
         config.text,

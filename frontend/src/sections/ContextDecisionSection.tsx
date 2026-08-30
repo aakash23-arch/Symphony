@@ -1,6 +1,4 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
-import { NarrativeSection } from '../design-system/NarrativeSection';
 import { formatAmount } from '../lib/format';
 import { useSession } from '../state/useSession';
 
@@ -10,89 +8,117 @@ export const ContextDecisionSection: React.FC = () => {
   const decision = state.decision;
 
   const amountDisplay = tx ? formatAmount(tx.amount, tx.currency) : '₹25,00,000';
-  const beneficiaryDisplay = tx?.beneficiary ?? 'Apex Industrial Suppliers Ltd';
+  const beneficiaryDisplay = tx?.beneficiary ?? 'Nexus Holdings Offshore Ltd';
   const noveltyDisplay = tx?.beneficiary_novelty ?? 'NEW';
 
   return (
-    <NarrativeSection
-      index="06"
-      title="A DETECTOR ISN'T ENOUGH."
-      subtitle="An acoustic classifier only measures spectral signals. Symphony fuses acoustic evidence with transaction stakes and caller context to make a defensible security decision."
-      tag="MULTI-FACTOR FUSION"
-    >
-      <div className="space-y-6">
-        {/* The Multi-Factor Fusion Equation */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-7 items-center font-mono">
-          {/* Factor 1: Voice Evidence */}
-          <div className="rounded-xl border border-border/80 bg-surface/90 p-4 lg:col-span-2">
-            <div className="flex items-center gap-2 text-micro-label text-fg-tertiary uppercase pb-2 border-b border-border/50">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              <span>VOICE EVIDENCE</span>
-            </div>
-            <p className="mt-2 text-technical-value font-bold text-fg">L3 Expert Fused Output</p>
-            <p className="mt-1 text-micro-label text-fg-secondary">
-              P(inauth) = {decision ? decision.risk.risk_score.toFixed(3) : '0.860'}
+    <section id="context" className="py-16 sm:py-24 border-b border-border">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
+        {/* Section Header */}
+        <div className="flex items-center justify-between border-b border-border pb-4 font-mono text-micro-label uppercase text-fg-tertiary">
+          <span>06 // MULTI-FACTOR SYNTHESIS</span>
+          <span>VOICE + CONTEXT + TRANSACTION</span>
+        </div>
+
+        {/* Giant Editorial Headline */}
+        <div className="mt-8 sm:mt-12 mb-12 sm:mb-16">
+          <h2 className="display-giant text-fg font-black tracking-tight leading-[0.94]">
+            A DETECTOR<br />
+            <span className="serif-italic font-normal">ISN’T ENOUGH.</span>
+          </h2>
+          <p className="mt-5 text-lg sm:text-xl text-fg-secondary max-w-2xl font-normal leading-relaxed">
+            An acoustic classifier only scores acoustic distortion. Symphony fuses acoustic evidence
+            with caller behavior, transfer urgency, and beneficiary novelty into a definitive security action.
+          </p>
+        </div>
+
+        {/* Multi-Factor Equation Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 border-t border-b border-border py-8 mb-12 font-mono">
+          <div className="space-y-1">
+            <span className="text-micro-label text-fg-tertiary uppercase block">FACTOR 01</span>
+            <p className="text-sm sm:text-base font-bold text-fg">VOICE ACOUSTIC EVIDENCE</p>
+            <p className="text-xs text-fg-secondary">
+              P(inauth) = {decision ? decision.risk.risk_score.toFixed(3) : '0.890'} (High Synthetic Probability)
             </p>
-            <p className="mt-0.5 text-micro-label text-fg-tertiary">Acoustic, Waveform &amp; Speaker Cosine</p>
           </div>
 
-          <div className="flex justify-center text-fg-tertiary lg:col-span-0">
-            <Plus className="h-5 w-5" />
-          </div>
-
-          {/* Factor 2: Call Context */}
-          <div className="rounded-xl border border-border/80 bg-surface/90 p-4 lg:col-span-2">
-            <div className="flex items-center gap-2 text-micro-label text-fg-tertiary uppercase pb-2 border-b border-border/50">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-              <span>CALL CONTEXT</span>
-            </div>
-            <p className="mt-2 text-technical-value font-bold text-fg">Caller Metadata &amp; Signals</p>
-            <p className="mt-1 text-micro-label text-fg-secondary">
-              CFO (Ananya Sharma) · ENROLLED
+          <div className="space-y-1">
+            <span className="text-micro-label text-fg-tertiary uppercase block">FACTOR 02</span>
+            <p className="text-sm sm:text-base font-bold text-fg">CALL BEHAVIOR &amp; CODEC</p>
+            <p className="text-xs text-fg-secondary">
+              PSTN Inbound · Executive Impersonation · Urgency Flag Active
             </p>
-            <p className="mt-0.5 text-micro-label text-fg-tertiary">Inbound PSTN · Urgency &amp; Secrecy Flags</p>
           </div>
 
-          <div className="flex justify-center text-fg-tertiary lg:col-span-0">
-            <Plus className="h-5 w-5" />
-          </div>
-
-          {/* Factor 3: Transaction Context */}
-          <div className="rounded-xl border border-border/80 bg-surface/90 p-4 lg:col-span-2">
-            <div className="flex items-center gap-2 text-micro-label text-fg-tertiary uppercase pb-2 border-b border-border/50">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              <span>TRANSACTION CONTEXT</span>
-            </div>
-            <p className="mt-2 text-technical-value font-bold text-fg">{amountDisplay}</p>
-            <p className="mt-1 text-micro-label text-fg-secondary truncate">
-              {beneficiaryDisplay}
+          <div className="space-y-1">
+            <span className="text-micro-label text-fg-tertiary uppercase block">FACTOR 03</span>
+            <p className="text-sm sm:text-base font-bold text-amber-600">TRANSACTION NOVELTY</p>
+            <p className="text-xs text-fg-secondary">
+              {amountDisplay} Wire Transfer · {noveltyDisplay} Beneficiary
             </p>
-            <p className="mt-0.5 text-micro-label text-fg-tertiary">Beneficiary Novelty: {noveltyDisplay}</p>
           </div>
         </div>
 
-        {/* Equals Resulting Decision Directive */}
-        <div className="rounded-2xl border border-accent/40 bg-accent/10 p-5 backdrop-blur-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span className="font-mono text-micro-label uppercase tracking-widest text-accent font-bold">
-                DEFENSIBLE DECISION RESULT
+        {/* CALL / TRANSACTION STATEMENT LEDGER (Phase 13) */}
+        <div className="border border-border bg-surface p-8 sm:p-12 max-w-4xl mx-auto shadow-sm">
+          <div className="flex items-center justify-between border-b border-border pb-4 font-mono text-micro-label text-fg-tertiary uppercase">
+            <span>CALL &amp; TRANSACTION STATEMENT</span>
+            <span>AUDIT DISPATCH RECEIPT</span>
+          </div>
+
+          <div className="divide-y divide-border font-mono text-xs sm:text-sm py-4">
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">CLAIMED CALLER</span>
+              <span className="font-bold text-fg">{state.callerRef ?? 'ANANYA SHARMA (CFO)'}</span>
+            </div>
+
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">TRANSFER REQUEST</span>
+              <span className="font-bold text-fg">URGENT WIRE DISBURSEMENT</span>
+            </div>
+
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">AMOUNT</span>
+              <span className="font-bold text-amber-600 text-base">{amountDisplay}</span>
+            </div>
+
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">BENEFICIARY</span>
+              <span className="font-bold text-fg truncate max-w-[240px] sm:max-w-none">
+                {beneficiaryDisplay} ({noveltyDisplay})
               </span>
-              <p className="mt-1 text-lg font-bold text-fg">
-                High stakes + High acoustic risk + Unverified payee = <span className="text-accent">MANDATED HOLD &amp; STEP-UP</span>
-              </p>
-              <p className="mt-1 text-xs text-fg-secondary">
-                A benign check might pass low amounts, but ₹25,00,000 to an unverified beneficiary triggers hard out-of-band verification.
+            </div>
+
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">CALLBACK STATUS</span>
+              <span className="font-bold text-red-600">REFUSED / BYPASS ATTEMPTED</span>
+            </div>
+
+            <div className="py-3 flex items-center justify-between">
+              <span className="text-fg-tertiary uppercase">VOICE EVIDENCE</span>
+              <span className="font-bold text-fg-primary">
+                {decision ? `Score ${decision.risk.risk_score.toFixed(2)} (${decision.risk.risk_band})` : 'HIGH ACOUSTIC RISK'}
+              </span>
+            </div>
+          </div>
+
+          {/* Resulting Symphony Decision Directive */}
+          <div className="mt-6 pt-6 border-t-2 border-fg flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono">
+            <div>
+              <span className="text-micro-label text-fg-primary uppercase font-bold block">
+                MANDATED SYMPHONY POLICY DIRECTIVE
+              </span>
+              <p className="text-lg sm:text-xl font-black text-fg mt-0.5">
+                {decision?.action ?? 'MANDATED HOLD'} (STEP-UP VERIFICATION REQUIRED)
               </p>
             </div>
 
-            <div className="shrink-0 rounded-xl border border-accent/50 bg-surface px-4 py-2 text-center font-mono">
-              <span className="text-micro-label text-fg-tertiary uppercase block">MANDATED ACTION</span>
-              <span className="text-base font-bold text-accent">{decision?.action ?? 'HOLD'}</span>
-            </div>
+            <span className="border border-fg bg-fg text-background px-4 py-2 text-xs font-bold uppercase tracking-widest text-center">
+              FUNDS FROZEN
+            </span>
           </div>
         </div>
       </div>
-    </NarrativeSection>
+    </section>
   );
 };

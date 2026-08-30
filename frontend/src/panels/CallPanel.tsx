@@ -89,12 +89,12 @@ export const CallPanel: React.FC = () => {
       </dl>
 
       {/* Transaction Association Strip */}
-      <div className="mt-4 rounded-xl border border-border/80 bg-surface-elevated/40 p-3">
+      <div className="mt-4 border-y border-border py-3">
         <div className="flex items-center justify-between">
           <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
             Linked Disbursement Context
           </span>
-          <span className="font-mono text-[0.625rem] text-accent">L4 ASSOC</span>
+          <span className="font-mono text-[0.625rem] text-fg-primary">L4 ASSOC</span>
         </div>
         {transaction ? (
           <p className="mt-1.5 text-xs text-fg-secondary">
@@ -112,17 +112,17 @@ export const CallPanel: React.FC = () => {
       </div>
 
       {/* Frame Telemetry Counters */}
-      <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-2.5 font-mono text-micro text-fg-tertiary">
+      <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 pt-2.5 font-mono text-micro text-fg-tertiary">
         <div className="flex items-center gap-3">
           <span>frames <strong className="text-fg-secondary">{state.framesSeen}</strong></span>
           <span>scored <strong className="text-fg-secondary">{state.framesScored}</strong></span>
         </div>
         {state.framesSkipped > 0 ? (
-          <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-band-medium">
+          <span className="px-1.5 py-0.5 text-band-medium font-bold">
             dropped {state.framesSkipped}
           </span>
         ) : (
-          <span className="text-emerald-400/80">0 dropped</span>
+          <span className="text-emerald-600">0 dropped</span>
         )}
       </div>
     </Panel>

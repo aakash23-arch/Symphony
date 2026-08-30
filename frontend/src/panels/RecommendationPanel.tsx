@@ -45,9 +45,9 @@ export const RecommendationPanel: React.FC = () => {
       subtitle="Automated Policy Directives"
     >
       {/* Primary Action Directives Strip */}
-      <div className={cn('rounded-2xl border p-4 transition-all', action.border, action.surface)}>
+      <div className={cn('border-y border-border py-4 transition-all', action.surface)}>
         <div className="flex items-start gap-3.5">
-          <div className={cn('mt-0.5 rounded-lg p-1.5 ring-1', action.border, action.surface)}>
+          <div className={cn('mt-0.5 border border-border bg-surface p-1.5', action.border)}>
             <ShieldAlert className={cn('h-5 w-5 shrink-0', action.text)} aria-hidden="true" />
           </div>
           <div className="min-w-0">
@@ -71,9 +71,9 @@ export const RecommendationPanel: React.FC = () => {
             {decision.recommended_verifications.map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-surface-elevated/40 px-3 py-2 text-xs leading-relaxed text-fg-secondary"
+                className="flex items-start gap-2.5 border-b border-border/50 py-2 text-xs leading-relaxed text-fg-secondary last:border-0"
               >
-                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-accent mt-0.5" />
+                <ArrowRight className="h-3.5 w-3.5 shrink-0 text-fg-primary mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -91,7 +91,7 @@ export const RecommendationPanel: React.FC = () => {
             {decision.reason_codes.map((code) => (
               <Badge
                 key={code}
-                className="border-border bg-surface-elevated text-fg-secondary hover:text-fg"
+                className="border-border bg-surface text-fg-secondary hover:text-fg-primary"
                 title={humanise(code)}
               >
                 {code}

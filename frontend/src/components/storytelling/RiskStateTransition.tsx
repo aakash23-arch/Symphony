@@ -63,10 +63,10 @@ export const RiskStateTransition: React.FC<RiskStateTransitionProps> = ({ classN
             <div
               key={item.band}
               className={cn(
-                'relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-300',
+                'relative flex flex-col justify-between border p-4 transition-all duration-300',
                 isCurrent
-                  ? `${tokens.border} ${tokens.surface} ring-2 ring-accent scale-[1.02] shadow-xl`
-                  : 'border-border/60 bg-surface/70 opacity-60 hover:opacity-100',
+                  ? `${tokens.border} ${tokens.surface} ring-1 ring-fg-primary scale-[1.02]`
+                  : 'border-border bg-surface opacity-60 hover:opacity-100',
               )}
             >
               <div>
@@ -98,24 +98,24 @@ export const RiskStateTransition: React.FC<RiskStateTransitionProps> = ({ classN
       {/* Dedicated UNCERTAIN Fail-Safe Branch (Never mapped into LOW) */}
       <div
         className={cn(
-          'relative rounded-2xl border p-5 transition-all',
+          'relative border p-5 transition-all',
           isUncertain
-            ? 'border-purple-500/80 bg-purple-500/15 ring-2 ring-purple-400 shadow-xl'
-            : 'border-border/60 bg-surface/60 opacity-70',
+            ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600'
+            : 'border-border bg-surface opacity-70',
         )}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/40">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-purple-600 bg-purple-50 text-purple-600">
               <HelpCircle className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-300">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-600">
                   UNCERTAIN STATE (DEGRADED CHANNEL / INSUFFICIENT EVIDENCE)
                 </span>
                 {isUncertain && (
-                  <span className="rounded bg-purple-500/30 px-2 py-0.5 text-[0.625rem] font-bold text-purple-200 uppercase">
+                  <span className="border border-purple-600 bg-purple-50 px-2 py-0.5 text-[0.625rem] font-bold text-purple-700 uppercase">
                     ACTIVE DIRECTIVE
                   </span>
                 )}
@@ -128,7 +128,7 @@ export const RiskStateTransition: React.FC<RiskStateTransitionProps> = ({ classN
 
           <div className="shrink-0 text-right font-mono text-micro-label text-fg-tertiary">
             <span>FAIL-SAFE POLICY</span>
-            <p className="font-bold text-purple-300">STEP_UP REQUIRED</p>
+            <p className="font-bold text-purple-600">STEP_UP REQUIRED</p>
           </div>
         </div>
       </div>

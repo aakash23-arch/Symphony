@@ -43,7 +43,7 @@ export const SystemTimeline: React.FC<SystemTimelineProps> = ({
 }) => {
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-border/70 rounded-xl bg-surface-elevated/20">
+      <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed border-border bg-surface">
         <p className="font-mono text-technical-label text-fg-tertiary">{emptyMessage}</p>
       </div>
     );
@@ -65,7 +65,7 @@ export const SystemTimeline: React.FC<SystemTimelineProps> = ({
             <li
               key={item.id}
               className={cn(
-                'rounded-lg border border-border/70 bg-surface-elevated/40 p-3 border-l-4 transition-all hover:bg-surface-elevated/70',
+                'border border-border bg-surface p-3 border-l-4 transition-colors hover:border-r-fg-primary hover:border-y-fg-primary hover:bg-surface-elevated',
                 borderStyle,
               )}
             >
@@ -94,7 +94,7 @@ export const SystemTimeline: React.FC<SystemTimelineProps> = ({
       </ol>
 
       {pinnedTopNotice ? (
-        <p className="pt-2 text-right font-mono text-micro-label text-fg-muted border-t border-border/40">
+        <p className="pt-2 text-right font-mono text-micro-label text-fg-muted border-t border-border">
           {pinnedTopNotice}
         </p>
       ) : null}

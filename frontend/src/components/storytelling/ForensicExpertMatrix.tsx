@@ -63,16 +63,16 @@ export const ForensicExpertMatrix: React.FC<ForensicExpertMatrixProps> = ({
           return (
             <div
               key={item.id}
-              className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border/70 bg-surface/80 p-3.5 transition-all hover:bg-surface-elevated/60 hover:border-border-strong"
+              className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border py-3.5 transition-colors hover:bg-surface-elevated last:border-0"
             >
               {/* Expert Identifier & Name */}
               <div className="flex items-center gap-3 min-w-0">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-sm font-bold text-accent">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-border text-sm font-bold text-fg-primary">
                   {item.id}
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-fg uppercase truncate">
+                    <span className="text-xs font-bold text-fg-primary uppercase truncate">
                       {expertNames[item.id] ?? item.name}
                     </span>
                     <span className="text-border-strong hidden sm:inline">─────────</span>

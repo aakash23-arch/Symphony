@@ -90,7 +90,7 @@ export const EvidencePanel: React.FC = () => {
           </dl>
 
           {/* Fused Acoustic Evidence Progress Meter */}
-          <div className="mt-4 rounded-xl border border-border/80 bg-surface-elevated/40 p-3">
+          <div className="mt-4 border-y border-border py-4">
             <MetricBar
               label="Acoustic Evidence (E1–E3 Ensemble Mean)"
               value={
@@ -113,7 +113,7 @@ export const EvidencePanel: React.FC = () => {
                 <span className="font-mono text-[0.625rem] text-accent">TEMPORAL BELIEF</span>
               </div>
               <div
-                className="h-28 rounded-xl border border-border/70 bg-surface-elevated/30 p-2"
+                className="h-28 border border-border bg-surface p-2"
                 aria-label="Synthetic speech belief over time"
               >
                 <ResponsiveContainer width="100%" height="100%">
@@ -124,23 +124,23 @@ export const EvidencePanel: React.FC = () => {
                       type="number"
                       domain={['dataMin', 'dataMax']}
                       tickFormatter={(value: number) => `${value.toFixed(1)}s`}
-                      tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-                      stroke="#1E293B"
+                      tick={{ fill: '#888888', fontSize: 10, fontFamily: '-apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif' }}
+                      stroke="#EBEBEA"
                       tickLine={false}
                       minTickGap={28}
                     />
                     <YAxis
                       domain={[0, 1]}
                       ticks={[0, 0.5, 1]}
-                      tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-                      stroke="#1E293B"
+                      tick={{ fill: '#888888', fontSize: 10, fontFamily: '-apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif' }}
+                      stroke="#EBEBEA"
                       tickLine={false}
                     />
                     {/* connectNulls={false} MUST remain false to prevent fabricating fake lines */}
                     <Line
                       type="monotone"
                       dataKey="p_spoof"
-                      stroke="#818CF8"
+                      stroke="#000000"
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
@@ -164,10 +164,10 @@ export const EvidencePanel: React.FC = () => {
               {rows.map((row) => (
                 <li
                   key={row.expert_id}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-surface-elevated/30 px-3 py-2 text-xs"
+                  className="flex items-center justify-between gap-3 border-b border-border py-2.5 text-xs last:border-0"
                 >
                   <span className="flex items-center gap-2 min-w-0 truncate text-fg-secondary">
-                    <span className="font-mono font-bold text-accent">{row.expert_id}</span>
+                    <span className="font-mono font-bold text-fg-primary">{row.expert_id}</span>
                     <span className="truncate">{expertNames[row.expert_id] ?? ''}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2.5">
@@ -183,24 +183,23 @@ export const EvidencePanel: React.FC = () => {
             </ul>
           </div>
 
-          {/* Enrolled Biometric Voiceprint Inspector */}
-          <div className="mt-3.5 border-t border-border/80 pt-3">
+          <div className="mt-3.5 border-t border-border pt-3">
             <button
               type="button"
               onClick={() => setShowBiometricInfo((prev) => !prev)}
-              className="flex w-full items-center justify-between rounded-xl bg-surface-elevated/70 px-3 py-2 text-left text-xs text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg border border-border/60"
+              className="flex w-full items-center justify-between border border-border bg-surface px-4 py-3 text-left text-xs text-fg-secondary transition-all hover:border-border-strong hover:text-fg-primary"
             >
               <span className="inline-flex items-center gap-2 font-mono text-[0.75rem]">
-                <UserCheck className="h-4 w-4 text-accent" />
-                <span>Enrolled Speaker: <strong className="text-fg">Ananya Sharma (CFO)</strong></span>
+                <UserCheck className="h-4 w-4 text-fg-primary" />
+                <span>Enrolled Speaker: <strong className="text-fg-primary">Ananya Sharma (CFO)</strong></span>
               </span>
-              <span className="font-mono text-[0.6875rem] font-semibold text-accent">
+              <span className="font-mono text-[0.6875rem] font-semibold text-fg-primary">
                 {showBiometricInfo ? 'Hide Voiceprint' : 'Inspect Voiceprint'}
               </span>
             </button>
 
             {showBiometricInfo ? (
-              <div className="mt-2 rounded-xl border border-border bg-surface-elevated/90 p-3 text-xs space-y-2">
+              <div className="border-x border-b border-border bg-surface p-4 text-xs space-y-3">
                 <div className="grid grid-cols-2 gap-3 text-[0.6875rem]">
                   <div>
                     <span className="text-fg-tertiary">Voiceprint Identifier:</span>
@@ -236,7 +235,7 @@ export const EvidencePanel: React.FC = () => {
                 {evidence.top_factors.map((factor) => (
                   <li
                     key={factor.factor}
-                    className="flex items-center justify-between gap-3 rounded-md bg-surface-elevated/20 px-2.5 py-1.5 text-xs"
+                    className="flex items-center justify-between gap-3 border-b border-border/50 py-2 text-xs last:border-0"
                   >
                     <span className="min-w-0 truncate text-fg-secondary">
                       {humanise(factor.factor)}
@@ -265,12 +264,11 @@ export const EvidencePanel: React.FC = () => {
             </p>
           ) : null}
 
-          {/* Cryptographic Evidence Dossier Export CTA */}
-          <div className="mt-4 border-t border-border/80 pt-3.5">
+          <div className="mt-6 border-t border-border pt-4">
             <button
               type="button"
               onClick={() => setShowDossier(true)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-4 py-2.5 text-xs font-bold text-accent transition-all hover:bg-accent/20 hover:border-accent hover:text-white shadow-sm"
+              className="inline-flex w-full items-center justify-center gap-2 bg-fg-primary px-4 py-3.5 text-xs font-bold text-white transition-all hover:bg-fg-secondary"
             >
               <FileCheck className="h-4 w-4" />
               Export Cryptographic Evidence Dossier

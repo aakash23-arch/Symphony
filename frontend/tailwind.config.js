@@ -5,94 +5,79 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Core background and surface hierarchy (Symphony Black & Charcoal)
-        background: '#080B11',
-        'surface-base': '#080B11',
-        surface: '#0F1523',
-        'surface-elevated': '#161F33',
-        'surface-hover': '#1D2842',
-        'surface-subtle': '#0B101A',
+        // Core background and surface hierarchy (SignalIQ Paper & Ink)
+        background: '#FBFBFA', // SignalIQ off-white paper canvas
+        'surface-base': '#FBFBFA',
+        surface: '#FFFFFF', // Clean white cards/sections
+        'surface-elevated': '#F4F4F2',
+        'surface-hover': '#EFEFEA',
+        'surface-subtle': '#F8F8F6',
 
         // Infrastructure Grayscale Borders
-        border: '#1E293B',
-        'border-strong': '#334155',
-        'border-subtle': '#151D2C',
-        'border-hairline': 'rgba(255, 255, 255, 0.08)',
+        border: '#EBEBEA', // SignalIQ hairline border
+        'border-strong': '#DCDCD9',
+        'border-subtle': '#F4F4F2',
+        'border-hairline': 'rgba(0, 0, 0, 0.06)',
 
-        // Neutral Text Hierarchy
+        // Editorial Text Hierarchy
         fg: {
-          DEFAULT: '#F8FAFC',
-          primary: '#F8FAFC',
-          secondary: '#94A3B8',
-          tertiary: '#64748B',
-          muted: '#475569',
-          subtle: '#334155',
-          inverse: '#080B11',
-        },
-
-        // Symphony Pure Infrastructure Neutrals
-        neutral: {
-          950: '#06080D',
-          900: '#0D111A',
-          850: '#131824',
-          800: '#1C2333',
-          700: '#2A3449',
-          600: '#414E69',
-          500: '#62718E',
-          400: '#8E9BB4',
-          300: '#B6C1D6',
-          200: '#D9E0EE',
-          100: '#EDF1F7',
-          50: '#F8FAFC',
+          DEFAULT: '#0A0A0A',
+          primary: '#0A0A0A', // Stark Ink
+          secondary: '#666666', // SignalIQ secondary neutral
+          tertiary: '#888888', // SignalIQ tertiary neutral
+          muted: '#A8A8A5',
+          subtle: '#DCDCD9',
+          inverse: '#FFFFFF',
         },
 
         /**
          * Semantic Accent States ONLY:
-         * Accents strictly communicate system state and threat levels.
+         * Adjusted for legibility on light mode
          */
         state: {
-          safe: '#10B981',
-          'safe-glow': 'rgba(16, 185, 129, 0.12)',
-          medium: '#F59E0B',
-          'medium-glow': 'rgba(245, 158, 11, 0.12)',
-          high: '#EF4444',
-          'high-glow': 'rgba(239, 68, 68, 0.12)',
-          critical: '#F87171',
-          'critical-bg': '#450A0A',
-          'critical-glow': 'rgba(239, 68, 68, 0.25)',
-          uncertain: '#A78BFA',
-          'uncertain-glow': 'rgba(167, 139, 250, 0.12)',
-          processing: '#38BDF8',
-          'processing-glow': 'rgba(56, 189, 248, 0.12)',
-          disconnected: '#64748B',
+          safe: '#059669', // Emerald 600
+          'safe-glow': 'rgba(5, 150, 105, 0.08)',
+          medium: '#D97706', // Amber 600
+          'medium-glow': 'rgba(217, 119, 6, 0.08)',
+          high: '#DC2626', // Red 600
+          'high-glow': 'rgba(220, 38, 38, 0.08)',
+          critical: '#B91C1C', // Red 700
+          'critical-bg': '#FEF2F2', // Red 50
+          'critical-glow': 'rgba(185, 28, 28, 0.12)',
+          uncertain: '#7C3AED', // Violet 600
+          'uncertain-glow': 'rgba(124, 58, 237, 0.08)',
+          processing: '#0284C7', // Sky 600
+          'processing-glow': 'rgba(2, 132, 199, 0.08)',
+          disconnected: '#94A3B8', // Slate 400
         },
 
         // Backward-compatible risk band keys
         band: {
-          low: '#10B981',
-          'low-glow': 'rgba(16, 185, 129, 0.15)',
-          medium: '#F59E0B',
-          'medium-glow': 'rgba(245, 158, 11, 0.15)',
-          high: '#EF4444',
-          'high-glow': 'rgba(239, 68, 68, 0.15)',
-          critical: '#FCA5A5',
-          'critical-field': '#7F1D1D',
-          'critical-edge': '#EF4444',
-          'critical-glow': 'rgba(239, 68, 68, 0.25)',
-          uncertain: '#A78BFA',
-          'uncertain-glow': 'rgba(167, 139, 250, 0.15)',
+          low: '#059669',
+          'low-glow': 'rgba(5, 150, 105, 0.08)',
+          medium: '#D97706',
+          'medium-glow': 'rgba(217, 119, 6, 0.08)',
+          high: '#DC2626',
+          'high-glow': 'rgba(220, 38, 38, 0.08)',
+          critical: '#B91C1C',
+          'critical-field': '#FEF2F2',
+          'critical-edge': '#DC2626',
+          'critical-glow': 'rgba(185, 28, 28, 0.12)',
+          uncertain: '#7C3AED',
+          'uncertain-glow': 'rgba(124, 58, 237, 0.08)',
         },
 
         accent: {
-          DEFAULT: '#6366F1',
-          hover: '#4F46E5',
-          light: '#818CF8',
-          glow: 'rgba(99, 102, 241, 0.15)',
+          DEFAULT: '#000000', // Primary accent is now high contrast black
+          hover: '#27272A',
+          light: '#52525B',
+          glow: 'rgba(0, 0, 0, 0.05)',
         },
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"SF Pro"', '"Plus Jakarta Sans"', '"Inter"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"SF Pro"', '"Plus Jakarta Sans"', '"Inter"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        serif: ['Instrument Serif', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
       },
       fontSize: {
         // Micro & Technical Labels
@@ -113,6 +98,7 @@ export default {
         'display-md': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.03em' }],
         'display-lg': ['2.625rem', { lineHeight: '3rem', letterSpacing: '-0.04em' }],
         'display-xl': ['3.75rem', { lineHeight: '4rem', letterSpacing: '-0.05em' }],
+        'display-giant': ['clamp(3rem, 7vw, 6rem)', { lineHeight: '1.02', letterSpacing: '-0.045em' }],
 
         // Legacy compatibility
         micro: ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.08em' }],

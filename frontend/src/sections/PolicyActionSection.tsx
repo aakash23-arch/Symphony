@@ -15,7 +15,7 @@ export const PolicyActionSection: React.FC = () => {
         <RiskStateTransition />
 
         {/* Disclaimer on Uncalibrated Score Semantics */}
-        <div className="rounded-xl border border-border/80 bg-surface/90 p-4 font-mono text-xs text-fg-tertiary">
+        <div className="border border-border bg-surface p-4 font-mono text-xs text-fg-tertiary">
           <p className="font-bold text-fg-secondary uppercase text-micro-label mb-1">
             SCORE SEMANTICS DISCLOSURE
           </p>

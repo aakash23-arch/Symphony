@@ -12,4 +12,6 @@ export * from './AssuranceSection';
 export * from './ScenarioMatrixSection';
 export * from './TechnicalArchitectureSection';
 export * from './ClosingSection';
+export * from './FaqSection';
+export * from './SignalTransitionSection';
 export * from './NarrativeFooter';

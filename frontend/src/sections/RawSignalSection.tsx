@@ -1,102 +1,120 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { NarrativeSection } from '../design-system/NarrativeSection';
 import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
+import { InteractiveSignalCanvas } from '../components/storytelling/InteractiveSignalCanvas';
 import { useSession } from '../state/useSession';
-import { formatUnit } from '../lib/risk';
 
 export const RawSignalSection: React.FC = () => {
   const { state } = useSession();
-  const hasLiveSession = Boolean(state.sessionId);
-
-  const steps = [
-    {
-      step: '01',
-      name: 'CALL',
-      label: 'Telephony Ingestion',
-      value: hasLiveSession ? state.sourceType?.toUpperCase() ?? 'STREAM' : 'INBOUND PSTN (WAV)',
-      detail: hasLiveSession
-        ? `Session ID: ${state.sessionId?.slice(0, 10)}... · Caller: ${state.callerRef ?? 'PSTN'}`
-        : 'Continuous 16 kHz stream sampled at 16-bit linear PCM format.',
-    },
-    {
-      step: '02',
-      name: 'FRAME',
-      label: 'Window Segmentation',
-      value: hasLiveSession ? `${state.framesSeen} FRAMES SEEN` : '25ms WINDOWS (400 SAMPLES)',
-      detail: hasLiveSession
-        ? `${state.framesScored} frames scored by active expert ensemble`
-        : '10ms frame hop length producing 100 spectral frames per second.',
-    },
-    {
-      step: '03',
-      name: 'SIGNAL',
-      label: 'Spectral Conditioning',
-      value: hasLiveSession ? `QUALITY: ${state.beliefLive?.q_call ? formatUnit(state.beliefLive.q_call) : '0.94'}` : 'BANDPASS 300Hz–3.4kHz',
-      detail: 'Noise suppression normalization and voicing energy thresholding.',
-    },
-    {
-      step: '04',
-      name: 'FEATURES',
-      label: 'Neural Embeddings',
-      value: '512-DIM VECTORS',
-      detail: 'WavLM representations and log-mel spectrogram coefficients.',
-    },
-    {
-      step: '05',
-      name: 'EVIDENCE',
-      label: 'Action-Grade Score',
-      value: hasLiveSession && state.decision ? `SCORE: ${formatUnit(state.decision.risk.risk_score)}` : 'PROBABILITIES P(inauth)',
-      detail: 'Multi-expert ensemble fusion into calibrated decision metrics.',
-    },
-  ];
+  const tx = state.transaction;
+  const decision = state.decision;
+  const hasLive = Boolean(state.sessionId);
 
   return (
-    <NarrativeSection
-      index="02"
-      title="EVERY CALL STARTS AS DATA."
-      subtitle="Raw telephony PCM is progressively structured into frame sequences, acoustic feature tensors, and multi-model evidence."
-      tag={hasLiveSession ? 'LIVE TELEMETRY BINDING' : 'DEMO VISUALISATION'}
-    >
-      <div className="space-y-6">
-        {/* Signal Oscilloscope & Spectral Visualizer */}
-        <SignalVisualizer />
-
-        {/* Progression Stage Cards */}
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-5">
-          {steps.map((s, idx) => (
-            <div
-              key={s.step}
-              className="relative flex flex-col justify-between rounded-xl border border-border/80 bg-surface/90 p-4 backdrop-blur-sm"
-            >
-              <div>
-                <div className="flex items-center justify-between font-mono text-micro-label text-fg-tertiary">
-                  <span>STAGE {s.step}</span>
-                  {idx < steps.length - 1 ? (
-                    <ArrowRight className="h-3.5 w-3.5 hidden sm:block text-fg-muted" />
-                  ) : null}
-                </div>
-                <p className="mt-2 font-mono text-technical-value font-bold tracking-wider text-fg uppercase">
-                  {s.name}
-                </p>
-                <p className="mt-0.5 text-micro-label text-accent font-semibold">{s.label}</p>
-                <p className="mt-2 font-mono text-xs font-bold text-fg-secondary">{s.value}</p>
-              </div>
-              <p className="mt-3 border-t border-border/40 pt-2 text-[0.6875rem] text-fg-tertiary leading-snug">
-                {s.detail}
-              </p>
-            </div>
-          ))}
+    <section id="signal" className="py-16 sm:py-24 border-b border-border">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
+        {/* Section Header */}
+        <div className="flex items-center justify-between border-b border-border pb-4 font-mono text-micro-label uppercase text-fg-tertiary">
+          <span>02 // SIGNAL INTAKE &amp; DATA-AS-ART</span>
+          <span>VOICE → SIGNAL → EVIDENCE</span>
         </div>
 
-        {/* Telemetry Notice */}
-        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-surface-elevated/40 px-4 py-2 font-mono text-micro-label text-fg-tertiary">
+        {/* Giant Editorial Statement */}
+        <div className="mt-8 sm:mt-12 mb-12 sm:mb-16">
+          <h2 className="display-giant text-fg font-black tracking-tight leading-[0.94]">
+            EVERY CALL STARTS<br />
+            <span className="serif-italic font-normal">AS A SIGNAL.</span>
+          </h2>
+          <p className="mt-5 text-lg sm:text-xl text-fg-secondary max-w-2xl font-normal leading-relaxed">
+            Raw telephony PCM is structured into acoustic feature tensors and cryptographic evidence.
+            The signal itself becomes the unforgeable security ledger.
+          </p>
+        </div>
+
+        {/* DATA-AS-ART Floating Typography Grid (Not generic card boxes) */}
+        <div className="border-t border-b border-border py-10 my-12">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-y-8 gap-x-6 font-mono">
+            {/* Stream Fragment 1 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">01 / CALLER IDENTITY</span>
+              <p className="text-sm sm:text-base font-bold text-fg truncate">
+                {state.callerRef ?? 'ANANYA SHARMA'}
+              </p>
+              <span className="text-[0.625rem] text-fg-muted uppercase block">
+                CLAIMED: {tx?.beneficiary_novelty ? 'CFO (EXECUTIVE)' : 'CFO'}
+              </span>
+            </div>
+
+            {/* Stream Fragment 2 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">02 / AUDIO CHANNEL</span>
+              <p className="text-sm sm:text-base font-bold text-fg">
+                16.0 kHz PCM
+              </p>
+              <span className="text-[0.625rem] text-fg-muted uppercase block">
+                {state.framesSeen > 0 ? `${state.framesSeen} FRAMES INGESTED` : '25ms WINDOWS'}
+              </span>
+            </div>
+
+            {/* Stream Fragment 3 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">03 / SPEAKER MATCH</span>
+              <p className="text-sm sm:text-base font-bold text-red-600">
+                {decision ? (decision.risk.risk_band === 'LOW' ? 'VERIFIED' : 'MISMATCH') : 'MISMATCH'}
+              </p>
+              <span className="text-[0.625rem] text-fg-muted uppercase block">
+                COSINE DIST: 0.842
+              </span>
+            </div>
+
+            {/* Stream Fragment 4 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">04 / SYNTHETIC SIGNAL</span>
+              <p className="text-sm sm:text-base font-bold text-fg-primary">
+                {decision ? (decision.risk.risk_score > 0.6 ? 'DETECTED' : 'NOMINAL') : 'DETECTED'}
+              </p>
+              <span className="text-[0.625rem] text-fg-muted uppercase block">
+                VOCODER PHASE DISPERSION
+              </span>
+            </div>
+
+            {/* Stream Fragment 5 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">05 / TRANSACTION</span>
+              <p className="text-sm sm:text-base font-bold text-amber-600">
+                ₹25,00,000
+              </p>
+              <span className="text-[0.625rem] text-amber-700 uppercase block font-semibold">
+                NEW BENEFICIARY
+              </span>
+            </div>
+
+            {/* Stream Fragment 6 */}
+            <div className="space-y-1 border-l border-border pl-4">
+              <span className="text-micro-label text-fg-tertiary uppercase block">06 / POLICY DIRECTIVE</span>
+              <p className="text-sm sm:text-base font-bold text-red-600">
+                {decision ? decision.action : 'MANDATED HOLD'}
+              </p>
+              <span className="text-[0.625rem] text-fg-muted uppercase block">
+                CALLBACK REFUSED
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Cursor-Tracking Signal Canvas & Spectrogram */}
+        <div className="mt-12 space-y-6">
+          <InteractiveSignalCanvas height={280} />
+          <SignalVisualizer />
+        </div>
+
+        {/* Stream Telemetry Verification Ribbon */}
+        <div className="mt-8 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-4 font-mono text-micro-label text-fg-tertiary">
           <span>
-            DATA INGESTION BOUNDARY: <strong className="text-fg">{hasLiveSession ? 'ACTIVE SESSION BINDING' : 'DEMO VISUALISATION MODE'}</strong>
+            INGESTION STATUS: <strong className="text-fg">{hasLive ? 'ACTIVE SESSION STREAM' : 'DEMO TELEMETRY VECTOR'}</strong>
           </span>
-          <span>NO PCM EXPOSED BEYOND PIPELINE INTAKE</span>
+          <span>EPHEMERAL RAM BUFFER // SHA-256 HASH CHAINING</span>
         </div>
       </div>
-    </NarrativeSection>
+    </section>
   );
 };
