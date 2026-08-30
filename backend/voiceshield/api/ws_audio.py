@@ -73,7 +73,9 @@ async def websocket_audio(websocket: WebSocket, session_id: str) -> None:
     pipeline: L1IngestionPipeline = runtime.pipeline
 
     try:
-        await source.open()
+        # BUG-01 FIX: Do NOT call source.open() here. pipeline.run() opens the
+        # source internally. Calling it twice would double-open any source whose
+        # open() is not idempotent (e.g. a future SIP/RTP source).
         await runtime.orchestrator.start(session_id)
         pump = asyncio.create_task(
             pipeline.run(session_id, source, on_frame=runtime.make_frame_sink(session_id))
@@ -166,5 +168,12 @@ def _finalise(runtime, session_id: str) -> None:
     except Exception:
         return
     if not record.is_terminal and record.state is not SessionState.CREATED:
-        runtime.sessions.stop(session_id)
+        # BUG-04 FIX: sessions.stop() calls transition() which raises SessionError
+        # for illegal state transitions (e.g. if a concurrent path already moved the
+        # state). Without this guard the exception would propagate out of the finally
+        # block in websocket_audio, leaving the session permanently non-terminal.
+        try:
+            runtime.sessions.stop(session_id)
+        except Exception:
+            pass
 

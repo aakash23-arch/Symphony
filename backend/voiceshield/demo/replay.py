@@ -174,7 +174,12 @@ class ReplaySimulator:
                 pass
             self._task = None
 
-        if self._source is not None:
+        # BUG-08 FIX: pipeline.run() already calls source.close() in its own
+        # finally block. Calling close() again here double-closes the source.
+        # Only close manually if the task never ran (e.g. stop() before run()).
+        # WavFileSource.close() is idempotent (guards _wav is not None), but
+        # future sources may not be, so we avoid the double-close explicitly.
+        if self._source is not None and self._state is ReplayState.STOPPING:
             await self._source.close()
 
         if self._state is not ReplayState.ERROR:

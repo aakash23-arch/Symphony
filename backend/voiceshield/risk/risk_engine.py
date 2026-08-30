@@ -205,7 +205,9 @@ class StandardRiskEngine(RiskEngine):
             refs.append(EvidenceReference(kind="EXPERT", ref=f"model:{version}", detail="model version"))
 
         contributing_factors = {c.factor for c in contributions}
-        for key, provenance in sorted(context.provenance.items()):
+        # BUG-02 FIX: context.provenance can be None for hand-built ContextVectors.
+        # _context_completeness() already guards this, but _evidence_refs() did not.
+        for key, provenance in sorted((context.provenance or {}).items()):
             # Only reference context fields that actually moved the score;
             # listing thirty untouched fields would bury the ones that mattered.
             if provenance == ProvenanceType.UNAVAILABLE:

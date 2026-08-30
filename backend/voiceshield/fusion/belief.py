@@ -89,11 +89,22 @@ class StandardBeliefAccumulator(BeliefAccumulator):
         # beta = 1.0 if not initialized, else based on tau
         dt = 0.02 # Assuming 20ms per frame
         beta = min(1.0, dt / self.config.smoothing_time_constant) if self.config.smoothing_time_constant > 0 else 1.0
-        
-        if not state['trajectory'] and has_experts:
-            state['p_smoothed'] = frame_p
-        elif has_experts:
-            state['p_smoothed'] = (1.0 - beta) * state['p_smoothed'] + beta * frame_p
+
+        # BUG-05 FIX: The old code only seeded p_smoothed on the first frame when
+        # has_experts was True AND trajectory was empty. If the very first frame had
+        # no experts (has_experts=False), p_smoothed stayed 0.0. All subsequent
+        # frames would then mix real frame_p against that spurious 0.0, producing a
+        # systematic downward bias in P_spoof during session warm-up.
+        # Fix: track whether p_smoothed has ever been seeded; seed it on the first
+        # frame with valid experts regardless of trajectory length.
+        p_seeded = state.get('p_seeded', False)
+        if has_experts:
+            if not p_seeded:
+                state['p_smoothed'] = frame_p
+                state['p_seeded'] = True
+            else:
+                state['p_smoothed'] = (1.0 - beta) * state['p_smoothed'] + beta * frame_p
+
             
         # 4. Confidence Calculation
         # C_base = sum(w'_i) / sum(w_base_i)
