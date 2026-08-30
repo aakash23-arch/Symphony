@@ -1,7 +1,6 @@
 import React from 'react';
-import { Waves } from 'lucide-react';
 import { NarrativeSection } from '../design-system/NarrativeSection';
-import { VoiceSignalVisualizer } from '../components/visualizations/VoiceSignalVisualizer';
+import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
 import { DemoControl } from '../panels/DemoControl';
 import { CallPanel } from '../panels/CallPanel';
 import { TransactionPanel } from '../panels/TransactionPanel';
@@ -116,16 +115,7 @@ export const LiveDetectionSection: React.FC = () => {
           <DemoControl />
 
           {/* Live Signal Telemetry Visualizer */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between font-mono text-micro uppercase tracking-wider text-fg-tertiary px-1">
-              <span className="flex items-center gap-1.5">
-                <Waves className="h-3.5 w-3.5 text-accent" />
-                <span>REAL-TIME INGESTION SIGNAL &amp; SPECTROGRAM</span>
-              </span>
-              <span>VOICE → ANALYSIS → RISK</span>
-            </div>
-            <VoiceSignalVisualizer isStreaming={isStreaming} />
-          </div>
+          <SignalVisualizer />
 
           {state.error ? (
             <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 shadow-lg shadow-red-500/5">

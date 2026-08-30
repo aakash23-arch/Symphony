@@ -1,7 +1,6 @@
 import React from 'react';
 import { ArrowDown, ArrowRight, Play } from 'lucide-react';
-import { VoiceSignalVisualizer } from '../components/visualizations/VoiceSignalVisualizer';
-import { useSession } from '../state/useSession';
+import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
 
 export interface HeroSectionProps {
   onScrollToLive?: () => void;
@@ -12,8 +11,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onScrollToLive,
   onScrollToExplore,
 }) => {
-  const { state } = useSession();
-  const isStreaming = Boolean(state.sessionId && state.sourceType);
 
   const handleLiveClick = () => {
     if (onScrollToLive) {
@@ -92,7 +89,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Right Technical Signal Visualizer Column */}
         <div className="lg:col-span-6">
-          <VoiceSignalVisualizer isStreaming={isStreaming} />
+          <SignalVisualizer />
         </div>
       </div>
     </section>

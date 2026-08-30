@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { NarrativeSection } from '../design-system/NarrativeSection';
+import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
 import { useSession } from '../state/useSession';
 import { formatUnit } from '../lib/risk';
 
@@ -57,7 +58,10 @@ export const RawSignalSection: React.FC = () => {
       subtitle="Raw telephony PCM is progressively structured into frame sequences, acoustic feature tensors, and multi-model evidence."
       tag={hasLiveSession ? 'LIVE TELEMETRY BINDING' : 'DEMO VISUALISATION'}
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Signal Oscilloscope & Spectral Visualizer */}
+        <SignalVisualizer />
+
         {/* Progression Stage Cards */}
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-5">
           {steps.map((s, idx) => (
