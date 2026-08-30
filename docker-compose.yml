@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voiceshield-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - VOICESHIELD_ROLE=all-in-one
+      - VOICESHIELD_HOST=0.0.0.0
+      - VOICESHIELD_PORT=8000
+      - VOICESHIELD_ENV=development
+      - VOICESHIELD_DEBUG=false
+      - VOICESHIELD_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000
+      - VOICESHIELD_SQLITE_PATH=/app/data/voiceshield.sqlite3
+      - VOICESHIELD_MODELS_DIR=/app/assets/models
+    volumes:
+      - ./data:/app/data
+      - ./assets/models:/app/assets/models:ro
+      - ./demo:/app/demo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: voiceshield-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  shared-data:

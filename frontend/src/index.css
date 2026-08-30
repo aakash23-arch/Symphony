@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #0b0f19;
+  color: #f3f4f6;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers are always tabular: proportional digits jitter as a live score
+   updates, which reads as instability in the system rather than in the font. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* The UNCERTAIN band's hatch. The one gradient in the design that earns its
+   place: it encodes "provisional" rather than decorating. */
+.risk-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(196, 181, 253, 0.05) 0px,
+    rgba(196, 181, 253, 0.05) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+}
+
+/* Keyboard focus must stay visible on a dark surface. */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbars sized down so the timeline does not grow a chrome-heavy gutter. */
+.scroll-slim::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: #232b3b;
+  border-radius: 3px;
+}
+.scroll-slim::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* CRITICAL is the only band that animates. Honour the OS preference: the band
+   still reads via colour, weight and label without the pulse. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,823 @@
+{
+  "1_genuine_scenario": {
+    "status": "PASS",
+    "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+    "transaction_id": "c570d298efea4e4eb5aab4fb186229d0",
+    "start_status": 202,
+    "risk_data": {
+      "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+      "session_state": "STOPPED",
+      "decision": {
+        "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+        "risk": {
+          "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+          "risk_score": 0.0,
+          "risk_confidence": 0.214181,
+          "risk_band": "UNCERTAIN",
+          "contributions": [
+            {
+              "factor": "identity_verified",
+              "weight": 1.0,
+              "direction": "DECREASES_RISK",
+              "points": -0.06396108895411236,
+              "detail": "claimed identity matches an independently verified identity"
+            },
+            {
+              "factor": "known_contact",
+              "weight": 1.0,
+              "direction": "DECREASES_RISK",
+              "points": -0.051168871163289886,
+              "detail": "caller is an established contact of this identity"
+            },
+            {
+              "factor": "audio_quality",
+              "weight": 0.7532347621277358,
+              "direction": "INCREASES_RISK",
+              "points": 0.024088857811890883,
+              "detail": "degraded call audio quality q=0.14"
+            },
+            {
+              "factor": "genuine_voice",
+              "weight": 0.29172327974429396,
+              "direction": "DECREASES_RISK",
+              "points": -0.02239072637485223,
+              "detail": "voice evidence consistent with genuine speech (P_spoof=0.11)"
+            },
+            {
+              "factor": "call_source",
+              "weight": 0.35,
+              "direction": "INCREASES_RISK",
+              "points": 0.013431828680363593,
+              "detail": "call arrived via INBOUND_PSTN"
+            }
+          ],
+          "context_degraded": false,
+          "score_semantics": "UNCALIBRATED_RISK_SCORE",
+          "score_label": "risk score",
+          "timestamp": "2026-08-29T10:50:58.089858Z"
+        },
+        "action": "STEP_UP",
+        "matched_policy": "P-INSUFFICIENT-CONFIDENCE",
+        "transaction_tier": 3,
+        "reason_codes": [
+          "POOR_AUDIO_QUALITY",
+          "INSUFFICIENT_CONFIDENCE",
+          "FAIL_SAFE_UNCERTAIN",
+          "VOICE_BELIEF_UNCERTAIN",
+          "SCORE_UNCALIBRATED"
+        ],
+        "top_factors": [
+          {
+            "factor": "identity_verified",
+            "weight": 1.0,
+            "direction": "DECREASES_RISK",
+            "points": -0.06396108895411236,
+            "detail": "claimed identity matches an independently verified identity"
+          },
+          {
+            "factor": "known_contact",
+            "weight": 1.0,
+            "direction": "DECREASES_RISK",
+            "points": -0.051168871163289886,
+            "detail": "caller is an established contact of this identity"
+          },
+          {
+            "factor": "audio_quality",
+            "weight": 0.7532347621277358,
+            "direction": "INCREASES_RISK",
+            "points": 0.024088857811890883,
+            "detail": "degraded call audio quality q=0.14"
+          },
+          {
+            "factor": "genuine_voice",
+            "weight": 0.29172327974429396,
+            "direction": "DECREASES_RISK",
+            "points": -0.02239072637485223,
+            "detail": "voice evidence consistent with genuine speech (P_spoof=0.11)"
+          },
+          {
+            "factor": "call_source",
+            "weight": 0.35,
+            "direction": "INCREASES_RISK",
+            "points": 0.013431828680363593,
+            "detail": "call arrived via INBOUND_PSTN"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "VOICE_BELIEF",
+            "ref": "belief:21f5f1f22f1044aaafac2f5fd8b82bf7@2026-08-29T10:50:58.089858+00:00",
+            "detail": "band=UNCERTAIN, P_spoof=0.106, confidence=0.138"
+          },
+          {
+            "kind": "EXPERT",
+            "ref": "expert:E2",
+            "detail": "p=0.000, fusion_weight=1.000"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:identity.known_contact",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:technical.call_source",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "POLICY",
+            "ref": "policy:P-INSUFFICIENT-CONFIDENCE@risk-1.0.0",
+            "detail": "matched policy rule"
+          }
+        ],
+        "recommended_verifications": [
+          "Request a dynamically generated liveness challenge phrase",
+          "Ask the caller to move to a better connection and re-attempt",
+          "Confirm the request through a second factor before proceeding"
+        ],
+        "fail_safe_engaged": true,
+        "policy_version": "risk-1.0.0",
+        "timestamp": "2026-08-29T10:50:58.089858Z"
+      },
+      "belief": {
+        "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+        "P_spoof": 0.1062415080383559,
+        "confidence": 0.13785214191580278,
+        "band": "UNCERTAIN",
+        "q_call": 0.13572088082974537,
+        "spans": [],
+        "trajectory": [
+          {
+            "t": 0.0,
+            "p_spoof": 1.8916594854090363e-05,
+            "confidence": 0.13785214191580278
+          },
+          {
+            "t": 0.02,
+            "p_spoof": 0.04001714426791295,
+            "confidence": 0.15115687749848175
+          },
+          {
+            "t": 0.04,
+            "p_spoof": 0.07841543806567788,
+            "confidence": 0.1511568390773803
+          },
+          {
+            "t": 0.06,
+            "p_spoof": 0.1152778048799038,
+            "confidence": 0.15115687749848175
+          },
+          {
+            "t": 0.08,
+            "p_spoof": 0.11066744934850181,
+            "confidence": 0.13785214191580278
+          },
+          {
+            "t": 0.1,
+            "p_spoof": 0.1062415080383559,
+            "confidence": 0.13785214191580278
+          }
+        ],
+        "contributing_experts": [
+          {
+            "expert_id": "E2",
+            "weight": 1.0,
+            "raw_p": 1.8916594854090363e-05,
+            "calibrated_p": 1.8916594854090363e-05
+          }
+        ],
+        "uncertainty_reason": "Low confidence (contradictory evidence or poor quality)",
+        "switch_damping_events": [],
+        "model_versions": [],
+        "clock": "SLOW",
+        "timestamp": "2026-08-29T10:50:58.089858Z"
+      },
+      "explanation": "WHY THIS CALL SCORED 0.00 (UNCERTAIN)\n\nThis is an uncalibrated risk score, not a probability of fraud.\n\nThese are the features contributing to the score, not proof of anything:\n  baseline                     +0.100\n  identity_verified            -0.064   claimed identity matches an independently verified identity\n  known_contact                -0.051   caller is an established contact of this identity\n  audio_quality                +0.024   degraded call audio quality q=0.14\n  genuine_voice                -0.022   voice evidence consistent with genuine speech (P_spoof=0.11)\n  call_source                  +0.013   call arrived via INBOUND_PSTN\n\n  TOTAL                        0.000\n  Confidence                   0.214\n  Action                       STEP_UP\n  Policy                       P-INSUFFICIENT-CONFIDENCE (risk-1.0.0)",
+      "clock": "SLOW",
+      "analysis_degraded": true,
+      "degradation_reasons": [
+        "MODEL_UNAVAILABLE:E1",
+        "MODEL_UNAVAILABLE:E3",
+        "ABSTAIN:E4",
+        "DEFERRED:E5",
+        "DEFERRED:E6",
+        "FAIL_SAFE_ENGAGED"
+      ],
+      "frames_seen": 10,
+      "frames_scored": 8,
+      "frames_skipped": 0,
+      "computed_at": "2026-08-29T10:50:58.089858Z",
+      "served_at": "2026-08-29T10:50:58.704241Z"
+    },
+    "tx_data": {
+      "environment": "DEMO TRANSACTION ENVIRONMENT",
+      "disclaimer": "Simulated transaction for internal demonstration only. No real funds move and no external banking system is contacted.",
+      "transaction": {
+        "transaction_id": "c570d298efea4e4eb5aab4fb186229d0",
+        "environment": "DEMO TRANSACTION ENVIRONMENT",
+        "disclaimer": "Simulated transaction for internal demonstration only. No real funds move and no external banking system is contacted.",
+        "caller_identity": "cfo.ananya_sharma",
+        "amount": "2500000.00",
+        "currency": "INR",
+        "beneficiary": "Apex Infrastructure & Industrial Suppliers Ltd",
+        "beneficiary_novelty": "KNOWN",
+        "transaction_type": "WIRE_TRANSFER",
+        "state": "PENDING",
+        "session_id": "21f5f1f22f1044aaafac2f5fd8b82bf7",
+        "hold_reason": null,
+        "verification_reference": null,
+        "risk_actions": [],
+        "created_at": "2026-08-29T10:50:56.566267Z",
+        "updated_at": "2026-08-29T10:50:56.566267Z"
+      }
+    }
+  },
+  "2_impersonation_scenario": {
+    "status": "PASS",
+    "session_id": "f8f9660fa0cf40b08902af2d8014b1e9",
+    "risk_data": {
+      "session_id": "f8f9660fa0cf40b08902af2d8014b1e9",
+      "session_state": "STOPPED",
+      "decision": {
+        "session_id": "f8f9660fa0cf40b08902af2d8014b1e9",
+        "risk": {
+          "session_id": "f8f9660fa0cf40b08902af2d8014b1e9",
+          "risk_score": 1.0,
+          "risk_confidence": 0.214181,
+          "risk_band": "UNCERTAIN",
+          "contributions": [
+            {
+              "factor": "identity_mismatch",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.15615709356318036,
+              "detail": "claimed identity does not match the verified identity on record"
+            },
+            {
+              "factor": "beneficiary_new",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.10410472904212023,
+              "detail": "funds directed to a beneficiary never used before"
+            },
+            {
+              "factor": "sensitive_action",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.08675394086843354,
+              "detail": "request classified as the sensitive action WIRE_TRANSFER"
+            },
+            {
+              "factor": "callback_refusal",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.08675394086843354,
+              "detail": "caller declined verification by callback to a number on record"
+            },
+            {
+              "factor": "high_risk_workflow",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.08675394086843354,
+              "detail": "session is inside the high-risk workflow HIGH_VALUE_TRANSFER"
+            },
+            {
+              "factor": "number_reputation",
+              "weight": 0.8285714285714285,
+              "direction": "INCREASES_RISK",
+              "points": 0.08625820406347105,
+              "detail": "originating number reputation 0.12 below clean threshold"
+            },
+            {
+              "factor": "urgency",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.06940315269474683,
+              "detail": "caller applied time pressure to the request"
+            },
+            {
+              "factor": "secrecy",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.06940315269474683,
+              "detail": "caller asked that the request be kept confidential"
+            },
+            {
+              "factor": "number_recently_created",
+              "weight": 0.9333333333333333,
+              "direction": "INCREASES_RISK",
+              "points": 0.05667924136737658,
+              "detail": "originating number provisioned 2 days ago"
+            },
+            {
+              "factor": "call_source",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.052052364521060115,
+              "detail": "call arrived via INBOUND_VOIP"
+            },
+            {
+              "factor": "first_contact",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.04337697043421677,
+              "detail": "caller has no established contact history with this identity"
+            },
+            {
+              "factor": "audio_quality",
+              "weight": 0.7532347621277358,
+              "direction": "INCREASES_RISK",
+              "points": 0.03267304200683909,
+              "detail": "degraded call audio quality q=0.14"
+            },
+            {
+              "factor": "genuine_voice",
+              "weight": 0.29172327974429396,
+              "direction": "DECREASES_RISK",
+              "points": -0.030369772993058368,
+              "detail": "voice evidence consistent with genuine speech (P_spoof=0.11)"
+            }
+          ],
+          "context_degraded": false,
+          "score_semantics": "UNCALIBRATED_RISK_SCORE",
+          "score_label": "risk score",
+          "timestamp": "2026-08-29T10:51:00.336513Z"
+        },
+        "action": "STEP_UP",
+        "matched_policy": "P-INSUFFICIENT-CONFIDENCE",
+        "transaction_tier": 3,
+        "reason_codes": [
+          "POOR_AUDIO_QUALITY",
+          "INSUFFICIENT_CONFIDENCE",
+          "FAIL_SAFE_UNCERTAIN",
+          "VOICE_BELIEF_UNCERTAIN",
+          "SCORE_UNCALIBRATED"
+        ],
+        "top_factors": [
+          {
+            "factor": "identity_mismatch",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.15615709356318036,
+            "detail": "claimed identity does not match the verified identity on record"
+          },
+          {
+            "factor": "beneficiary_new",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.10410472904212023,
+            "detail": "funds directed to a beneficiary never used before"
+          },
+          {
+            "factor": "sensitive_action",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.08675394086843354,
+            "detail": "request classified as the sensitive action WIRE_TRANSFER"
+          },
+          {
+            "factor": "callback_refusal",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.08675394086843354,
+            "detail": "caller declined verification by callback to a number on record"
+          },
+          {
+            "factor": "high_risk_workflow",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.08675394086843354,
+            "detail": "session is inside the high-risk workflow HIGH_VALUE_TRANSFER"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "VOICE_BELIEF",
+            "ref": "belief:f8f9660fa0cf40b08902af2d8014b1e9@2026-08-29T10:51:00.336513+00:00",
+            "detail": "band=UNCERTAIN, P_spoof=0.106, confidence=0.138"
+          },
+          {
+            "kind": "EXPERT",
+            "ref": "expert:E2",
+            "detail": "p=0.000, fusion_weight=1.000"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:behaviour.callback_refusal",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:behaviour.secrecy",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:behaviour.urgency",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:identity.identity_mismatch",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:number.reputation",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:technical.call_source",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:transaction.sensitive_action",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "POLICY",
+            "ref": "policy:P-INSUFFICIENT-CONFIDENCE@risk-1.0.0",
+            "detail": "matched policy rule"
+          }
+        ],
+        "recommended_verifications": [
+          "Request a dynamically generated liveness challenge phrase",
+          "Ask the caller to move to a better connection and re-attempt",
+          "Confirm the request through a second factor before proceeding"
+        ],
+        "fail_safe_engaged": true,
+        "policy_version": "risk-1.0.0",
+        "timestamp": "2026-08-29T10:51:00.336513Z"
+      },
+      "belief": {
+        "session_id": "f8f9660fa0cf40b08902af2d8014b1e9",
+        "P_spoof": 0.1062415080383559,
+        "confidence": 0.13785214191580278,
+        "band": "UNCERTAIN",
+        "q_call": 0.13572088082974537,
+        "spans": [],
+        "trajectory": [
+          {
+            "t": 0.0,
+            "p_spoof": 1.8916594854090363e-05,
+            "confidence": 0.13785214191580278
+          },
+          {
+            "t": 0.02,
+            "p_spoof": 0.04001714426791295,
+            "confidence": 0.15115687749848175
+          },
+          {
+            "t": 0.04,
+            "p_spoof": 0.07841543806567788,
+            "confidence": 0.1511568390773803
+          },
+          {
+            "t": 0.06,
+            "p_spoof": 0.1152778048799038,
+            "confidence": 0.15115687749848175
+          },
+          {
+            "t": 0.08,
+            "p_spoof": 0.11066744934850181,
+            "confidence": 0.13785214191580278
+          },
+          {
+            "t": 0.1,
+            "p_spoof": 0.1062415080383559,
+            "confidence": 0.13785214191580278
+          }
+        ],
+        "contributing_experts": [
+          {
+            "expert_id": "E2",
+            "weight": 1.0,
+            "raw_p": 1.8916594854090363e-05,
+            "calibrated_p": 1.8916594854090363e-05
+          }
+        ],
+        "uncertainty_reason": "Low confidence (contradictory evidence or poor quality)",
+        "switch_damping_events": [],
+        "model_versions": [],
+        "clock": "SLOW",
+        "timestamp": "2026-08-29T10:51:00.336513Z"
+      },
+      "explanation": "WHY THIS CALL SCORED 1.00 (UNCERTAIN)\n\nThis is an uncalibrated risk score, not a probability of fraud.\n\nThese are the features contributing to the score, not proof of anything:\n  baseline                     +0.100\n  identity_mismatch            +0.156   claimed identity does not match the verified identity on record\n  beneficiary_new              +0.104   funds directed to a beneficiary never used before\n  sensitive_action             +0.087   request classified as the sensitive action WIRE_TRANSFER\n  callback_refusal             +0.087   caller declined verification by callback to a number on record\n  high_risk_workflow           +0.087   session is inside the high-risk workflow HIGH_VALUE_TRANSFER\n\n  TOTAL                        1.000\n  Confidence                   0.214\n  Action                       STEP_UP\n  Policy                       P-INSUFFICIENT-CONFIDENCE (risk-1.0.0)",
+      "clock": "SLOW",
+      "analysis_degraded": true,
+      "degradation_reasons": [
+        "MODEL_UNAVAILABLE:E1",
+        "MODEL_UNAVAILABLE:E3",
+        "ABSTAIN:E4",
+        "DEFERRED:E5",
+        "DEFERRED:E6",
+        "FAIL_SAFE_ENGAGED"
+      ],
+      "frames_seen": 10,
+      "frames_scored": 7,
+      "frames_skipped": 0,
+      "computed_at": "2026-08-29T10:51:00.336513Z",
+      "served_at": "2026-08-29T10:51:00.749905Z"
+    }
+  },
+  "3_uncertain_scenario": {
+    "status": "PASS",
+    "session_id": "f46ad9351c0a471c895c50f0086c1d01",
+    "risk_data": {
+      "session_id": "f46ad9351c0a471c895c50f0086c1d01",
+      "session_state": "STOPPED",
+      "decision": {
+        "session_id": "f46ad9351c0a471c895c50f0086c1d01",
+        "risk": {
+          "session_id": "f46ad9351c0a471c895c50f0086c1d01",
+          "risk_score": 0.062624,
+          "risk_confidence": 0.17988,
+          "risk_band": "UNCERTAIN",
+          "contributions": [
+            {
+              "factor": "genuine_voice",
+              "weight": 0.9995626197930515,
+              "direction": "DECREASES_RISK",
+              "points": -0.11994751437516618,
+              "detail": "voice evidence consistent with genuine speech (P_spoof=0.00)"
+            },
+            {
+              "factor": "call_source",
+              "weight": 1.0,
+              "direction": "INCREASES_RISK",
+              "points": 0.06,
+              "detail": "call arrived via INBOUND_VOIP"
+            },
+            {
+              "factor": "audio_quality",
+              "weight": 0.4514385148595307,
+              "direction": "INCREASES_RISK",
+              "points": 0.022571925742976534,
+              "detail": "degraded call audio quality q=0.30"
+            }
+          ],
+          "context_degraded": true,
+          "score_semantics": "UNCALIBRATED_RISK_SCORE",
+          "score_label": "risk score",
+          "timestamp": "2026-08-29T10:51:02.716025Z"
+        },
+        "action": "STEP_UP",
+        "matched_policy": "P-INSUFFICIENT-CONFIDENCE",
+        "transaction_tier": 3,
+        "reason_codes": [
+          "POOR_AUDIO_QUALITY",
+          "INSUFFICIENT_CONFIDENCE",
+          "FAIL_SAFE_UNCERTAIN",
+          "CONTEXT_INCOMPLETE",
+          "VOICE_BELIEF_UNCERTAIN",
+          "SCORE_UNCALIBRATED"
+        ],
+        "top_factors": [
+          {
+            "factor": "genuine_voice",
+            "weight": 0.9995626197930515,
+            "direction": "DECREASES_RISK",
+            "points": -0.11994751437516618,
+            "detail": "voice evidence consistent with genuine speech (P_spoof=0.00)"
+          },
+          {
+            "factor": "call_source",
+            "weight": 1.0,
+            "direction": "INCREASES_RISK",
+            "points": 0.06,
+            "detail": "call arrived via INBOUND_VOIP"
+          },
+          {
+            "factor": "audio_quality",
+            "weight": 0.4514385148595307,
+            "direction": "INCREASES_RISK",
+            "points": 0.022571925742976534,
+            "detail": "degraded call audio quality q=0.30"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "VOICE_BELIEF",
+            "ref": "belief:f46ad9351c0a471c895c50f0086c1d01@2026-08-29T10:51:02.716025+00:00",
+            "detail": "band=UNCERTAIN, P_spoof=0.000, confidence=0.143"
+          },
+          {
+            "kind": "EXPERT",
+            "ref": "expert:E2",
+            "detail": "p=0.000, fusion_weight=1.000"
+          },
+          {
+            "kind": "CONTEXT",
+            "ref": "context:technical.call_source",
+            "detail": "provenance=SIMULATED"
+          },
+          {
+            "kind": "POLICY",
+            "ref": "policy:P-INSUFFICIENT-CONFIDENCE@risk-1.0.0",
+            "detail": "matched policy rule"
+          }
+        ],
+        "recommended_verifications": [
+          "Request a dynamically generated liveness challenge phrase",
+          "Ask the caller to move to a better connection and re-attempt",
+          "Confirm the request through a second factor before proceeding"
+        ],
+        "fail_safe_engaged": true,
+        "policy_version": "risk-1.0.0",
+        "timestamp": "2026-08-29T10:51:02.716025Z"
+      },
+      "belief": {
+        "session_id": "f46ad9351c0a471c895c50f0086c1d01",
+        "P_spoof": 6.56070310422614e-05,
+        "confidence": 0.14335347308759386,
+        "band": "UNCERTAIN",
+        "q_call": 0.30170881682725814,
+        "spans": [],
+        "trajectory": [
+          {
+            "t": 0.0,
+            "p_spoof": 6.673147436231375e-05,
+            "confidence": 0.14337115291368552
+          },
+          {
+            "t": 0.02,
+            "p_spoof": 6.476254471635911e-05,
+            "confidence": 0.14387307030669824
+          },
+          {
+            "t": 0.04,
+            "p_spoof": 6.293643531680571e-05,
+            "confidence": 0.14338481878019868
+          },
+          {
+            "t": 0.06,
+            "p_spoof": 6.13267407097155e-05,
+            "confidence": 0.14338379202839288
+          },
+          {
+            "t": 0.08,
+            "p_spoof": 6.2990703303311e-05,
+            "confidence": 0.14336078368101499
+          },
+          {
+            "t": 0.1,
+            "p_spoof": 6.56070310422614e-05,
+            "confidence": 0.14335347308759386
+          }
+        ],
+        "contributing_experts": [
+          {
+            "expert_id": "E2",
+            "weight": 1.0,
+            "raw_p": 0.00012839889677707106,
+            "calibrated_p": 0.00012839889677707106
+          }
+        ],
+        "uncertainty_reason": "Low confidence (contradictory evidence or poor quality)",
+        "switch_damping_events": [],
+        "model_versions": [],
+        "clock": "SLOW",
+        "timestamp": "2026-08-29T10:51:02.716025Z"
+      },
+      "explanation": "WHY THIS CALL SCORED 0.06 (UNCERTAIN)\n\nThis is an uncalibrated risk score, not a probability of fraud.\n\nThese are the features contributing to the score, not proof of anything:\n  baseline                     +0.100\n  genuine_voice                -0.120   voice evidence consistent with genuine speech (P_spoof=0.00)\n  call_source                  +0.060   call arrived via INBOUND_VOIP\n  audio_quality                +0.023   degraded call audio quality q=0.30\n\n  TOTAL                        0.063\n  Confidence                   0.180\n  Action                       STEP_UP\n  Policy                       P-INSUFFICIENT-CONFIDENCE (risk-1.0.0)",
+      "clock": "SLOW",
+      "analysis_degraded": true,
+      "degradation_reasons": [
+        "MODEL_UNAVAILABLE:E1",
+        "MODEL_UNAVAILABLE:E3",
+        "ABSTAIN:E4",
+        "DEFERRED:E5",
+        "DEFERRED:E6",
+        "FAIL_SAFE_ENGAGED"
+      ],
+      "frames_seen": 10,
+      "frames_scored": 6,
+      "frames_skipped": 0,
+      "computed_at": "2026-08-29T10:51:02.716025Z",
+      "served_at": "2026-08-29T10:51:02.904126Z"
+    }
+  },
+  "4_malformed_audio": {
+    "status": "PASS",
+    "detail": "Correctly rejected: received 4404 (private use); then sent 4404 (private use)"
+  },
+  "5_empty_audio": {
+    "status": "PASS",
+    "detail": "received 4404 (private use); then sent 4404 (private use)"
+  },
+  "6_very_short_audio": {
+    "status": "PASS",
+    "detail": "received 4404 (private use); then sent 4404 (private use)"
+  },
+  "7_disconnected_websocket": {
+    "status": "FAIL",
+    "error": "received 4404 (private use); then sent 4404 (private use)"
+  },
+  "8_persistence_check": {
+    "status": "PASS",
+    "tx_id": "fc3aabbb83e04484a96d74282bd292fa"
+  },
+  "9_model_unavailable_report": {
+    "status": "PASS",
+    "models": {
+      "E1": {
+        "status": "MODEL_UNAVAILABLE",
+        "version": "0.0.0-unavailable",
+        "reason": "WEIGHTS_NOT_ACQUIRED",
+        "model_id": "aasist:not-acquired"
+      },
+      "E2": {
+        "status": "OK",
+        "version": "1.0.0",
+        "model_id": "mo-thecreator/Deepfake-audio-detection"
+      },
+      "E3": {
+        "status": "MODEL_UNAVAILABLE",
+        "version": "0.0.0-no-probe",
+        "reason": "PROBE_NOT_TRAINED",
+        "model_id": "wavlm-ssl:probe-not-trained"
+      },
+      "E4": {
+        "status": "OK",
+        "version": "1.0.0",
+        "model_id": "microsoft/wavlm-base-plus-sv"
+      },
+      "E5": {
+        "status": "DEFERRED",
+        "version": "0.0.0-deferred"
+      },
+      "E6": {
+        "status": "DEFERRED",
+        "version": "0.0.0-deferred"
+      }
+    }
+  },
+  "10_session_rehydration": {
+    "status": "FAIL",
+    "error": "'session_id'"
+  },
+  "11_transaction_hold": {
+    "status": "PASS",
+    "state": "HELD"
+  },
+  "12_transaction_release": {
+    "status": "PASS",
+    "state": "APPROVED"
+  },
+  "13_sequential_sessions": {
+    "status": "FAIL",
+    "error": ""
+  },
+  "14_invalid_api_inputs": {
+    "status": "PASS",
+    "negative_amount_status": 422,
+    "extra_forbidden_field_status": 422,
+    "unknown_scenario_status": 404
+  },
+  "15_missing_context": {
+    "status": "FAIL",
+    "error": "'session_id'"
+  },
+  "16_missing_speaker_reference": {
+    "status": "PASS",
+    "context_status": 404,
+    "data": {
+      "error": {
+        "code": "HTTP_404",
+        "message": "SESSION_NOT_FOUND: Unknown session: s_unenroll_test",
+        "session_id": "s_unenroll_test",
+        "correlation_id": "bde6ca95-de15-460a-8bca-9110ff82e9fd",
+        "retriable": false
+      }
+    }
+  },
+  "17_poor_audio_quality": {
+    "status": "PASS",
+    "session_id": "82bf42d69fc541c98ce38515cfe84b28",
+    "risk": {
+      "error": {
+        "code": "RISK_NOT_YET_AVAILABLE",
+        "message": "No action-grade assessment has been produced for this session yet. Frames seen: 10; frames scored: 5.",
+        "session_id": "82bf42d69fc541c98ce38515cfe84b28",
+        "correlation_id": "aabf5f6b-d9fc-4238-8319-890c962be930",
+        "retriable": true
+      }
+    }
+  },
+  "18_slow_inference": {
+    "status": "PASS",
+    "expert_timeout_ms": 1500,
+    "fast_clock_hop_ms": 250
+  },
+  "19_frontend_service": {
+    "status": "PASS",
+    "status_code": 200
+  },
+  "20_backend_exceptions": {
+    "status": "PASS",
+    "status_code": 404,
+    "response_text": "{\"error\":{\"code\":\"HTTP_404\",\"message\":\"SESSION_NOT_FOUND: Unknown session: %%%invalid-url-path\",\"session_id\":\"%%%invalid-url-path\",\"correlation_id\":\"0460926d-d7de-432a-849e-3f89c1b4f4dc\",\"retriable\":false}}"
+  }
+}

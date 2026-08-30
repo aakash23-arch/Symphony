@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -e
+
+# ==============================================================================
+# VoiceShield Demo Launcher (POSIX / Linux / macOS)
+# ==============================================================================
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+SCENARIO="${1:-genuine-executive}"
+
+echo "=== VoiceShield Demo Launcher ==="
+echo "Selected Scenario: $SCENARIO"
+
+# Ensure services are up
+if ! curl -s -f http://localhost:8000/health >/dev/null 2>&1; then
+    echo "VoiceShield services not running. Starting them..."
+    ./scripts/start
+fi
+
+echo "Triggering scenario '$SCENARIO' via Demo Control API..."
+RESPONSE=$(curl -s -X POST "http://localhost:8000/api/demo/scenarios/${SCENARIO}/start?speed=1.0")
+
+echo "Server response:"
+echo "$RESPONSE" | python -m json.tool 2>/dev/null || echo "$RESPONSE"
+
+echo ""
+echo "=============================================================================="
+echo " Scenario '$SCENARIO' launched!"
+echo " Open dashboard to observe live real-time analysis:"
+echo " -> http://localhost:5173"
+echo "=============================================================================="

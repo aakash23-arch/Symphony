@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -e
+
+# ==============================================================================
+# VoiceShield Start Script (POSIX / Linux / macOS)
+# ==============================================================================
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+mkdir -p .run data
+
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+elif [ -f ".venv/Scripts/activate" ]; then
+    source .venv/Scripts/activate
+fi
+
+echo "=== Starting VoiceShield Services ==="
+
+# Check if already running
+if [ -f ".run/backend.pid" ] && kill -0 "$(cat .run/backend.pid)" 2>/dev/null; then
+    echo "Backend is already running (PID: $(cat .run/backend.pid))."
+else
+    echo "Starting backend API server on http://localhost:8000..."
+    python -m uvicorn voiceshield.api.app:app --host 0.0.0.0 --port 8000 > .run/backend.log 2>&1 &
+    echo $! > .run/backend.pid
+fi
+
+if [ -f ".run/frontend.pid" ] && kill -0 "$(cat .run/frontend.pid)" 2>/dev/null; then
+    echo "Frontend is already running (PID: $(cat .run/frontend.pid))."
+else
+    echo "Starting frontend dev server on http://localhost:5173..."
+    (cd "$ROOT_DIR/frontend" && npm run dev -- --host 0.0.0.0 --port 5173 > "$ROOT_DIR/.run/frontend.log" 2>&1 & echo $! > "$ROOT_DIR/.run/frontend.pid")
+fi
+
+echo "Waiting for services to become ready..."
+MAX_RETRIES=20
+COUNT=0
+HEALTHY=false
+
+while [ $COUNT -lt $MAX_RETRIES ]; do
+    if curl -s -f http://localhost:8000/health >/dev/null 2>&1; then
+        HEALTHY=true
+        break
+    fi
+    sleep 1
+    COUNT=$((COUNT + 1))
+done
+
+if [ "$HEALTHY" = true ]; then
+    echo ""
+    echo "=============================================================================="
+    echo " VoiceShield is LIVE and healthy!"
+    echo " - Dashboard:  http://localhost:5173"
+    echo " - API / Docs: http://localhost:8000/docs"
+    echo " - Health:     http://localhost:8000/health"
+    echo ""
+    echo " Target Workflow:"
+    echo "   1. Open http://localhost:5173"
+    echo "   2. In the DEMO MODE panel, choose a scenario (e.g. Scenario 1, 2, or 3)"
+    echo "   3. Click 'Start Scenario Call'"
+    echo ""
+    echo " To stop services: ./scripts/stop"
+    echo "=============================================================================="
+else
+    echo "WARNING: Backend healthcheck timed out. Check .run/backend.log for errors."
+    exit 1
+fi

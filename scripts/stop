@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+# VoiceShield Stop Script (POSIX / Linux / macOS)
+# ==============================================================================
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+echo "=== Stopping VoiceShield Services ==="
+
+if [ -f ".run/backend.pid" ]; then
+    PID=$(cat .run/backend.pid)
+    if kill -0 "$PID" 2>/dev/null; then
+        echo "Stopping Backend (PID: $PID)..."
+        kill "$PID" 2>/dev/null || true
+    fi
+    rm -f .run/backend.pid
+fi
+
+if [ -f ".run/frontend.pid" ]; then
+    PID=$(cat .run/frontend.pid)
+    if kill -0 "$PID" 2>/dev/null; then
+        echo "Stopping Frontend (PID: $PID)..."
+        kill "$PID" 2>/dev/null || true
+    fi
+    rm -f .run/frontend.pid
+fi
+
+# Fallback cleanup for ports 8000 and 5173
+if command -v fuser &>/dev/null; then
+    fuser -k 8000/tcp 2>/dev/null || true
+    fuser -k 5173/tcp 2>/dev/null || true
+fi
+
+echo "All VoiceShield services stopped."
