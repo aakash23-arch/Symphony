@@ -55,7 +55,7 @@ export const EditorialBeliefTrajectory: React.FC<EditorialBeliefTrajectoryProps>
   return (
     <div
       className={cn(
-        'rounded-2xl border border-border/80 bg-surface/95 p-6 shadow-xl backdrop-blur-md',
+        'border border-border bg-surface p-6',
         className,
       )}
     >
@@ -97,7 +97,7 @@ export const EditorialBeliefTrajectory: React.FC<EditorialBeliefTrajectoryProps>
         </div>
 
         <div
-          className="h-48 w-full rounded-xl border border-border/70 bg-surface-elevated/30 p-2"
+          className="h-48 w-full border border-border bg-surface p-2"
           role="img"
           aria-label="Synthetic speech belief over time"
         >
@@ -109,15 +109,15 @@ export const EditorialBeliefTrajectory: React.FC<EditorialBeliefTrajectoryProps>
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 tickFormatter={(v: number) => `${v.toFixed(1)}s`}
-                tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-                stroke="#1E293B"
+                tick={{ fill: '#888888', fontSize: 10, fontFamily: '-apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif' }}
+                stroke="#EBEBEA"
                 tickLine={false}
               />
               <YAxis
                 domain={[0, 1]}
                 ticks={[0, 0.5, 1]}
-                tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-                stroke="#1E293B"
+                tick={{ fill: '#888888', fontSize: 10, fontFamily: '-apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif' }}
+                stroke="#EBEBEA"
                 tickLine={false}
               />
               {/* connectNulls={false} is critical to prevent interpolating missing audio frames */}

@@ -67,7 +67,7 @@ export const EvidenceChainAudit: React.FC<EvidenceChainAuditProps> = ({
     <div className={cn('space-y-4 font-mono', className)}>
       <div className="flex items-center justify-between border-b border-border/80 pb-2 text-micro-label text-fg-tertiary uppercase">
         <span>CRYPTOGRAPHIC EVIDENCE CHAIN</span>
-        <span className={cn('font-bold', isHashChained ? 'text-emerald-400' : 'text-accent')}>
+        <span className={cn('font-bold', isHashChained ? 'text-emerald-600' : 'text-fg-primary')}>
           {evidence ? `STATUS: ${evidence.chain_status}` : 'STATUS: SESSION CHAIN ESTABLISHED'}
         </span>
       </div>
@@ -77,7 +77,7 @@ export const EvidenceChainAudit: React.FC<EvidenceChainAuditProps> = ({
         {nodes.map((node, idx) => (
           <div
             key={node.name}
-            className="relative flex flex-col justify-between rounded-2xl border border-border/80 bg-surface/90 p-4 transition-all hover:bg-surface-elevated/60"
+            className="relative flex flex-col justify-between border border-border bg-surface p-4 transition-colors hover:border-fg-primary"
           >
             <div>
               <div className="flex items-center justify-between text-micro-label text-fg-tertiary pb-2 border-b border-border/40">
@@ -88,13 +88,13 @@ export const EvidenceChainAudit: React.FC<EvidenceChainAuditProps> = ({
               </div>
 
               <p className="mt-2 text-xs font-bold text-fg uppercase tracking-wider">{node.name}</p>
-              <p className="text-micro-label text-accent font-semibold">{node.label}</p>
+              <p className="text-micro-label text-fg-primary font-semibold">{node.label}</p>
               <p className="mt-2 text-[0.6875rem] text-fg-secondary font-sans leading-snug">
                 {node.detail}
               </p>
             </div>
 
-            <div className="mt-4 border-t border-border/40 pt-2 text-[0.625rem] text-emerald-400 font-bold">
+            <div className="mt-4 border-t border-border/40 pt-2 text-[0.625rem] text-emerald-600 font-bold">
               {node.hash}
             </div>
           </div>
@@ -102,9 +102,9 @@ export const EvidenceChainAudit: React.FC<EvidenceChainAuditProps> = ({
       </div>
 
       {/* Assurance Summary Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-emerald-600 bg-emerald-50 p-4 text-xs">
         <div className="flex items-center gap-2.5">
-          <Lock className="h-4 w-4 text-emerald-400 shrink-0" />
+          <Lock className="h-4 w-4 text-emerald-600 shrink-0" />
           <span className="text-fg font-sans">
             Every acoustic finding, contextual signal, and policy evaluation is bound into an immutable hash chain for regulatory auditability.
           </span>
@@ -114,7 +114,7 @@ export const EvidenceChainAudit: React.FC<EvidenceChainAuditProps> = ({
           <button
             type="button"
             onClick={onOpenDossier}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 font-bold text-white shadow-md hover:bg-emerald-500 transition-all shrink-0"
+            className="inline-flex items-center gap-2 border border-emerald-600 bg-emerald-600 px-3.5 py-2 font-bold text-white hover:bg-emerald-700 transition-all shrink-0"
           >
             <FileCheck className="h-3.5 w-3.5" />
             <span>Export Dossier</span>

@@ -36,8 +36,8 @@ export const Panel: React.FC<PanelProps> = ({
 }) => (
   <section
     className={cn(
-      'group relative flex flex-col rounded-2xl border border-border bg-surface/90 backdrop-blur-sm transition-all duration-200',
-      'hover:border-border-strong/70 hover:shadow-lg hover:shadow-black/20',
+      'group relative flex flex-col border border-border bg-surface transition-all duration-200',
+      'hover:border-border-strong',
       stale && 'border-l-4 border-l-band-medium',
       className,
     )}

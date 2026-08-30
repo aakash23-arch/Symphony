@@ -1,4 +1,6 @@
 export * from './SignalVisualizer';
+export * from './InteractiveSignalCanvas';
+export * from './VoiceSignalMotif';
 export * from './ForensicExpertMatrix';
 export * from './EditorialBeliefTrajectory';
 export * from './RiskStateTransition';

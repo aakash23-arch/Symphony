@@ -22,21 +22,21 @@ export const LiveDetectionSection: React.FC = () => {
   const band = risk ? bandTokens[risk.risk_band] : null;
 
   return (
-    <div id="live-console" className="space-y-8">
+    <div id="live-detection" className="space-y-8 pt-8">
       <NarrativeSection
-        index="07"
+        index="06"
         title="DETECT IT WHILE IT IS HAPPENING."
-        subtitle="The operational Symphony Command Console evaluating real-time streaming audio, Bayesian threat belief, and automated policy enforcement."
+        subtitle="This is the real system, not a mockup. Pick a scenario below and watch Symphony evaluate a live call end to end."
         tag="LIVE OPERATIONAL CONSOLE"
       >
         <div className="space-y-6">
           {/* PRIMARY SECURITY STATE HERO STRIP */}
           <div
             className={cn(
-              'relative overflow-hidden rounded-2xl border p-6 shadow-2xl backdrop-blur-md transition-all duration-300',
+              'relative transition-all duration-300 border-y py-8',
               band
-                ? `${band.border} ${band.surface}`
-                : 'border-border/80 bg-surface/90',
+                ? `${band.border} bg-surface`
+                : 'border-border bg-surface',
             )}
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -47,9 +47,9 @@ export const LiveDetectionSection: React.FC = () => {
                     className={cn(
                       'h-2 w-2 rounded-full',
                       isStreaming
-                        ? 'bg-accent animate-pulse-dot'
+                        ? 'bg-fg-primary animate-pulse-dot'
                         : decision
-                        ? 'bg-emerald-400'
+                        ? 'bg-emerald-600'
                         : 'bg-fg-muted',
                     )}
                   />
@@ -76,7 +76,7 @@ export const LiveDetectionSection: React.FC = () => {
                   </h3>
 
                   {decision && (
-                    <span className="font-mono text-xs font-bold uppercase text-accent bg-accent/15 px-2.5 py-1 rounded-md border border-accent/30">
+                    <span className="font-mono text-xs font-bold uppercase text-fg-primary bg-surface px-2.5 py-1 border border-border">
                       ACTION: {decision.action}
                     </span>
                   )}
@@ -90,7 +90,7 @@ export const LiveDetectionSection: React.FC = () => {
               </div>
 
               {/* Right Score Numerical Display */}
-              <div className="flex items-center gap-6 border-t border-white/10 pt-4 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-8 shrink-0">
+              <div className="flex items-center gap-6 border-t border-border pt-4 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-8 shrink-0">
                 <div>
                   <span className="font-mono text-micro uppercase text-fg-tertiary block">
                     {risk ? risk.score_label : 'COMPOSITE RISK SCALAR'}
@@ -118,7 +118,7 @@ export const LiveDetectionSection: React.FC = () => {
           <SignalVisualizer />
 
           {state.error ? (
-            <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 shadow-lg shadow-red-500/5">
+            <div className="border border-red-500 bg-surface p-4 text-red-600">
               <ErrorState code={state.error.code} message={state.error.message} />
             </div>
           ) : null}

@@ -72,7 +72,7 @@ export const RiskPanel: React.FC = () => {
         tag="L4 Composite"
         subtitle="Multi-Modal Threat Level"
       >
-        <div className="rounded-2xl border border-dashed border-band-uncertain/50 bg-band-uncertain/[0.06] risk-hatch p-6">
+        <div className="border border-dashed border-border bg-surface p-6">
           <div className="flex items-baseline justify-between">
             <p
               className="font-mono tnum text-7xl font-light tracking-tight text-fg-tertiary"
@@ -80,7 +80,7 @@ export const RiskPanel: React.FC = () => {
             >
               {NONE}
             </p>
-            <span className="rounded-md border border-band-uncertain/40 bg-band-uncertain/10 px-2.5 py-1 font-mono text-micro uppercase text-band-uncertain">
+            <span className="border border-border bg-surface px-2.5 py-1 font-mono text-micro uppercase text-fg-primary">
               Awaiting Assessment
             </span>
           </div>
@@ -127,7 +127,7 @@ export const RiskPanel: React.FC = () => {
       {/* Primary Risk Decision Hero Card */}
       <div
         className={cn(
-          'relative overflow-hidden rounded-2xl border p-5 transition-all duration-200',
+          'relative overflow-hidden border p-5 transition-all duration-200',
           band.border,
           band.surface,
           critical && 'animate-pulse-edge',
@@ -192,7 +192,7 @@ export const RiskPanel: React.FC = () => {
 
       {/* Fail-Safe & Degradation Disclosures */}
       {(decision.fail_safe_engaged || state.analysisDegraded || risk.context_degraded) && (
-        <div className="mt-4 space-y-2 rounded-xl border border-border/80 bg-surface-elevated/50 p-3">
+        <div className="mt-4 space-y-2 border border-border bg-surface p-3">
           {decision.fail_safe_engaged ? (
             <div className="flex items-center gap-2 text-xs font-medium text-band-medium">
               <AlertTriangle className="h-4 w-4 shrink-0" />

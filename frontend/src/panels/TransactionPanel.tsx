@@ -60,7 +60,7 @@ export const TransactionPanel: React.FC = () => {
         <Metric
           label="Amount"
           value={formatAmount(transaction.amount, transaction.currency)}
-          valueClassName="text-base font-bold text-amber-300"
+          valueClassName="text-base font-bold text-fg-primary"
         />
         <Metric label="Beneficiary" value={transaction.beneficiary} mono={false} />
         <Metric
@@ -79,7 +79,7 @@ export const TransactionPanel: React.FC = () => {
       </dl>
 
       {/* Security Action Trail */}
-      <div className="mt-4 rounded-xl border border-border/80 bg-surface-elevated/40 p-3">
+      <div className="mt-4 border-y border-border py-3">
         <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
           Policy Action History
         </span>
@@ -98,7 +98,7 @@ export const TransactionPanel: React.FC = () => {
           </p>
         ) : null}
         {transaction.verification_reference ? (
-          <p className="mt-1.5 font-mono text-micro text-emerald-400">
+          <p className="mt-1.5 font-mono text-micro text-emerald-600">
             Verified audit reference: {transaction.verification_reference}
           </p>
         ) : null}
@@ -106,9 +106,9 @@ export const TransactionPanel: React.FC = () => {
 
       {/* Operator Intervention Panel */}
       {!terminal ? (
-        <div className="mt-4 space-y-3 border-t border-border/80 pt-3">
+        <div className="mt-4 space-y-3 pt-1">
           {held ? (
-            <div className="space-y-2.5 rounded-xl border border-band-high/30 bg-band-high/[0.06] p-3">
+            <div className="space-y-2.5 border-l-2 border-band-high pl-4">
               <label
                 htmlFor="verification-reference"
                 className="block font-mono text-micro uppercase tracking-wider text-band-high"
@@ -123,8 +123,8 @@ export const TransactionPanel: React.FC = () => {
                 onBlur={() => setTouched(true)}
                 placeholder="e.g. CALLBACK-CFO-8891"
                 className={cn(
-                  'w-full rounded-lg border bg-surface px-3 py-2 text-xs text-fg transition-all',
-                  'placeholder:text-fg-tertiary/60 focus:outline-none focus:ring-1 focus:ring-accent',
+                  'w-full border bg-surface px-3 py-2 text-xs text-fg transition-all',
+                  'placeholder:text-fg-tertiary/60 focus:outline-none focus:border-fg-primary focus:ring-1 focus:ring-fg-primary',
                   touched && !verificationValid ? 'border-band-high' : 'border-border-strong',
                 )}
               />
@@ -138,7 +138,7 @@ export const TransactionPanel: React.FC = () => {
                   type="button"
                   disabled={!verificationValid || busy}
                   onClick={() => void releaseTransaction(verification.trim(), true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-band-low/50 bg-band-low/15 px-3 py-1.5 text-xs font-semibold text-band-low transition-all hover:bg-band-low/25 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 border border-band-low bg-surface px-3 py-2 text-xs font-semibold text-band-low transition-all hover:bg-band-low hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy ? <Spinner /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                   Release &amp; Approve
@@ -147,7 +147,7 @@ export const TransactionPanel: React.FC = () => {
                   type="button"
                   disabled={!verificationValid || busy}
                   onClick={() => void releaseTransaction(verification.trim(), false)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-strong bg-surface-elevated px-3 py-1.5 text-xs font-medium text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 border border-border-strong bg-surface px-3 py-2 text-xs font-medium text-fg-secondary transition-all hover:border-fg-primary hover:text-fg-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <XCircle className="h-3.5 w-3.5" />
                   Reject
@@ -159,7 +159,7 @@ export const TransactionPanel: React.FC = () => {
               type="button"
               disabled={busy}
               onClick={() => void holdTransaction('Held by operator from the console')}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-band-high/50 bg-band-high/15 px-4 py-2 text-xs font-bold text-band-high transition-all hover:bg-band-high/25 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex w-full items-center justify-center gap-2 border border-band-high bg-surface px-4 py-3 text-xs font-bold text-band-high transition-all hover:bg-band-high hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? <Spinner /> : <Lock className="h-3.5 w-3.5" />}
               Hold Transaction Pending Out-of-Band Verification

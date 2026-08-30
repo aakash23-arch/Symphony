@@ -1,67 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ScrollProgress } from './design-system/ScrollProgress';
 import { HeaderBar } from './panels/HeaderBar';
+import { ConsoleView } from './panels/ConsoleView';
 import {
   HeroSection,
   ProblemSection,
   RawSignalSection,
-  PipelineSection,
-  ForensicLayerSection,
-  BeliefTrajectorySection,
+  HowItWorksSection,
   ContextDecisionSection,
-  LiveDetectionSection,
-  PolicyActionSection,
   ProtectionSection,
-  AssuranceSection,
-  ScenarioMatrixSection,
-  TechnicalArchitectureSection,
+  LiveDetectionSection,
+  FaqSection,
   ClosingSection,
   NarrativeFooter,
 } from './sections';
 import { SessionProvider } from './state/SessionProvider';
 
 /**
- * Symphony Editorial Product Narrative & Live Detection Console.
+ * Symphony — SignalIQ Visual Reconstruction & Operational Testing Suite.
  *
- * Storytelling Hierarchy:
- *  - Section 00: Hero (Voice sounds real — that doesn't mean it is)
- *  - Section 01: The Problem (A voice is no longer proof of identity)
- *  - Section 02: Raw Signal (Every call starts as data)
- *  - Section 03: The Five-Layer Symphony Pipeline (L1–L5 stages)
- *  - Section 04: The Forensic Layer (One signal, multiple questions — E1–E6 ensemble)
- *  - Section 05: The Signal Becomes a Belief (Temporal trajectory & convergence)
- *  - Section 06: Context Changes the Decision (Voice + Call + Transaction fusion)
- *  - Section 07: Live Detection Console (Operational real-time defense console)
- *  - Section 08: The Decision (The output is an action — policy directives)
- *  - Section 09: Protection (Real-time financial hold & verification sequence)
- *  - Section 10: Assurance (Cryptographic SHA-256 evidence chain & dossier)
- *  - Section 11: Demo Scenarios (Interactive test vectors & live mic)
- *  - Section 12: Technical Architecture (End-to-end processing topology)
- *  - Section 13: Closing (Don't trust voice alone — trust the signal behind it)
- *  - Footer: Brand, simulation disclaimer, and raw audio privacy notice
+ * Provides:
+ *  - Narrative Mode: High-impact editorial storytelling landing experience
+ *  - Console Mode: Dedicated full-screen operational testing & scenario terminal
  */
 const Dashboard: React.FC = () => {
-  return (
-    <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-accent/30 selection:text-white">
-      <ScrollProgress />
-      <HeaderBar />
+  const [viewMode, setViewMode] = useState<'narrative' | 'console'>('narrative');
 
-      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8 max-w-[1600px] w-full mx-auto space-y-16">
-        <HeroSection />
-        <ProblemSection />
-        <RawSignalSection />
-        <PipelineSection />
-        <ForensicLayerSection />
-        <BeliefTrajectorySection />
-        <ContextDecisionSection />
-        <LiveDetectionSection />
-        <PolicyActionSection />
-        <ProtectionSection />
-        <AssuranceSection />
-        <ScenarioMatrixSection />
-        <TechnicalArchitectureSection />
-        <ClosingSection />
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-fg selection:text-background">
+      <ScrollProgress />
+      <HeaderBar viewMode={viewMode} onToggleView={setViewMode} />
+
+      <main className="flex-1 w-full mx-auto">
+        {viewMode === 'narrative' ? (
+          <>
+            <HeroSection onScrollToLive={() => setViewMode('console')} />
+            <ProblemSection />
+            <RawSignalSection />
+            <HowItWorksSection />
+            <ContextDecisionSection />
+            <ProtectionSection />
+            <LiveDetectionSection />
+            <FaqSection />
+            <ClosingSection />
+          </>
+        ) : (
+          <ConsoleView />
+        )}
       </main>
 
       <NarrativeFooter />
@@ -74,5 +60,3 @@ export const App: React.FC = () => (
     <Dashboard />
   </SessionProvider>
 );
-
-
