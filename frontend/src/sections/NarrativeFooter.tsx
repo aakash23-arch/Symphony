@@ -45,7 +45,7 @@ export const NarrativeFooter: React.FC = () => {
         </div>
 
         <div className="pt-2 text-center font-mono text-micro-label text-fg-muted/60">
-          © {new Date().getFullYear()} Symphony VoiceShield. Certified for production-grade defense demonstration.
+          © {new Date().getFullYear()} Symphony VoiceShield. Demonstration &amp; Defense Infrastructure Environment.
         </div>
       </div>
     </footer>

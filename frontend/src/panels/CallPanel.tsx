@@ -34,7 +34,7 @@ export const CallPanel: React.FC = () => {
         title="Call"
         sectionNumber="01"
         tag="L1 Intake"
-        subtitle="Telecom & Stream Ingestion"
+        subtitle="Audio Stream Ingestion"
       >
         <EmptyState message="No active session." hint="Start a demo call to begin monitoring." />
       </Panel>
@@ -54,7 +54,7 @@ export const CallPanel: React.FC = () => {
       title="Call"
       sectionNumber="01"
       tag="L1 Intake"
-      subtitle="Telecom & Stream Ingestion"
+      subtitle="Audio Stream Ingestion"
       stale={stale}
       staleLabel={stale ? `Last update ${formatClock(state.lastMessageAt)}` : undefined}
     >

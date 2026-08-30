@@ -45,7 +45,7 @@ export const ClosingSection: React.FC = () => {
         </div>
 
         <p className="body-lg text-fg-secondary max-w-xl mx-auto">
-          Deploy real-time acoustic neural forensics, speaker biometric verification, and automated transaction hold assurance across your critical voice channels.
+          Symphony turns voice signals into defensible security decisions. Real-time acoustic forensics, speaker biometric verification, and automated transaction protection.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">

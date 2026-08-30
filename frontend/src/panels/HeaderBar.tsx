@@ -106,20 +106,32 @@ export const HeaderBar: React.FC = () => {
           {/* Connection Status Indicator */}
           <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
 
-          {/* Session Status Pill */}
-          <div className="flex items-center gap-1.5 rounded-md bg-surface-elevated/70 px-2.5 py-1 font-mono text-micro uppercase text-fg-secondary ring-1 ring-border/50">
+          {/* Visible Demo Status / Active Ingress Mode Indicator */}
+          <div className="flex items-center gap-1.5 rounded-md bg-surface-elevated/80 px-2.5 py-1 font-mono text-micro uppercase tracking-wider text-fg-secondary ring-1 ring-border/60">
             <span
               className={cn(
                 'h-1.5 w-1.5 rounded-full',
-                isStreaming
-                  ? 'bg-accent animate-pulse-dot'
-                  : state.sessionId
-                  ? 'bg-emerald-400'
-                  : 'bg-fg-muted',
+                state.sourceType === 'mic'
+                  ? 'bg-rose-400 animate-pulse-dot'
+                  : state.sourceType
+                  ? 'bg-amber-400'
+                  : 'bg-accent/70',
               )}
             />
-            <span>
-              {isStreaming ? 'STREAMING' : state.sessionId ? 'SESSION READY' : 'STANDBY'}
+            <span
+              className={cn(
+                state.sourceType === 'mic'
+                  ? 'font-bold text-rose-300'
+                  : state.sourceType
+                  ? 'text-amber-300 font-semibold'
+                  : 'text-fg-secondary',
+              )}
+            >
+              {state.sourceType === 'mic'
+                ? 'LIVE MICROPHONE'
+                : state.sourceType
+                ? 'DEMO / SIMULATION'
+                : 'DEMO ENVIRONMENT'}
             </span>
           </div>
 

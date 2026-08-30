@@ -17,7 +17,7 @@ export const ContextDecisionSection: React.FC = () => {
     <NarrativeSection
       index="06"
       title="A DETECTOR ISN'T ENOUGH."
-      subtitle="A deepfake classifier only measures acoustics. Symphony fuses acoustic evidence with financial stakes and behavioural vectors to make a business-grade decision."
+      subtitle="An acoustic classifier only measures spectral signals. Symphony fuses acoustic evidence with transaction stakes and caller context to make a defensible security decision."
       tag="MULTI-FACTOR FUSION"
     >
       <div className="space-y-6">
