@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertCircle, AlertTriangle } from 'lucide-react';
 
 import { Badge } from '../components/Badge';
 import { MetricBar } from '../components/Metric';
@@ -17,17 +18,11 @@ import { isStale } from '../state/sessionReducer';
 import { useSession } from '../state/useSession';
 
 /**
- * The decision panel.
+ * Editorial Risk Assessment Panel (L4 Composite).
  *
- * Two rules are enforced here rather than trusted to callers:
- *
- *  1. The score is written as `0.78`, never `78%`. `score_semantics` is
- *     UNCALIBRATED_RISK_SCORE - the number orders calls by concern, it does not
- *     estimate a probability of fraud, and a percent sign would assert a
- *     calibration nobody performed. `formatScore` is the only formatter used.
- *  2. When no assessment exists the score slot shows an em dash, never a
- *     numeral. A zero here would paint a reassuring LOW for a call the system
- *     has said nothing about.
+ * Enforces two critical non-negotiable rules:
+ *  1. The score is displayed as an uncalibrated scalar (e.g. `0.78`), NEVER as a percentage (`78%`).
+ *  2. When no assessment is produced, an em dash (`—`) is rendered rather than 0.00.
  */
 export const RiskPanel: React.FC = () => {
   const { state } = useSession();
@@ -35,7 +30,12 @@ export const RiskPanel: React.FC = () => {
 
   if (!state.sessionId) {
     return (
-      <Panel title="Risk assessment" tag="L4 Composite">
+      <Panel
+        title="Risk assessment"
+        sectionNumber="02"
+        tag="L4 Composite"
+        subtitle="Multi-Modal Threat Level"
+      >
         <EmptyState
           message="No active session."
           hint="Risk is produced by the pipeline once audio is flowing."
@@ -46,32 +46,46 @@ export const RiskPanel: React.FC = () => {
 
   if (state.riskStatus === 'error' && state.error) {
     return (
-      <Panel title="Risk assessment" tag="L4 Composite">
+      <Panel
+        title="Risk assessment"
+        sectionNumber="02"
+        tag="L4 Composite"
+        subtitle="Multi-Modal Threat Level"
+      >
         <ErrorState code={state.error.code} message={state.error.message} />
       </Panel>
     );
   }
 
-  // No decision yet. Deliberately renders an em dash and the awaiting notice
-  // rather than any number at all.
+  // Awaiting state: explicitly renders em dash rather than 0.00
   if (!state.decision) {
     return (
-      <Panel title="Risk assessment" tag="L4 Composite">
-        <div className="rounded-lg border border-dashed border-band-uncertain/50 bg-band-uncertain/5 risk-hatch px-5 py-6">
-          <p
-            className="font-mono tnum text-7xl leading-none text-fg-tertiary"
-            data-testid="risk-score"
-          >
-            {NONE}
-          </p>
-          <p className="mt-3 font-mono text-micro uppercase text-band-uncertain">
+      <Panel
+        title="Risk assessment"
+        sectionNumber="02"
+        tag="L4 Composite"
+        subtitle="Multi-Modal Threat Level"
+      >
+        <div className="rounded-2xl border border-dashed border-band-uncertain/50 bg-band-uncertain/[0.06] risk-hatch p-6">
+          <div className="flex items-baseline justify-between">
+            <p
+              className="font-mono tnum text-7xl font-light tracking-tight text-fg-tertiary"
+              data-testid="risk-score"
+            >
+              {NONE}
+            </p>
+            <span className="rounded-md border border-band-uncertain/40 bg-band-uncertain/10 px-2.5 py-1 font-mono text-micro uppercase text-band-uncertain">
+              Awaiting Assessment
+            </span>
+          </div>
+          <p className="mt-3 font-mono text-micro uppercase tracking-wider text-band-uncertain">
             Awaiting first action-grade assessment
           </p>
-          <p className="mt-2 text-[0.8125rem] text-fg-secondary">
+          <p className="mt-1.5 text-xs text-fg-secondary">
             {state.riskMessage ??
-              'The pipeline has not yet produced an assessment for this call.'}
+              'The pipeline is accumulating spectral frames to produce a calibrated action-grade assessment.'}
           </p>
-          <p className="mt-3 font-mono text-micro text-fg-tertiary">
+          <p className="mt-3 font-mono text-micro text-fg-tertiary border-t border-border/40 pt-2">
             frames seen {state.framesSeen} · scored {state.framesScored}
           </p>
         </div>
@@ -86,7 +100,12 @@ export const RiskPanel: React.FC = () => {
   const critical = risk.risk_band === 'CRITICAL';
 
   return (
-    <Panel title="Risk assessment" tag="L4 Composite">
+    <Panel
+      title="Risk assessment"
+      sectionNumber="02"
+      tag="L4 Composite"
+      subtitle="Multi-Modal Threat Level"
+    >
       {stale ? (
         <div className="mb-4">
           <DisconnectedState
@@ -96,9 +115,10 @@ export const RiskPanel: React.FC = () => {
         </div>
       ) : null}
 
+      {/* Primary Risk Decision Hero Card */}
       <div
         className={cn(
-          'rounded-lg border px-5 py-5 transition-colors duration-150',
+          'relative overflow-hidden rounded-2xl border p-5 transition-all duration-200',
           band.border,
           band.surface,
           critical && 'animate-pulse-edge',
@@ -108,46 +128,51 @@ export const RiskPanel: React.FC = () => {
       >
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-micro uppercase tracking-widest text-fg-tertiary">
+                {risk.score_label}
+              </span>
+              <span className="font-mono text-[0.625rem] text-fg-tertiary">SCALE 0.00–1.00</span>
+            </div>
             <p
-              className={cn('font-mono tnum text-7xl leading-none', band.text)}
+              className={cn('mt-1 font-mono tnum text-7xl font-bold tracking-tight leading-none', band.text)}
               data-testid="risk-score"
             >
               {formatScore(risk.risk_score)}
-            </p>
-            <p className="mt-2 text-xs text-fg-tertiary">
-              {risk.score_label} · scale 0.00–1.00
             </p>
           </div>
 
           <div className="text-right">
             <p
-              className={cn('text-lg font-semibold tracking-tight', band.text)}
+              className={cn('text-xl font-bold tracking-tight', band.text)}
               data-testid="risk-band"
             >
               {bandLabel(risk.risk_band)}
             </p>
-            <p className="mt-1 max-w-[22ch] text-xs text-fg-secondary">{band.meaning}</p>
+            <p className="mt-1 max-w-[24ch] text-xs text-fg-secondary leading-snug">{band.meaning}</p>
           </div>
         </div>
 
-        {/* Permanent, not a tooltip: the calibration caveat qualifies the number
-            above it and must travel with every reading of it. */}
-        <p className="mt-4 border-t border-white/5 pt-3 text-xs text-fg-tertiary">
+        {/* Uncalibrated caveat notice */}
+        <p className="mt-4 border-t border-white/10 pt-2.5 text-[0.6875rem] text-fg-tertiary">
           {scoreDisclaimer(risk.score_semantics)}
         </p>
       </div>
 
+      {/* Metric Bars & Current Action */}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <MetricBar
-          label="Confidence"
+          label="Risk Assessment Confidence"
           value={risk.risk_confidence}
           tone={risk.risk_confidence < 0.4 ? 'bg-band-medium' : 'bg-accent'}
         />
         <div>
-          <p className="font-mono text-micro uppercase text-fg-tertiary">Current action</p>
+          <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
+            Mandated Security Action
+          </span>
           <div className="mt-1.5">
             <Badge
-              className={cn(action.text, action.border, action.surface)}
+              className={cn('px-2.5 py-1 text-xs font-bold', action.text, action.border, action.surface)}
               title={action.headline}
             >
               <span data-testid="risk-action">{decision.action}</span>
@@ -156,24 +181,24 @@ export const RiskPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Qualifiers that change how much the decision above can be relied on.
-          These belong in the layout, not behind a hover. */}
+      {/* Fail-Safe & Degradation Disclosures */}
       {(decision.fail_safe_engaged || state.analysisDegraded || risk.context_degraded) && (
-        <div className="mt-4 space-y-1.5 border-t border-border pt-3">
+        <div className="mt-4 space-y-2 rounded-xl border border-border/80 bg-surface-elevated/50 p-3">
           {decision.fail_safe_engaged ? (
-            <p className="text-xs text-band-medium">
-              Fail-safe path — this outcome came from incomplete evidence, not a confident
-              assessment.
-            </p>
+            <div className="flex items-center gap-2 text-xs font-medium text-band-medium">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>Fail-safe engaged: Incomplete acoustic evidence triggered default protection.</span>
+            </div>
           ) : null}
           {risk.context_degraded ? (
-            <p className="text-xs text-band-medium">
-              Call context was incomplete when this was assessed.
-            </p>
+            <div className="flex items-center gap-2 text-xs text-band-medium">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>Context degraded: Ingested telemetry vector had incomplete fields.</span>
+            </div>
           ) : null}
           {state.degradationReasons.length > 0 ? (
-            <p className="font-mono text-micro text-fg-tertiary">
-              {state.degradationReasons.join(' · ')}
+            <p className="font-mono text-[0.6875rem] text-fg-tertiary pl-5">
+              Reasons: {state.degradationReasons.join(' · ')}
             </p>
           ) : null}
         </div>
@@ -181,3 +206,4 @@ export const RiskPanel: React.FC = () => {
     </Panel>
   );
 };
+

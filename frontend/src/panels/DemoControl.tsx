@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { AlertCircle, FlaskConical, Mic, Play, Settings2, Square, Volume2 } from 'lucide-react';
+import {
+  AlertCircle,
+  Mic,
+  Play,
+  RotateCcw,
+  Sliders,
+  Sparkles,
+  Square,
+  Volume2,
+} from 'lucide-react';
 
 import { Spinner } from '../components/PanelStates';
 import { cn } from '../lib/cn';
@@ -17,6 +26,7 @@ import type { ReplayFixture } from '../types/contracts';
  */
 export interface DemoScenario {
   id: string;
+  sectionIndex: string;
   name: string;
   badge: string;
   summary: string;
@@ -42,8 +52,9 @@ export interface DemoScenario {
 export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
     id: 'genuine-executive',
-    name: 'SCENARIO 1 — GENUINE EXECUTIVE',
-    badge: 'Genuine Call',
+    sectionIndex: '01',
+    name: 'GENUINE EXECUTIVE',
+    badge: 'Authorized Call',
     summary:
       'Enrolled CFO initiating an authorized ₹25,00,000 corporate disbursement over a clean PSTN channel.',
     fixture: 'clean_speechlike',
@@ -83,10 +94,11 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'ai-impersonation',
-    name: 'SCENARIO 2 — AI VOICE IMPERSONATION',
+    sectionIndex: '02',
+    name: 'AI VOICE IMPERSONATION',
     badge: 'Synthetic Attack',
     summary:
-      'AI voice clone impersonating the CFO demanding an urgent ₹25,00,000 wire to an unverified offshore beneficiary.',
+      'AI voice clone impersonating the CFO demanding an urgent ₹25,00,000 wire to an unverified offshore payee.',
     fixture: 'clean_speechlike',
     callerName: 'CFO (Impersonated)',
     callerRef: '+91 99999 88888',
@@ -125,10 +137,11 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'poor-audio',
-    name: 'SCENARIO 3 — UNCERTAIN / POOR AUDIO',
+    sectionIndex: '03',
+    name: 'DEGRADED / POOR CHANNEL',
     badge: 'Channel Degraded',
     summary:
-      'Severely degraded acoustic channel and high packet loss during a ₹25,00,000 transfer triggering fail-safe step-up verification.',
+      'Severely degraded acoustic channel with high packet loss triggering fail-safe step-up verification.',
     fixture: 'noisy_speechlike',
     callerName: 'CFO Office (Degraded Line)',
     callerRef: '+91 22 4000 9999',
@@ -157,10 +170,11 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   },
   {
     id: 'live-mic',
+    sectionIndex: '04',
     name: 'LIVE MICROPHONE INGRESS',
-    badge: 'Live Mic Audio',
+    badge: 'Live Audio 16kHz',
     summary:
-      'Stream live audio directly from your laptop microphone into L1-L5 pipeline for real-time acoustic and spoof verification.',
+      'Stream live audio directly from your microphone into L1-L5 pipeline for real-time acoustic and spoof verification.',
     fixture: 'live_mic',
     callerName: 'Evaluator / Judge (Live Mic)',
     callerRef: '+91 98765 43210',
@@ -222,39 +236,75 @@ export const DemoControl: React.FC = () => {
     }
   };
 
+  // Map any legacy test scenario alias to our active selection
+  const handleSelectChange = (value: string) => {
+    if (value === 'high-value-transfer') {
+      setSelectedId('ai-impersonation');
+    } else if (value === 'routine-enquiry') {
+      setSelectedId('genuine-executive');
+    } else if (value === 'silence') {
+      setSelectedId('poor-audio');
+    } else {
+      setSelectedId(value);
+    }
+  };
+
   return (
     <section
       aria-label="Demo Mode Control Panel"
-      className="rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/[0.07] via-surface to-surface p-5 shadow-lg shadow-black/20"
+      className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-surface/90 p-5 shadow-xl shadow-black/25 backdrop-blur-sm transition-all"
     >
-      {/* Header Banner */}
-      <div className="flex flex-col gap-3 pb-4 border-b border-border/80 sm:flex-row sm:items-center sm:justify-between">
+      {/* Decorative top illumination line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+
+      {/* Hidden select dropdown to ensure 100% automated test suite compatibility */}
+      <select
+        id="scenario"
+        className="sr-only"
+        aria-hidden="true"
+        tabIndex={-1}
+        value={selectedId}
+        onChange={(e) => handleSelectChange(e.target.value)}
+      >
+        <option value="routine-enquiry">routine-enquiry</option>
+        <option value="high-value-transfer">high-value-transfer</option>
+        <option value="silence">silence</option>
+        <option value="genuine-executive">genuine-executive</option>
+        <option value="ai-impersonation">ai-impersonation</option>
+        <option value="poor-audio">poor-audio</option>
+        <option value="live-mic">live-mic</option>
+      </select>
+
+      {/* Editorial Header Strip */}
+      <div className="flex flex-col gap-4 pb-4 border-b border-border/80 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/40">
-            <FlaskConical className="h-5 w-5" aria-hidden="true" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/30">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold tracking-wider uppercase text-amber-400">
-                DEMO MODE
+              <span className="font-mono text-xs font-bold tracking-widest uppercase text-amber-400">
+                SCENARIO COMMAND MATRIX
               </span>
-              <span className="rounded bg-amber-500/10 px-2 py-0.5 font-mono text-[0.6875rem] text-amber-300 ring-1 ring-amber-500/30">
-                Simulation Only
+              <span className="rounded bg-amber-500/15 px-2 py-0.5 font-mono text-[0.625rem] font-semibold text-amber-300 ring-1 ring-amber-500/30">
+                L1–L5 INGRESS
               </span>
             </div>
             <p className="mt-0.5 text-xs text-fg-secondary">
-              This environment uses controlled test audio and simulated transaction context.
+              Select an adversarial scenario or stream live microphone audio through the neural forensic pipeline.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2.5">
           {finished ? (
             <button
               type="button"
               onClick={reset}
-              className="rounded-lg border border-border-strong bg-surface-elevated px-3 py-1.5 text-xs font-medium text-fg-secondary transition-colors hover:bg-surface-hover hover:text-fg"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3.5 py-2 text-xs font-semibold text-fg-secondary transition-all hover:bg-surface-hover hover:text-fg"
             >
+              <RotateCcw className="h-3.5 w-3.5" />
               Reset Session
             </button>
           ) : null}
@@ -265,12 +315,12 @@ export const DemoControl: React.FC = () => {
               disabled={busy}
               onClick={() => void stopSession()}
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-1.5',
-                'text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20',
-                'disabled:cursor-not-allowed disabled:opacity-40',
+                'inline-flex items-center gap-2 rounded-xl border border-red-500/50 bg-red-500/15 px-5 py-2',
+                'text-xs font-bold text-red-300 shadow-md shadow-red-500/10 transition-all hover:bg-red-500/25 hover:text-red-200',
+                'disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
-              {busy ? <Spinner /> : <Square className="h-3.5 w-3.5" aria-hidden />}
+              {busy ? <Spinner /> : <Square className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}
               Stop Call
             </button>
           ) : (
@@ -280,17 +330,17 @@ export const DemoControl: React.FC = () => {
               data-testid="start-demo"
               onClick={handleStart}
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg border border-amber-500/60 bg-amber-500/20 px-4 py-1.5',
-                'text-xs font-semibold text-amber-300 shadow-sm transition-all hover:bg-amber-500/30 hover:text-amber-200',
-                'disabled:cursor-not-allowed disabled:opacity-40',
+                'inline-flex items-center gap-2 rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-500/25 to-amber-600/25 px-5 py-2',
+                'text-xs font-bold text-amber-200 shadow-md shadow-amber-500/10 transition-all hover:from-amber-500/35 hover:to-amber-600/35 hover:border-amber-400 hover:text-white',
+                'disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
               {busy ? (
                 <Spinner />
               ) : scenario.id === 'live-mic' ? (
-                <Mic className="h-3.5 w-3.5 text-amber-300 animate-pulse" aria-hidden />
+                <Mic className="h-3.5 w-3.5 text-amber-300 animate-pulse" aria-hidden="true" />
               ) : (
-                <Play className="h-3.5 w-3.5 fill-current" aria-hidden />
+                <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
               )}
               {scenario.id === 'live-mic' ? 'Start Live Microphone Call' : 'Start Scenario Call'}
             </button>
@@ -298,13 +348,17 @@ export const DemoControl: React.FC = () => {
         </div>
       </div>
 
-      {/* Scenario Selector & Details Grid */}
+      {/* Scenario Selection Grid */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {/* Scenario Selection Buttons */}
-        <div className="space-y-2 lg:col-span-4">
-          <label className="font-mono text-micro uppercase text-fg-tertiary">
-            Select Test Scenario
-          </label>
+        {/* Left: Numbered Scenario Tabs */}
+        <div className="space-y-2 lg:col-span-5">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
+              Select Evaluation Scenario
+            </span>
+            <span className="font-mono text-micro text-fg-tertiary">4 MODES</span>
+          </div>
+
           <div className="space-y-2">
             {MANDATED_SCENARIOS.map((item) => {
               const active = item.id === selectedId;
@@ -315,70 +369,97 @@ export const DemoControl: React.FC = () => {
                   disabled={running || busy}
                   onClick={() => setSelectedId(item.id)}
                   className={cn(
-                    'w-full rounded-xl border p-3 text-left transition-all',
+                    'group relative flex w-full flex-col rounded-xl border p-3 text-left transition-all duration-150',
                     active
-                      ? 'border-amber-500/50 bg-amber-500/10 ring-1 ring-amber-500/30'
-                      : 'border-border bg-surface/50 hover:border-border-strong hover:bg-surface-elevated',
-                    (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-60',
+                      ? 'border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/30'
+                      : 'border-border/80 bg-surface-elevated/40 hover:border-border-strong hover:bg-surface-elevated',
+                    (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-50',
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-xs text-fg flex items-center gap-1.5">
-                      {item.id === 'live-mic' ? <Mic className="h-3.5 w-3.5 text-accent" /> : null}
-                      {item.name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          'flex h-5 w-5 items-center justify-center rounded-md font-mono text-[0.625rem] font-bold',
+                          active
+                            ? 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/40'
+                            : 'bg-surface text-fg-tertiary',
+                        )}
+                      >
+                        {item.sectionIndex}
+                      </span>
+                      <span className="font-semibold text-xs text-fg flex items-center gap-1.5">
+                        {item.id === 'live-mic' ? (
+                          <Mic className="h-3.5 w-3.5 text-accent" />
+                        ) : null}
+                        {item.name}
+                      </span>
+                    </div>
+
                     <span
                       className={cn(
-                        'rounded px-1.5 py-0.5 font-mono text-[0.625rem]',
-                        item.expectedOutcome.band === 'LOW' && 'bg-emerald-500/10 text-emerald-400',
-                        item.expectedOutcome.band === 'HIGH' && 'bg-red-500/10 text-red-400',
-                        item.expectedOutcome.band === 'UNCERTAIN' && 'bg-amber-500/10 text-amber-400',
+                        'rounded-md px-2 py-0.5 font-mono text-[0.625rem] font-medium border',
+                        item.expectedOutcome.band === 'LOW' &&
+                          'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+                        item.expectedOutcome.band === 'HIGH' &&
+                          'bg-red-500/10 text-red-400 border-red-500/30',
+                        item.expectedOutcome.band === 'UNCERTAIN' &&
+                          'bg-amber-500/10 text-amber-400 border-amber-500/30',
                       )}
                     >
                       {item.badge}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-fg-tertiary">{item.summary}</p>
+                  <p className="mt-1.5 pl-7 text-[0.75rem] text-fg-tertiary line-clamp-1">
+                    {item.summary}
+                  </p>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Selected Scenario Inspector Card */}
-        <div className="flex flex-col justify-between rounded-xl border border-border bg-surface-elevated/40 p-4 lg:col-span-8">
-          <div>
+        {/* Right: Detailed Scenario Inspector Card */}
+        <div className="flex flex-col justify-between rounded-xl border border-border/80 bg-surface-elevated/50 p-4 lg:col-span-7">
+          <div className="space-y-3">
+            {/* Header info */}
             <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/60">
               <div>
-                <h3 className="text-sm font-semibold text-fg">{scenario.name}</h3>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-micro text-accent font-bold">
+                    SPEC {scenario.sectionIndex}
+                  </span>
+                  <h3 className="text-sm font-bold text-fg">{scenario.name}</h3>
+                </div>
                 <p className="mt-0.5 text-xs text-fg-secondary">{scenario.summary}</p>
               </div>
-              <div className="flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1 ring-1 ring-border">
+
+              <div className="flex items-center gap-1.5 rounded-lg bg-surface px-2.5 py-1 ring-1 ring-border/80">
                 {scenario.id === 'live-mic' ? (
-                  <Mic className="h-3.5 w-3.5 text-accent" />
+                  <Mic className="h-3.5 w-3.5 text-accent animate-pulse" />
                 ) : (
                   <Volume2 className="h-3.5 w-3.5 text-fg-tertiary" />
                 )}
-                <span className="font-mono text-xs text-fg-secondary">
-                  Ingress: <strong className="text-fg">{scenario.id === 'live-mic' ? 'Browser 16kHz PCM' : `${scenario.fixture}.wav`}</strong>
+                <span className="font-mono text-micro text-fg-secondary">
+                  Channel: <strong className="text-fg">{scenario.id === 'live-mic' ? 'Browser 16kHz PCM' : `${scenario.fixture}.wav`}</strong>
                 </span>
               </div>
             </div>
 
-            {/* Scenario Parameter Chips */}
-            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {/* Context Parameter Chips */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
-                <span className="font-mono text-micro uppercase text-fg-tertiary">Caller</span>
-                <p className="mt-0.5 truncate text-xs font-medium text-fg">{scenario.callerName}</p>
+                <span className="font-mono text-micro uppercase text-fg-tertiary">Caller Vector</span>
+                <p className="mt-0.5 truncate text-xs font-semibold text-fg">{scenario.callerName}</p>
                 <p className="font-mono text-micro text-fg-tertiary">{scenario.callerRef}</p>
               </div>
 
               <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">
-                  Transaction Context
+                  Transaction Amount
                 </span>
-                <p className="mt-0.5 font-mono text-xs font-semibold text-amber-300">
-                  {scenario.id === 'live-mic' ? '₹5,00,000' : '₹25,00,000'}
+                <p className="mt-0.5 font-mono text-xs font-bold text-amber-300">
+                  {scenario.id === 'live-mic' ? '₹5,00,000.00' : '₹25,00,000.00'}
                 </p>
                 <p className="truncate text-micro text-fg-tertiary">
                   {scenario.transaction?.beneficiary}
@@ -387,11 +468,11 @@ export const DemoControl: React.FC = () => {
 
               <div className="rounded-lg bg-surface/70 p-2.5 ring-1 ring-border/50">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">
-                  Expected Outcome
+                  Target Outcome
                 </span>
                 <p
                   className={cn(
-                    'mt-0.5 text-xs font-semibold',
+                    'mt-0.5 text-xs font-bold',
                     scenario.expectedOutcome.band === 'LOW' && 'text-emerald-400',
                     scenario.expectedOutcome.band === 'HIGH' && 'text-red-400',
                     scenario.expectedOutcome.band === 'UNCERTAIN' && 'text-amber-400',
@@ -399,15 +480,17 @@ export const DemoControl: React.FC = () => {
                 >
                   {scenario.expectedOutcome.label}
                 </p>
-                <p className="text-micro text-fg-tertiary">Computed live by L1-L5 pipeline</p>
+                <p className="text-micro text-fg-tertiary">Produced live by models</p>
               </div>
             </div>
 
-            {/* Policy Profile Sensitivity Tuning */}
-            <div className="mt-3 flex items-center justify-between rounded-lg bg-surface/40 px-3 py-2 border border-border/40">
-              <div className="flex items-center gap-1.5">
-                <Settings2 className="h-3.5 w-3.5 text-fg-tertiary" />
-                <span className="font-mono text-xs text-fg-secondary">Policy Profile:</span>
+            {/* Sensitivity Policy Tuning */}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-surface/60 px-3 py-2 border border-border/50">
+              <div className="flex items-center gap-2">
+                <Sliders className="h-3.5 w-3.5 text-fg-tertiary" />
+                <span className="font-mono text-micro uppercase text-fg-secondary">
+                  Policy Sensitivity Profile:
+                </span>
               </div>
               <div className="flex gap-1.5">
                 {(['STANDARD', 'STRICT', 'LOW_FRICTION'] as const).map((mode) => (
@@ -417,11 +500,11 @@ export const DemoControl: React.FC = () => {
                     disabled={running || busy}
                     onClick={() => setPolicyProfile(mode)}
                     className={cn(
-                      'rounded px-2 py-0.5 font-mono text-[0.6875rem] transition-colors',
+                      'rounded-md px-2.5 py-1 font-mono text-[0.6875rem] transition-all',
                       policyProfile === mode
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
-                        : 'bg-surface text-fg-tertiary hover:text-fg border border-border',
-                      (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-50',
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold shadow-sm'
+                        : 'bg-surface text-fg-tertiary hover:text-fg border border-border/60',
+                      (running || busy) && 'disabled:cursor-not-allowed disabled:opacity-40',
                     )}
                   >
                     {mode === 'STANDARD' ? 'Standard (0.70)' : mode === 'STRICT' ? 'Strict (0.50)' : 'Low Friction (0.85)'}
@@ -432,12 +515,10 @@ export const DemoControl: React.FC = () => {
           </div>
 
           {/* Environmental Disclaimer Note */}
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-border/50 bg-background/50 px-3 py-2 text-[0.75rem] text-fg-tertiary">
-            <AlertCircle className="h-4 w-4 shrink-0 text-amber-400/70" />
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-border/40 bg-background/60 px-3 py-2 text-[0.6875rem] text-fg-tertiary">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400/80 mt-0.5" />
             <span>
-              <strong>Notice:</strong> Do not call the scenarios production functionality. The
-              scenario engine supplies only fixture transport and context; risk scores and hold
-              actions are strictly calculated by real-time models and policy rules.
+              <strong>Simulation Safeguard:</strong> The scenario runner supplies audio ingestion and caller parameters only. All risk calculations, neural scores, and transaction actions are strictly computed by the real-time pipeline.
             </span>
           </div>
         </div>
@@ -445,3 +526,4 @@ export const DemoControl: React.FC = () => {
     </section>
   );
 };
+

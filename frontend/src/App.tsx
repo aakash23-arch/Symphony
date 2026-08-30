@@ -13,53 +13,65 @@ import { SessionProvider } from './state/SessionProvider';
 import { useSession } from './state/useSession';
 
 /**
- * Dashboard layout.
+ * Editorial Dashboard Layout.
  *
- * Column order matters on small screens: Risk and Recommendation come first
- * because they are the decision. Call and Transaction are the context for it,
- * and Timeline is the history — useful, but never the thing an operator needs
- * in the first two seconds.
+ * Storytelling Flow:
+ *  - Section 00: Scenario Matrix & Live Audio Ingress
+ *  - Section 01: Intake & Context (Call & Transaction)
+ *  - Section 02: Composite Risk & Policy Directives (Risk & Recommendation)
+ *  - Section 03: Forensic Evidence & Neural Scorecard (Evidence & Dossier)
+ *  - Section 04: Forensic Event History (Timeline)
+ *
+ * Column order preserves strict accessibility and mobile priority:
+ * Risk & Recommendation come first in DOM order so operators see decisions first on small screens.
  */
 const Dashboard: React.FC = () => {
   const { state } = useSession();
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-fg">
+    <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-accent/30 selection:text-white">
       <HeaderBar />
 
-      <main className="flex-1 space-y-5 px-5 py-5 lg:px-6">
+      <main className="flex-1 space-y-6 px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] w-full mx-auto">
         <DemoControl />
 
         {state.error ? (
-          <ErrorState code={state.error.code} message={state.error.message} />
+          <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 shadow-lg shadow-red-500/5">
+            <ErrorState code={state.error.code} message={state.error.message} />
+          </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-          {/* Decision column: first in DOM order so it leads on mobile. */}
-          <div className="order-1 space-y-5 lg:order-2 lg:col-span-6">
+        {/* 3-Column Editorial Grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+          {/* Decision & Intelligence Column: Leads in DOM order for mobile operators */}
+          <div className="order-1 space-y-6 lg:order-2 lg:col-span-6">
             <RiskPanel />
             <RecommendationPanel />
             <EvidencePanel />
           </div>
 
-          {/* Context column. */}
-          <div className="order-2 space-y-5 lg:order-1 lg:col-span-3">
+          {/* Context & Telemetry Column */}
+          <div className="order-2 space-y-6 lg:order-1 lg:col-span-3">
             <CallPanel />
             <TransactionPanel />
           </div>
 
-          {/* History column. */}
+          {/* Event History Ledger Column */}
           <div className="order-3 lg:order-3 lg:col-span-3">
             <TimelinePanel />
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-border bg-surface px-6 py-2.5">
-        <p className="font-mono text-micro uppercase text-fg-tertiary">
-          Raw audio is confined to the ingestion boundary — no PCM is exposed through this
-          interface.
-        </p>
+      <footer className="border-t border-border/80 bg-surface/90 px-6 py-3.5 backdrop-blur-sm mt-8">
+        <div className="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2">
+          <p className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
+            Raw audio is confined to the ingestion boundary — no PCM is exposed through this interface.
+          </p>
+          <p className="font-mono text-micro text-fg-tertiary">
+            Symphony VoiceShield Defense Architecture
+          </p>
+        </div>
       </footer>
     </div>
   );
@@ -70,3 +82,4 @@ export const App: React.FC = () => (
     <Dashboard />
   </SessionProvider>
 );
+

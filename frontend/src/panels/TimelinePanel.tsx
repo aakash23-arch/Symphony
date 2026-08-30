@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 import { EmptyState } from '../components/PanelStates';
 import { Panel } from '../components/Panel';
@@ -17,8 +18,6 @@ export const TimelinePanel: React.FC = () => {
   // Newest first, so the most recent event is the one in view.
   const entries = [...state.timeline].reverse();
 
-  // Auto-scroll only when the reader is already at the top. Yanking the view
-  // back while someone is reading history is worse than missing an entry.
   useEffect(() => {
     const node = scrollRef.current;
     if (node && pinnedToTop.current) node.scrollTop = 0;
@@ -32,35 +31,43 @@ export const TimelinePanel: React.FC = () => {
   return (
     <Panel
       title="Timeline"
+      sectionNumber="04"
       tag={`${state.timeline.length} events`}
+      subtitle="Forensic Event Ledger"
       stale={stale}
       staleLabel={stale ? `Last update ${formatClock(state.lastMessageAt)}` : undefined}
       bodyClassName="flex min-h-0 flex-col"
     >
       {state.seqGapDetected ? (
-        <p className="mb-2 rounded border border-band-medium/40 bg-band-medium/10 px-2 py-1 font-mono text-micro uppercase text-band-medium">
-          Event gap detected — resyncing from the server
-        </p>
+        <div className="mb-2.5 flex items-center gap-1.5 rounded-lg border border-band-medium/40 bg-band-medium/10 px-2.5 py-1.5 font-mono text-micro uppercase text-band-medium">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <span>Event gap detected — resyncing from server</span>
+        </div>
       ) : null}
 
       {entries.length === 0 ? (
         <EmptyState
           message="No events yet."
-          hint={state.sessionId ? 'Events appear as the call progresses.' : undefined}
+          hint={state.sessionId ? 'Events appear dynamically as the call progresses.' : undefined}
         />
       ) : (
         <ol
           ref={scrollRef}
           onScroll={onScroll}
-          className="scroll-slim -mr-2 max-h-[32rem] min-h-0 flex-1 space-y-2 overflow-y-auto pr-2"
+          className="scroll-slim -mr-2 max-h-[34rem] min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-2"
         >
           {entries.map((entry) => (
             <li
               key={entry.seq}
-              className={cn('border-l-2 pl-3', severityTone(entry.severity))}
+              className={cn(
+                'rounded-lg border border-border/60 bg-surface-elevated/30 p-2.5 border-l-4 transition-all hover:bg-surface-elevated/60',
+                severityTone(entry.severity),
+              )}
             >
               <div className="flex items-baseline justify-between gap-2">
-                <p className="min-w-0 text-[0.8125rem] leading-snug text-fg">{entry.label}</p>
+                <p className="min-w-0 font-semibold text-xs text-fg leading-snug truncate">
+                  {entry.label}
+                </p>
                 <span className="shrink-0 font-mono tnum text-micro text-fg-tertiary">
                   {entry.t_offset_s !== null
                     ? formatDuration(entry.t_offset_s)
@@ -68,21 +75,25 @@ export const TimelinePanel: React.FC = () => {
                 </span>
               </div>
               {entry.detail ? (
-                <p className="mt-0.5 text-xs leading-snug text-fg-secondary">{entry.detail}</p>
+                <p className="mt-1 text-[0.75rem] leading-relaxed text-fg-secondary">
+                  {entry.detail}
+                </p>
               ) : null}
-              <p className="mt-0.5 font-mono text-micro uppercase text-fg-tertiary/70">
-                {entry.kind.replace(/_/g, ' ').toLowerCase()}
-              </p>
+              <div className="mt-1.5 flex items-center justify-between font-mono text-[0.625rem] text-fg-tertiary uppercase">
+                <span>{entry.kind.replace(/_/g, ' ').toLowerCase()}</span>
+                <span>SEQ #{entry.seq}</span>
+              </div>
             </li>
           ))}
         </ol>
       )}
 
       {state.timeline.length > 0 ? (
-        <p className="mt-2 shrink-0 border-t border-border pt-2 font-mono text-micro text-fg-tertiary">
-          Newest first
+        <p className="mt-3 shrink-0 border-t border-border/70 pt-2 font-mono text-micro text-fg-tertiary text-right">
+          Newest entries pinned to top
         </p>
       ) : null}
     </Panel>
   );
 };
+

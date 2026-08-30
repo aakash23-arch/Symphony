@@ -5,39 +5,47 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0B0F19',
-        surface: '#111827',
-        'surface-elevated': '#161E2E',
-        border: '#232B3B',
-        'border-strong': '#374151',
+        background: '#080B11',
+        surface: '#0F1523',
+        'surface-elevated': '#161F33',
+        'surface-hover': '#1D2842',
+        border: '#1E293B',
+        'border-strong': '#334155',
+        'border-subtle': '#151D2C',
 
         fg: {
-          DEFAULT: '#F3F4F6',
-          secondary: '#9CA3AF',
-          tertiary: '#6B7280',
+          DEFAULT: '#F8FAFC',
+          secondary: '#94A3B8',
+          tertiary: '#64748B',
+          muted: '#475569',
         },
 
         /**
-         * Risk band accents. Two deliberate departures from the obvious choice:
-         *
-         *  - `critical` is a LIGHT foreground on a deep field. A darker red than
-         *    `high` would make the worst band read as less urgent than the one
-         *    below it.
-         *  - `uncertain` is violet, not grey. Grey is the universal "inactive"
-         *    colour and would read as "nothing to see here" - exactly the
-         *    misreading this band exists to prevent.
+         * Risk band accents:
+         * - CRITICAL uses a light foreground on a deep red field with animated pulse edge.
+         * - UNCERTAIN uses violet with dashed border and diagonal hatch.
          */
         band: {
-          low: '#34D399',
-          medium: '#FBBF24',
-          high: '#F87171',
+          low: '#10B981',
+          'low-glow': 'rgba(16, 185, 129, 0.15)',
+          medium: '#F59E0B',
+          'medium-glow': 'rgba(245, 158, 11, 0.15)',
+          high: '#EF4444',
+          'high-glow': 'rgba(239, 68, 68, 0.15)',
           critical: '#FCA5A5',
           'critical-field': '#7F1D1D',
           'critical-edge': '#EF4444',
-          uncertain: '#C4B5FD',
+          'critical-glow': 'rgba(239, 68, 68, 0.25)',
+          uncertain: '#A78BFA',
+          'uncertain-glow': 'rgba(167, 139, 250, 0.15)',
         },
 
-        accent: '#818CF8',
+        accent: {
+          DEFAULT: '#6366F1',
+          hover: '#4F46E5',
+          light: '#818CF8',
+          glow: 'rgba(99, 102, 241, 0.15)',
+        },
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
@@ -45,6 +53,7 @@ export default {
       },
       fontSize: {
         micro: ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.08em' }],
+        mini: ['0.6875rem', { lineHeight: '0.9375rem', letterSpacing: '0.04em' }],
       },
       animation: {
         'pulse-edge': 'pulse-edge 2s ease-in-out infinite',
@@ -52,12 +61,12 @@ export default {
       },
       keyframes: {
         'pulse-edge': {
-          '0%, 100%': { borderColor: 'rgba(239, 68, 68, 0.55)' },
-          '50%': { borderColor: 'rgba(239, 68, 68, 1)' },
+          '0%, 100%': { borderColor: 'rgba(239, 68, 68, 0.45)', boxShadow: '0 0 15px rgba(239, 68, 68, 0.15)' },
+          '50%': { borderColor: 'rgba(239, 68, 68, 0.95)', boxShadow: '0 0 25px rgba(239, 68, 68, 0.35)' },
         },
         'pulse-dot': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.35' },
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.4', transform: 'scale(0.85)' },
         },
       },
     },

@@ -1,65 +1,88 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Activity, Radio, Shield, Terminal } from 'lucide-react';
 
 import { ConnectionDot } from '../components/ConnectionDot';
 import { useSession } from '../state/useSession';
 
 /**
- * The header carries the product identity, the live indicator, and the demo
- * disclaimer.
+ * Editorial Header Bar.
  *
- * The DEMO MODE strip is not decoration. The audio is a controlled fixture and
- * the transaction environment is simulated; without the strip, a screenshot of
- * this dashboard would read as a claim about a real call.
+ * Carries the product identity, real-time connection status, backend health telemetry,
+ * and the mandated demo environment disclaimer strip.
  */
 export const HeaderBar: React.FC = () => {
   const { state, health, healthError } = useSession();
 
   return (
-    <header className="border-b border-border bg-surface">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-surface/95 backdrop-blur-md">
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3.5">
-        <div className="flex items-center gap-3">
-          <span className="rounded-lg border border-accent/30 bg-accent/10 p-2 text-accent">
-            <Shield className="h-5 w-5" aria-hidden />
-          </span>
+        {/* Product Brand & Mission */}
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent ring-1 ring-accent/30 shadow-inner">
+            <Shield className="h-5 w-5" aria-hidden="true" />
+          </div>
           <div>
-            <h1 className="text-base font-semibold leading-tight tracking-tight text-fg">
-              VoiceShield
-            </h1>
-            <p className="text-xs leading-tight text-fg-secondary">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold tracking-tight text-fg">
+                VoiceShield
+              </h1>
+              <span className="rounded bg-accent/10 px-2 py-0.5 font-mono text-[0.625rem] font-medium text-accent ring-1 ring-accent/20">
+                L1–L5 ENGINE
+              </span>
+            </div>
+            <p className="text-xs text-fg-secondary">
               Real-Time Voice Integrity &amp; Impersonation Defense
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {/* Live System Diagnostics */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
 
-          <span className="font-mono text-micro uppercase text-fg-tertiary">
-            Backend{' '}
+          <div className="flex items-center gap-1.5 font-mono text-micro uppercase tracking-wider text-fg-tertiary">
+            <Activity className="h-3.5 w-3.5 text-fg-tertiary" aria-hidden="true" />
+            <span>Backend: </span>
             {healthError ? (
-              <span className="text-band-high">unreachable</span>
+              <span className="font-bold text-band-high">unreachable</span>
             ) : health ? (
-              <span className={health.status === 'healthy' ? 'text-band-low' : 'text-band-medium'}>
+              <span
+                className={
+                  health.status === 'healthy'
+                    ? 'font-bold text-band-low'
+                    : 'font-bold text-band-medium'
+                }
+              >
                 {health.status}
               </span>
             ) : (
               <span className="text-fg-tertiary">checking</span>
             )}
-          </span>
+          </div>
 
           {health ? (
-            <span className="font-mono text-micro uppercase text-fg-tertiary">
-              v{health.version} · {health.environment}
-            </span>
+            <div className="flex items-center gap-1.5 rounded-md bg-surface-elevated/70 px-2.5 py-1 font-mono text-micro uppercase text-fg-secondary ring-1 ring-border/50">
+              <Terminal className="h-3 w-3 text-fg-tertiary" aria-hidden="true" />
+              <span>v{health.version}</span>
+              <span className="text-fg-tertiary">·</span>
+              <span className="text-fg-tertiary">{health.environment}</span>
+            </div>
           ) : null}
         </div>
       </div>
 
-      <p className="border-t border-band-medium/25 bg-band-medium/10 px-6 py-1.5 font-mono text-micro uppercase tracking-wider text-band-medium">
-        Demo mode — controlled test audio, simulated transaction context. Not a real call and not a
-        real banking integration.
-      </p>
+      {/* Mandatory Demo Environment Banner */}
+      <div className="flex items-center justify-between border-t border-amber-500/25 bg-amber-500/[0.08] px-6 py-1.5 font-mono text-micro uppercase tracking-wider text-amber-300">
+        <p>
+          Demo mode — controlled test audio, simulated transaction context. Not a real call and not a
+          real banking integration.
+        </p>
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-[0.625rem] text-amber-400/80">
+          <Radio className="h-3 w-3 animate-pulse" />
+          <span>SIH26104 DEFENSE SPEC</span>
+        </span>
+      </div>
     </header>
   );
 };
+

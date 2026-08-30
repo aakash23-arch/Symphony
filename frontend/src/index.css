@@ -14,9 +14,14 @@ body,
 
 body {
   margin: 0;
-  background-color: #0b0f19;
-  color: #f3f4f6;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #080b11;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -27,15 +32,14 @@ body {
   font-feature-settings: 'tnum';
 }
 
-/* The UNCERTAIN band's hatch. The one gradient in the design that earns its
-   place: it encodes "provisional" rather than decorating. */
+/* The UNCERTAIN band's hatch. Encodes "provisional" rather than decorating. */
 .risk-hatch {
   background-image: repeating-linear-gradient(
     135deg,
-    rgba(196, 181, 253, 0.05) 0px,
-    rgba(196, 181, 253, 0.05) 1px,
+    rgba(167, 139, 250, 0.07) 0px,
+    rgba(167, 139, 250, 0.07) 1px,
     transparent 1px,
-    transparent 9px
+    transparent 8px
   );
 }
 
@@ -48,17 +52,18 @@ body {
 
 /* Scrollbars sized down so the timeline does not grow a chrome-heavy gutter. */
 .scroll-slim::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 .scroll-slim::-webkit-scrollbar-track {
   background: transparent;
 }
 .scroll-slim::-webkit-scrollbar-thumb {
-  background: #232b3b;
+  background: #1e293b;
   border-radius: 3px;
 }
 .scroll-slim::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #334155;
 }
 
 /* CRITICAL is the only band that animates. Honour the OS preference: the band
