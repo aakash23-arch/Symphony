@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ScrollProgress } from './design-system/ScrollProgress';
 import { HeaderBar } from './panels/HeaderBar';
 import { ConsoleView } from './panels/ConsoleView';
+import { Interactive3DBackground } from './components/3d';
 import {
   HeroSection,
   ProblemSection,
@@ -28,7 +29,8 @@ const Dashboard: React.FC = () => {
   const [viewMode, setViewMode] = useState<'narrative' | 'console'>('narrative');
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-fg selection:text-background">
+    <div className="flex min-h-screen flex-col bg-background text-fg selection:bg-fg selection:text-background relative">
+      <Interactive3DBackground visible={viewMode === 'narrative'} />
       <ScrollProgress />
       <HeaderBar viewMode={viewMode} onToggleView={setViewMode} />
 
