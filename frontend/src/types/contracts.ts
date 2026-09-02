@@ -316,6 +316,9 @@ export interface TransactionListResponse {
 // --- replay -------------------------------------------------------------------
 
 export type ReplayFixture =
+  | 'case_01_authentic_human'
+  | 'case_02_cloned_synthetic'
+  | 'case_03_adversarial_manipulated'
   | 'clean_speechlike'
   | 'noisy_speechlike'
   | 'narrowband_speechlike'
@@ -328,4 +331,86 @@ export interface ReplayResponse {
   fixture: ReplayFixture;
   environment: string;
   served_at: string;
+}
+
+// --- Canonical Evidence-Based Forensic Result Contracts ------------------------
+
+export interface OverallRisk {
+  risk_score: number;
+  risk_band: RiskBand;
+  severity_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNCERTAIN';
+  summary: string;
+}
+
+export interface DecisionVerdict {
+  verdict: PolicyAction;
+  matched_rule: string;
+  requires_step_up: boolean;
+  requires_hold: boolean;
+  action_narrative: string;
+}
+
+export interface ConfidenceScore {
+  score: number;
+  uncertainty_level: string;
+  confidence_interval: [number, number];
+  shrinkage_applied: number;
+}
+
+export interface DetectorScoreItem {
+  detector_id: string;
+  detector_name: string;
+  detector_type: string;
+  model_version: string;
+  p_synthetic: number;
+  confidence: number;
+  status: 'OK' | 'DEFERRED' | 'ERROR';
+  latency_ms: number;
+  weight_in_fusion: number;
+}
+
+export interface EvidenceItem {
+  signal: string;
+  category: 'NEURAL_ACOUSTIC' | 'PHYSICAL_DSP' | 'SPEAKER_BIOMETRICS' | 'SIGNAL_QUALITY' | 'TRANSACTION_CONTEXT';
+  score: number;
+  severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  explanation: string;
+}
+
+export interface ProcessingLatency {
+  total_ms: number;
+  validation_ms: number;
+  preprocessing_ms: number;
+  feature_extraction_ms: number;
+  detector_breakdown_ms: Record<string, number>;
+  fusion_and_calibration_ms: number;
+}
+
+export interface AudioMetadata {
+  duration_s: number;
+  active_speech_duration_s: number;
+  sample_rate_hz: number;
+  channels: number;
+  snr_db: number;
+  voiced_ratio: number;
+  clipping_detected: boolean;
+  peak_amplitude_dbfs: number;
+}
+
+export interface CanonicalInferenceResponse {
+  session_id: string;
+  timestamp: string;
+  is_valid_audio: boolean;
+  overall_risk: OverallRisk;
+  decision: DecisionVerdict;
+  confidence: ConfidenceScore;
+  detector_scores: DetectorScoreItem[];
+  evidence_items: EvidenceItem[];
+  processing_latency: ProcessingLatency;
+  model_versions: Record<string, string>;
+  audio_metadata: AudioMetadata;
+  verdict: PolicyAction;
+  risk_band: RiskBand;
+  calibrated_p_synthetic: number;
+  execution_time_ms: number;
 }

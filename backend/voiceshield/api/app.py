@@ -10,13 +10,19 @@ from voiceshield.config import settings
 from voiceshield.contracts import ErrorDetail, ErrorEnvelope, VoiceShieldException
 from voiceshield.obs.logging import get_logger, setup_logging
 from .routes import (
+    api_detect_router,
     demo_api_router,
     demo_router,
+    detect_router,
     health_router,
+    inference_api_router,
+    inference_router,
+    root_demo_router,
     sessions_api_router,
     sessions_router,
     transactions_api_router,
     transactions_router,
+    v1_detect_router,
 )
 from .ws_audio import router as ws_audio_router
 from .ws_events import router as ws_events_router
@@ -40,6 +46,84 @@ def _summarise_validation(exc: RequestValidationError) -> str:
     return "Request validation failed - " + "; ".join(parts)
 
 
+from contextlib import asynccontextmanager
+from pathlib import Path
+import numpy as np
+import soundfile as sf
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Deterministic SIH Demo Startup Sequence:
+    1. Preload and register L3 experts
+    2. Preload & pre-warm Wav2Vec2 and WavLM neural detectors in memory
+    3. Validate all 3 demo audio assets on disk
+    4. Warm up pipeline JIT compilation
+    5. Clean startup logging banner
+    """
+    from voiceshield.models.bootstrap import register_experts
+    from voiceshield.pipeline.detectors import (
+        Wav2Vec2DeepfakeDetector,
+        WavLMSpeakerVerificationDetector,
+    )
+    from voiceshield.pipeline.orchestrator import default_orchestrator
+
+    logger.info("Initializing VoiceShield SIH Demo Backend...")
+
+    # 1. Register and warmup L3 experts
+    try:
+        register_experts(warmup=True)
+    except Exception as exc:
+        logger.error(f"L3 expert registration warning: {exc}")
+
+    # 2. Preload neural detectors
+    try:
+        w2v = Wav2Vec2DeepfakeDetector.get_instance()
+        w2v.ensure_loaded()
+        wavlm = WavLMSpeakerVerificationDetector.get_instance()
+        wavlm.ensure_loaded()
+        logger.info(f"Preloaded neural detectors: Wav2Vec2 ({w2v.model_version}), WavLM ({wavlm.model_version})")
+    except Exception as exc:
+        logger.error(f"Neural detector preload error: {exc}")
+
+    # 3. Validate demo audio assets
+    audio_dir = Path("demo/audio")
+    demo_assets = [
+        "case_01_authentic_human.wav",
+        "case_02_cloned_synthetic.wav",
+        "case_03_adversarial_manipulated.wav",
+    ]
+    missing = []
+    for asset in demo_assets:
+        p = audio_dir / asset
+        if not p.exists():
+            missing.append(asset)
+        else:
+            try:
+                info = sf.info(str(p))
+                logger.info(f"Verified demo fixture '{asset}': {info.duration:.2f}s @ {info.samplerate}Hz")
+            except Exception as e:
+                logger.error(f"Corrupted demo fixture '{asset}': {e}")
+                missing.append(asset)
+
+    if missing:
+        logger.warning(f"Demo assets missing or corrupted: {missing}")
+
+    # 4. Pipeline Warmup
+    try:
+        dummy_pcm = (0.1 * np.sin(2 * np.pi * 220.0 * np.linspace(0, 0.2, 3200, endpoint=False, dtype=np.float32)))
+        import io
+        bio = io.BytesIO()
+        sf.write(bio, dummy_pcm, 16000, format="WAV", subtype="PCM_16")
+        default_orchestrator.process_audio(audio_bytes=bio.getvalue(), session_id="warmup-init")
+        logger.info("Forensic inference pipeline JIT warmup completed.")
+    except Exception as exc:
+        logger.warning(f"Pipeline warmup note: {exc}")
+
+    logger.info("VoiceShield SIH Demo Backend is ONLINE and READY for live judging.")
+    yield
+    logger.info("VoiceShield SIH Demo Backend shutting down.")
+
+
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
     setup_logging(
@@ -52,6 +136,7 @@ def create_app() -> FastAPI:
         title="VoiceShield API",
         description="Real-Time Voice Integrity & Impersonation Defense System",
         version=settings.app_version,
+        lifespan=lifespan,
         docs_url="/docs" if settings.debug else None,
         redoc_url="/redoc" if settings.debug else None,
     )
@@ -64,24 +149,6 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    @app.on_event("startup")
-    async def register_l3_experts() -> None:
-        """Register the L3 experts and log which ones are actually live (C-27).
-
-        Startup must never proceed silently as if all six experts were available.
-        A missing model marks that expert unavailable and is named in the log;
-        it never prevents the API from starting.
-        """
-        from voiceshield.models.bootstrap import register_experts
-
-        try:
-            register_experts()
-        except Exception as exc:  # pragma: no cover - defensive
-            logger.error(
-                "expert registration failed; L3 will report unavailable",
-                extra={"extra_fields": {"error_type": type(exc).__name__, "detail": str(exc)[:200]}},
-            )
 
     # Middleware: Correlation ID
     @app.middleware("http")
@@ -179,10 +246,16 @@ def create_app() -> FastAPI:
     app.include_router(sessions_router)
     app.include_router(transactions_router)
     app.include_router(demo_router)
-    # Gate 10 surface. Same handlers, so the two can never diverge.
+    app.include_router(root_demo_router)
+    # Gate 10 & Minimal Production Surface
     app.include_router(sessions_api_router)
     app.include_router(transactions_api_router)
     app.include_router(demo_api_router)
+    app.include_router(inference_router)
+    app.include_router(inference_api_router)
+    app.include_router(detect_router)
+    app.include_router(v1_detect_router)
+    app.include_router(api_detect_router)
     app.include_router(ws_audio_router)
     app.include_router(ws_events_router)
     app.include_router(ws_session_router)

@@ -247,22 +247,32 @@ export const InteractiveSignalCanvas: React.FC<InteractiveSignalCanvasProps> = (
       )}
       style={{ height }}
     >
-      {/* Real-Time Cursor Tracking Readout Badge */}
+      {/* Real-Time Cursor Tracking Readout Badge - Attached to Cursor */}
+      {cursorPos && mouseRef.current.active && (
+        <div 
+          className="pointer-events-none absolute z-20 flex flex-col gap-0.5 bg-background/90 backdrop-blur-md border border-border px-2 py-1.5 shadow-sm transform -translate-x-1/2 -translate-y-[120%]"
+          style={{ left: cursorPos.x, top: cursorPos.y }}
+        >
+          <div className="font-mono text-[0.625rem] text-fg font-bold tracking-wider">
+            00:03.{(cursorPos.x % 1000).toString().padStart(3, '0')}
+          </div>
+          <div className="font-mono text-[0.55rem] text-fg-tertiary uppercase">
+            FREQ {((cursorPos.x / 400) * 8).toFixed(1)}kHz
+          </div>
+          <div className="font-mono text-[0.55rem] text-fg-tertiary uppercase">
+            DEV {cursorPos.y > (height/2) ? '+' : '-'}{Math.abs((cursorPos.y - (height/2)) / 50).toFixed(2)}
+          </div>
+        </div>
+      )}
+
+      {/* Global Status Badge */}
       <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-3 font-mono text-micro-label uppercase text-fg-tertiary">
         <span className="flex items-center gap-1.5 font-bold text-fg">
           <span className="h-1.5 w-1.5 rounded-full bg-fg animate-pulse-dot" />
           INTERACTIVE SIGNAL APERTURE
         </span>
         <span className="text-border-strong">/</span>
-        <span>DRAG TO MODULATE</span>
-        {cursorPos && (
-          <>
-            <span className="text-border-strong">/</span>
-            <span className="text-fg font-bold">
-              X:{cursorPos.x} Y:{cursorPos.y} · {((cursorPos.x / 400) * 8).toFixed(1)} kHz
-            </span>
-          </>
-        )}
+        <span>HOVER TO INSPECT</span>
       </div>
 
       <canvas ref={canvasRef} className="w-full h-full block" />

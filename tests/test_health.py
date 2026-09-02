@@ -30,3 +30,20 @@ def test_get_v1_health(client):
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["version"] == "0.1.0"
+
+
+def test_get_health_readiness(client):
+    response = client.get("/health/ready")
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+
+    assert data["status"] in ["ready", "not_ready"]
+    assert "models_loaded" in data
+    assert "demo_assets_available" in data
+    assert "inference_pipeline_operational" in data
+    assert data["demo_cases_supported"] == 3
+    assert "case_01_authentic_human.wav" in data["demo_assets"]
+    assert "case_02_cloned_synthetic.wav" in data["demo_assets"]
+    assert "case_03_adversarial_manipulated.wav" in data["demo_assets"]
+    assert data["demo_assets"]["case_01_authentic_human.wav"].startswith("VALID")
+

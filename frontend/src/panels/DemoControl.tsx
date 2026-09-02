@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   AlertCircle,
-  Mic,
   Play,
   RotateCcw,
   Sliders,
@@ -51,13 +50,13 @@ export interface DemoScenario {
 
 export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
-    id: 'genuine-executive',
+    id: 'case-01-authentic',
     sectionIndex: '01',
-    name: 'GENUINE EXECUTIVE',
-    badge: 'Authorized Call',
+    name: 'AUTHENTIC HUMAN VOICE',
+    badge: 'Genuine Call',
     summary:
       'Enrolled CFO initiating an authorized ₹25,00,000 corporate disbursement over a clean PSTN channel.',
-    fixture: 'clean_speechlike',
+    fixture: 'case_01_authentic_human',
     callerName: 'CFO (Ananya Sharma)',
     callerRef: '+91 22 6123 4567',
     expectedOutcome: {
@@ -93,14 +92,14 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
     },
   },
   {
-    id: 'ai-impersonation',
+    id: 'case-02-cloned',
     sectionIndex: '02',
-    name: 'AI VOICE IMPERSONATION',
+    name: 'AI / VOICE-CLONED VOICE',
     badge: 'Synthetic Attack',
     summary:
-      'AI voice clone impersonating the CFO demanding an urgent ₹25,00,000 wire to an unverified offshore payee.',
-    fixture: 'clean_speechlike',
-    callerName: 'CFO (Impersonated)',
+      'AI voice clone impersonating executive CFO demanding an urgent ₹45,00,000 wire to an unverified offshore payee.',
+    fixture: 'case_02_cloned_synthetic',
+    callerName: 'CFO (Voice Clone Attack)',
     callerRef: '+91 99999 88888',
     expectedOutcome: {
       label: 'HIGH or CRITICAL RISK / HOLD',
@@ -128,7 +127,7 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
     },
     transaction: {
       caller_identity: 'cfo.ananya_sharma',
-      amount: '2500000.00',
+      amount: '4500000.00',
       beneficiary: 'Nexus Holdings Offshore Ltd (Unverified Payee)',
       beneficiary_novelty: 'NEW',
       currency: 'INR',
@@ -136,13 +135,13 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
     },
   },
   {
-    id: 'poor-audio',
+    id: 'case-03-adversarial',
     sectionIndex: '03',
-    name: 'DEGRADED / POOR CHANNEL',
+    name: 'ADVERSARIAL MANIPULATED VOICE',
     badge: 'Channel Degraded',
     summary:
-      'Severely degraded acoustic channel with high packet loss triggering fail-safe step-up verification.',
-    fixture: 'noisy_speechlike',
+      'Severely degraded acoustic channel, codec perturbation and noise during a ₹25,00,000 corporate transfer triggering fail-safe step-up verification.',
+    fixture: 'case_03_adversarial_manipulated',
     callerName: 'CFO Office (Degraded Line)',
     callerRef: '+91 22 4000 9999',
     expectedOutcome: {
@@ -168,43 +167,10 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       transaction_type: 'WIRE_TRANSFER',
     },
   },
-  {
-    id: 'live-mic',
-    sectionIndex: '04',
-    name: 'LIVE MICROPHONE INGRESS',
-    badge: 'Live Audio 16kHz',
-    summary:
-      'Stream live audio directly from your microphone into L1-L5 pipeline for real-time acoustic and spoof verification.',
-    fixture: 'live_mic',
-    callerName: 'Evaluator / Judge (Live Mic)',
-    callerRef: '+91 98765 43210',
-    expectedOutcome: {
-      label: 'EVALUATED LIVE ON SPEECH',
-      band: 'LOW',
-      action: 'EVALUATING',
-    },
-    context: {
-      claimed_identity: 'evaluator.live_judge',
-      verified_identity: null,
-      enrollment_status: 'NOT_ENROLLED',
-      known_contact: 'LIVE_TEST',
-      call_source: 'BROWSER_MIC',
-      voip_mobile_indicator: 'MIC',
-      language: 'en',
-    },
-    transaction: {
-      caller_identity: 'evaluator.live_judge',
-      amount: '500000.00',
-      beneficiary: 'Live Evaluation Test Beneficiary',
-      beneficiary_novelty: 'KNOWN',
-      currency: 'INR',
-      transaction_type: 'WIRE_TRANSFER',
-    },
-  },
 ];
 
 export const DemoControl: React.FC = () => {
-  const { state, startDemo, startMic, stopSession, reset, busy } = useSession();
+  const { state, startDemo, stopSession, reset, busy } = useSession();
   const [selectedId, setSelectedId] = useState<string>(MANDATED_SCENARIOS[0].id);
   const [policyProfile, setPolicyProfile] = useState<'STANDARD' | 'STRICT' | 'LOW_FRICTION'>('STANDARD');
 
@@ -219,21 +185,13 @@ export const DemoControl: React.FC = () => {
       policy_profile: policyProfile,
     };
 
-    if (scenario.id === 'live-mic') {
-      void startMic({
-        callerRef: scenario.callerRef,
-        context: contextWithProfile,
-        transaction: scenario.transaction,
-      });
-    } else {
-      void startDemo({
-        fixture: scenario.fixture as ReplayFixture,
-        callerRef: scenario.callerRef,
-        scenarioId: scenario.id,
-        context: contextWithProfile,
-        transaction: scenario.transaction,
-      });
-    }
+    void startDemo({
+      fixture: scenario.fixture as ReplayFixture,
+      callerRef: scenario.callerRef,
+      scenarioId: scenario.id,
+      context: contextWithProfile,
+      transaction: scenario.transaction,
+    });
   };
 
   // Map any legacy test scenario alias to our active selection
@@ -335,12 +293,10 @@ export const DemoControl: React.FC = () => {
             >
               {busy ? (
                 <Spinner />
-              ) : scenario.id === 'live-mic' ? (
-                <Mic className="h-3.5 w-3.5 text-white animate-pulse" aria-hidden="true" />
               ) : (
                 <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
               )}
-              {scenario.id === 'live-mic' ? 'Start Live Microphone Call' : 'Start Scenario Call'}
+              Start Case Replay
             </button>
           )}
         </div>
@@ -352,9 +308,9 @@ export const DemoControl: React.FC = () => {
         <div className="space-y-2 lg:col-span-5">
           <div className="flex items-center justify-between">
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
-              Select Evaluation Scenario
+              Select Evaluation Case
             </span>
-            <span className="font-mono text-micro text-fg-tertiary">4 MODES</span>
+            <span className="font-mono text-micro text-fg-tertiary">3 SIH CASES</span>
           </div>
 
           <div className="space-y-2">
@@ -386,10 +342,7 @@ export const DemoControl: React.FC = () => {
                       >
                         {item.sectionIndex}
                       </span>
-                      <span className="font-semibold text-xs text-fg flex items-center gap-1.5">
-                        {item.id === 'live-mic' ? (
-                          <Mic className="h-3.5 w-3.5 text-fg-primary" />
-                        ) : null}
+                      <span className="font-semibold text-xs text-fg">
                         {item.name}
                       </span>
                     </div>
@@ -425,7 +378,7 @@ export const DemoControl: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-micro text-fg-primary font-bold">
-                    SPEC {scenario.sectionIndex}
+                    CASE {scenario.sectionIndex}
                   </span>
                   <h3 className="text-sm font-bold text-fg">{scenario.name}</h3>
                 </div>
@@ -433,13 +386,9 @@ export const DemoControl: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1.5 border border-border bg-surface px-2.5 py-1">
-                {scenario.id === 'live-mic' ? (
-                  <Mic className="h-3.5 w-3.5 text-fg-primary animate-pulse" />
-                ) : (
-                  <Volume2 className="h-3.5 w-3.5 text-fg-tertiary" />
-                )}
+                <Volume2 className="h-3.5 w-3.5 text-fg-tertiary" />
                 <span className="font-mono text-micro text-fg-secondary">
-                  Channel: <strong className="text-fg">{scenario.id === 'live-mic' ? 'Browser 16kHz PCM' : `${scenario.fixture}.wav`}</strong>
+                  Asset: <strong className="text-fg">{`${scenario.fixture}.wav`}</strong>
                 </span>
               </div>
             </div>
@@ -457,7 +406,7 @@ export const DemoControl: React.FC = () => {
                   Transaction Amount
                 </span>
                 <p className="mt-0.5 font-mono text-xs font-bold text-fg-primary">
-                  {scenario.id === 'live-mic' ? '₹5,00,000.00' : '₹25,00,000.00'}
+                  {scenario.transaction?.amount ? `₹${Number(scenario.transaction.amount).toLocaleString('en-IN')}` : 'N/A'}
                 </p>
                 <p className="truncate text-micro text-fg-tertiary">
                   {scenario.transaction?.beneficiary}

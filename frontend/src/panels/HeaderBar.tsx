@@ -1,7 +1,7 @@
-import React from 'react';
-import { ArrowUpRight, LayoutDashboard, Sparkles } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { ConnectionDot } from '../components/ConnectionDot';
 import { useSession } from '../state/useSession';
+import { MagneticButton } from '../design-system/MagneticButton';
 
 export interface HeaderBarProps {
   viewMode?: 'narrative' | 'console';
@@ -39,103 +39,94 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
     if (onToggleView) {
       onToggleView('console');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      scrollTo('live-detection');
     }
   };
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md transition-all">
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4">
-        {/* Left: Brand Mark */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (onToggleView) onToggleView('narrative');
-              scrollTo('hero');
-            }}
-            className="flex items-center gap-2.5 text-left focus:outline-none group"
-          >
-            <span className="font-sans text-base sm:text-lg font-black tracking-tight text-fg">
+  // ---------------------------------------------------------------------------
+  // NARRATIVE HEADER
+  // ---------------------------------------------------------------------------
+  if (viewMode === 'narrative') {
+    return (
+      <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md transition-all border-b border-transparent hover:border-border">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between px-6 py-4">
+          
+          {/* Left: Brand Mark */}
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => scrollTo('hero')}
+              className="font-sans text-lg font-black tracking-tight text-fg focus:outline-none"
+            >
               SYMPHONY
-            </span>
-            <span className="hidden sm:inline-block border-l border-border pl-2.5 font-mono text-[0.625rem] font-semibold text-fg-tertiary tracking-widest uppercase">
-              VOICE INTEGRITY &amp; DEFENSE
-            </span>
-          </button>
-        </div>
+            </button>
+          </div>
 
-        {/* Center: Editorial Nav / View Switcher */}
-        {viewMode === 'narrative' ? (
-          <nav className="hidden lg:flex items-center gap-6 font-mono text-micro-label uppercase text-fg-tertiary">
+          {/* Center: Editorial Nav */}
+          <nav className="hidden lg:flex items-center gap-10 font-mono text-micro-label uppercase text-fg-tertiary">
             <button
               type="button"
-              onClick={() => scrollTo('problem')}
+              onClick={() => scrollTo('hero')}
               className="hover:text-fg transition-colors"
             >
-              Threat
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTo('signal')}
-              className="hover:text-fg transition-colors"
-            >
-              Signal
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTo('pipeline')}
-              className="hover:text-fg transition-colors"
-            >
-              Pipeline
+              Explore
             </button>
             <button
               type="button"
               onClick={() => scrollTo('forensics')}
               className="hover:text-fg transition-colors"
             >
-              Forensics
+              How it works
             </button>
             <button
               type="button"
-              onClick={() => scrollTo('protection')}
+              onClick={handleOpenConsole}
               className="hover:text-fg transition-colors"
             >
-              Protection
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTo('faq')}
-              className="hover:text-fg transition-colors"
-            >
-              FAQ
+              Live Demo
             </button>
           </nav>
-        ) : (
-          <div className="hidden sm:flex items-center gap-2 font-mono text-micro-label uppercase text-fg-tertiary">
-            <span className="font-bold text-fg">OPERATIONAL TESTING TERMINAL</span>
-            <span className="text-border-strong">/</span>
-            <span>REAL-TIME TELEMETRY &amp; EXPERT INFERENCE</span>
-          </div>
-        )}
 
-        {/* Right: Mode Switcher & Primary Action */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 font-mono text-micro-label text-fg-tertiary">
-            <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
-            <span className="hidden md:inline uppercase">
-              {state.sourceType === 'mic'
-                ? 'MIC ACTIVE'
-                : isStreaming
-                ? 'STREAMING'
-                : 'STANDBY'}
-            </span>
+          {/* Right: Primary Action */}
+          <div className="flex items-center gap-4">
+            <MagneticButton
+              type="button"
+              onClick={handleOpenConsole}
+              className="inline-flex items-center gap-2 border border-fg bg-fg px-4 py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-background hover:bg-fg/90 transition-transform hover:-translate-y-[1px] active:translate-y-[1px]"
+            >
+              <span>RUN DETECTION</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </MagneticButton>
           </div>
+        </div>
+      </header>
+    );
+  }
 
+  // ---------------------------------------------------------------------------
+  // CONSOLE DEMO HEADER (Phase 9)
+  // ---------------------------------------------------------------------------
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background transition-all">
+      <div className="max-w-[1600px] mx-auto flex items-center justify-between px-6 py-4">
+        
+        {/* Left: Brand */}
+        <div className="flex items-center gap-3">
+          <span className="font-sans text-base font-black tracking-tight text-fg">
+            SYMPHONY
+          </span>
+          <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
+        </div>
+
+        {/* Middle: Title */}
+        <div className="absolute left-1/2 -translate-x-1/2 font-mono text-micro-label uppercase text-fg font-bold tracking-widest hidden sm:block">
+          LIVE DETECTION
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-4">
           {/* Quick Active Session Reset / Stop */}
           {state.sessionId && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 mr-2">
               {isStreaming ? (
                 <button
                   type="button"
@@ -157,37 +148,19 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             </div>
           )}
 
-          {/* Dedicated View Switcher & Action */}
           {onToggleView && (
             <button
               type="button"
-              onClick={() => onToggleView(viewMode === 'narrative' ? 'console' : 'narrative')}
-              className="inline-flex items-center gap-1.5 border border-border bg-surface px-3 py-1.5 sm:py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-fg hover:border-fg transition-all"
+              onClick={() => onToggleView('narrative')}
+              className="inline-flex items-center gap-2 font-mono text-micro-label font-bold uppercase tracking-wider text-fg-secondary hover:text-fg transition-colors"
             >
-              {viewMode === 'narrative' ? (
-                <>
-                  <LayoutDashboard className="h-3.5 w-3.5 text-fg-secondary" />
-                  <span className="hidden sm:inline">DASHBOARD</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5 text-fg-secondary" />
-                  <span className="hidden sm:inline">NARRATIVE</span>
-                </>
-              )}
+              <ArrowUpRight className="h-3.5 w-3.5 rotate-[180deg]" />
+              <span>BACK TO STORY</span>
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={handleOpenConsole}
-            className="inline-flex items-center gap-1.5 border border-fg bg-fg px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-background hover:bg-fg/90 transition-all shadow-sm"
-          >
-            <span>RUN DETECTION</span>
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </button>
         </div>
       </div>
     </header>
   );
 };
+

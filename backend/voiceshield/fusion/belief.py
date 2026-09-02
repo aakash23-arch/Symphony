@@ -108,7 +108,7 @@ class StandardBeliefAccumulator(BeliefAccumulator):
                 alpha = self.config.quality_sensitivities.get(eid, 0.0)
                 q_factor = max(0.0, 1.0 - alpha * (1.0 - q_t))
                 w_prime_sum += base_w * c_i * q_factor
-                
+
         c_base = w_prime_sum / w_base_sum if w_base_sum > 0 else 0.0
         
         # Variance

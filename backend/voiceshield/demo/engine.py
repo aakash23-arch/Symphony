@@ -86,9 +86,11 @@ class ScenarioDefinition:
 
 # --- Mandated Scenario Definitions --------------------------------------------
 
+# --- Mandated Scenario Definitions --------------------------------------------
+
 SCENARIO_1_GENUINE_EXECUTIVE = ScenarioDefinition(
     scenario_id="genuine-executive",
-    title="Scenario 1 — Genuine Executive",
+    title="Case 01 — Authentic Human Voice",
     summary="Enrolled executive (CFO) conducting an authorized ₹25,00,000 corporate disbursement over a clean PSTN channel.",
     caller_name="CFO (Ananya Sharma)",
     caller_ref="+91 22 6123 4567",
@@ -129,11 +131,11 @@ SCENARIO_1_GENUINE_EXECUTIVE = ScenarioDefinition(
 
 SCENARIO_2_AI_IMPERSONATION = ScenarioDefinition(
     scenario_id="ai-impersonation",
-    title="Scenario 2 — AI Voice Impersonation",
+    title="Case 02 — AI / Voice-Cloned Voice",
     summary="Voice clone attempting an unauthorized ₹25,00,000 wire to an unverified offshore account with high urgency and callback refusal.",
-    caller_name="CFO (Impersonated)",
+    caller_name="CFO (Voice Clone Attack)",
     caller_ref="+91 99999 88888",
-    audio_fixture="clean_speechlike",
+    audio_fixture="case_02_cloned_synthetic",
     context={
         "claimed_identity": "cfo.ananya_sharma",
         "verified_identity": None,
@@ -171,8 +173,8 @@ SCENARIO_2_AI_IMPERSONATION = ScenarioDefinition(
 
 SCENARIO_3_POOR_AUDIO = ScenarioDefinition(
     scenario_id="poor-audio",
-    title="Scenario 3 — Uncertain / Poor Audio",
-    summary="Severely degraded acoustic channel and noise during a ₹25,00,000 corporate transfer triggering fail-safe step-up verification.",
+    title="Case 03 — Adversarial Manipulated / Degraded Voice",
+    summary="Severely degraded acoustic channel, codec perturbation and noise during a ₹25,00,000 corporate transfer triggering fail-safe step-up verification.",
     caller_name="CFO Office (Degraded Line)",
     caller_ref="+91 22 4000 9999",
     audio_fixture="noisy_speechlike",
@@ -212,13 +214,30 @@ class StandardScenarioEngine(ScenarioEngine):
     """Concrete scenario engine managing demo scenarios and session initialization."""
 
     def __init__(self, scenarios: Optional[List[ScenarioDefinition]] = None):
-        self._scenarios: Dict[str, ScenarioDefinition] = {
-            s.scenario_id: s for s in (scenarios or MANDATED_SCENARIOS)
-        }
+        self._scenarios: Dict[str, ScenarioDefinition] = {}
+        for s in (scenarios or MANDATED_SCENARIOS):
+            self._scenarios[s.scenario_id] = s
+        
+        # Add case alias mappings for SIH demo naming
+        if "genuine-executive" in self._scenarios:
+            self._scenarios["case-01-authentic"] = self._scenarios["genuine-executive"]
+            self._scenarios["routine-enquiry"] = self._scenarios["genuine-executive"]
+        if "ai-impersonation" in self._scenarios:
+            self._scenarios["case-02-cloned"] = self._scenarios["ai-impersonation"]
+            self._scenarios["high-value-transfer"] = self._scenarios["ai-impersonation"]
+        if "poor-audio" in self._scenarios:
+            self._scenarios["case-03-adversarial"] = self._scenarios["poor-audio"]
+            self._scenarios["silence"] = self._scenarios["poor-audio"]
 
     def list_scenarios(self) -> List[Dict[str, Any]]:
-        """List all available demo scenarios with full metadata."""
-        return [s.to_dict() for s in self._scenarios.values()]
+        """List all available demo scenarios with full metadata (deduplicated)."""
+        seen = set()
+        unique = []
+        for s in self._scenarios.values():
+            if s.scenario_id not in seen:
+                seen.add(s.scenario_id)
+                unique.append(s.to_dict())
+        return unique
 
     def get_scenario(self, scenario_id: str) -> Optional[ScenarioDefinition]:
         """Retrieve scenario definition by ID."""

@@ -68,6 +68,67 @@ class ScenarioStartResponse(BaseModel):
 def build_router(prefix: str, suffix: str = "") -> APIRouter:
     router = APIRouter(prefix=prefix, tags=["Demo"])
 
+    # Primary Cases routes
+    @router.get(
+        "/cases",
+        response_model=ScenarioListResponse,
+        status_code=status.HTTP_200_OK,
+        operation_id=f"list_cases{suffix}",
+        summary="List available demo cases",
+    )
+    def list_cases() -> ScenarioListResponse:
+        raw_list = default_scenario_engine.list_scenarios()
+        scenarios = [ScenarioDetailResponse(**s) for s in raw_list]
+        return ScenarioListResponse(scenarios=scenarios)
+
+    @router.get(
+        "/cases/{case_id}",
+        response_model=ScenarioDetailResponse,
+        status_code=status.HTTP_200_OK,
+        operation_id=f"get_case{suffix}",
+        summary="Get a demo case definition",
+    )
+    def get_case(
+        case_id: str = Path(description="Case identifier"),
+    ) -> ScenarioDetailResponse:
+        scenario = default_scenario_engine.get_scenario(case_id)
+        if scenario is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"SCENARIO_NOT_FOUND: Unknown demo scenario/case '{case_id}'",
+            )
+        return ScenarioDetailResponse(**scenario.to_dict())
+
+    @router.post(
+        "/cases/{case_id}/start",
+        response_model=ScenarioStartResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+        operation_id=f"start_case{suffix}",
+        summary="Start a named demo case",
+    )
+    async def start_case(
+        case_id: str = Path(description="Case identifier"),
+        speed: float = Query(default=1.0, gt=0, description="Replay speed factor"),
+    ) -> ScenarioStartResponse:
+        runtime = get_runtime()
+        try:
+            result = await default_scenario_engine.start_scenario(
+                scenario_id=case_id, runtime=runtime, speed=speed
+            )
+        except KeyError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"SCENARIO_NOT_FOUND: Unknown demo scenario/case '{case_id}'",
+            ) from exc
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(exc),
+            ) from exc
+
+        return ScenarioStartResponse(**result)
+
+    # Scenarios aliases for test and backward compatibility
     @router.get(
         "/scenarios",
         response_model=ScenarioListResponse,
@@ -76,10 +137,7 @@ def build_router(prefix: str, suffix: str = "") -> APIRouter:
         summary="List available demo scenarios",
     )
     def list_scenarios() -> ScenarioListResponse:
-        """Return the frozen demo scenarios available for controlled demonstration."""
-        raw_list = default_scenario_engine.list_scenarios()
-        scenarios = [ScenarioDetailResponse(**s) for s in raw_list]
-        return ScenarioListResponse(scenarios=scenarios)
+        return list_cases()
 
     @router.get(
         "/scenarios/{scenario_id}",
@@ -91,13 +149,7 @@ def build_router(prefix: str, suffix: str = "") -> APIRouter:
     def get_scenario(
         scenario_id: str = Path(description="Scenario identifier"),
     ) -> ScenarioDetailResponse:
-        scenario = default_scenario_engine.get_scenario(scenario_id)
-        if scenario is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"SCENARIO_NOT_FOUND: Unknown demo scenario '{scenario_id}'",
-            )
-        return ScenarioDetailResponse(**scenario.to_dict())
+        return get_case(scenario_id)
 
     @router.post(
         "/scenarios/{scenario_id}/start",
@@ -110,31 +162,12 @@ def build_router(prefix: str, suffix: str = "") -> APIRouter:
         scenario_id: str = Path(description="Scenario identifier"),
         speed: float = Query(default=1.0, gt=0, description="Replay speed factor"),
     ) -> ScenarioStartResponse:
-        """Start a session initialized with the specified scenario fixture.
-        
-        The scenario engine ONLY supplies the audio fixture, call context, and
-        transaction context. The real pipeline produces the risk evaluation.
-        """
-        runtime = get_runtime()
-        try:
-            result = await default_scenario_engine.start_scenario(
-                scenario_id=scenario_id, runtime=runtime, speed=speed
-            )
-        except KeyError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"SCENARIO_NOT_FOUND: Unknown demo scenario '{scenario_id}'",
-            ) from exc
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=str(exc),
-            ) from exc
-
-        return ScenarioStartResponse(**result)
+        return await start_case(scenario_id, speed)
 
     return router
 
 
 router = build_router("/v1/demo", "_v1")
 api_router = build_router("/api/demo", "_api")
+root_demo_router = build_router("/demo", "_root_demo")
+

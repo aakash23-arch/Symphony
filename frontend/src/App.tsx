@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
 import { HeaderBar } from './panels/HeaderBar';
-import { ProblemSection } from './sections/01_ProblemSection';
-import { SignalSection } from './sections/02_SignalSection';
-import { TransformationSection } from './sections/03_TransformationSection';
-import { ForensicsSection } from './sections/04_ForensicsSection';
-import { DecisionSection } from './sections/05_DecisionSection';
-import { LiveDetectionSection } from './sections/LiveDetectionSection';
+import { 
+  ProblemSection, 
+  SignalSection, 
+  TransformationSection, 
+  ForensicsSection, 
+  DecisionSection, 
+  FaqSection,
+  LiveDetectionSection 
+} from './sections';
 import { SessionProvider } from './state/SessionProvider';
 
 const Dashboard: React.FC = () => {
@@ -37,6 +40,7 @@ const Dashboard: React.FC = () => {
             <TransformationSection />
             <ForensicsSection />
             <DecisionSection onScrollToLive={() => setViewMode('console')} />
+            <FaqSection />
           </div>
         ) : (
           <div className="max-w-[1500px] mx-auto px-4 sm:px-8 py-8 space-y-8">

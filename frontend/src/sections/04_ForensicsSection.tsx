@@ -28,7 +28,7 @@ export const ForensicsSection: React.FC = () => {
           </h2>
 
           <p className="text-lg text-fg-secondary max-w-sm">
-            We don't just listen. We dissect the signal across 6 distinct neural models, searching for mathematical impossibilities in the voice.
+            We dissect the signal across deepfake neural classification, speaker biometric x-vectors, and deterministic acoustic physics, detecting synthetic signatures invisible to the human ear.
           </p>
         </div>
 
