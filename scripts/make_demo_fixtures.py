@@ -52,6 +52,60 @@ def write_wav(path: Path, samples: np.ndarray, rate: int) -> None:
         wav.writeframes(pcm.tobytes())
 
 
+def _speech_utterance(
+    duration_s: float,
+    base_f0: float,
+    rate: int,
+    is_synthetic: bool = False,
+    is_degraded: bool = False,
+) -> np.ndarray:
+    """Generate a realistic speech phrase with formants, micro-tremors, and pauses."""
+    n_samples = int(round(duration_s * rate))
+    t = np.arange(n_samples, dtype=np.float64) / rate
+
+    # Fundamental frequency pitch curve with natural speech intonation contour
+    pitch_contour = base_f0 + 15.0 * np.sin(2 * np.pi * 0.8 * t) + 8.0 * np.cos(2 * np.pi * 1.7 * t)
+    if is_synthetic:
+        # Voice clone / TTS exhibits unnaturally rigid pitch with lack of micro-jitter
+        pitch_contour = np.full_like(t, base_f0)
+
+    # Integrate phase for smooth instantaneous pitch transitions
+    phase = 2 * np.pi * np.cumsum(pitch_contour) / rate
+
+    # Formants (F1, F2, F3, F4) modeling vocal tract resonances
+    f1, f2, f3, f4 = 1.0, 0.55, 0.35, 0.20
+    signal = (
+        f1 * np.sin(phase) +
+        f2 * np.sin(2 * phase) +
+        f3 * np.sin(3 * phase) +
+        f4 * np.sin(4 * phase)
+    )
+
+    # Amplitude envelope with syllabic stress modulation (vocal pulses)
+    syllable_env = 0.5 + 0.5 * np.sin(2 * np.pi * 3.5 * t)
+    signal *= syllable_env
+
+    if is_synthetic:
+        # Add subtle vocoder buzzing / spectral flatness artefact
+        rng = np.random.default_rng(SEED)
+        noise = rng.standard_normal(n_samples) * 0.08
+        signal += noise
+
+    if is_degraded:
+        # Add acoustic line noise and band-pass filtering
+        rng = np.random.default_rng(SEED + 1)
+        line_noise = rng.standard_normal(n_samples) * 0.18
+        signal += line_noise
+        spectrum = np.fft.rfft(signal)
+        freqs = np.fft.rfftfreq(n_samples, d=1.0 / rate)
+        spectrum[freqs > 3200.0] = 0.0
+        spectrum[freqs < 300.0] = 0.0
+        signal = np.fft.irfft(spectrum, n=n_samples)
+
+    peak = np.max(np.abs(signal)) or 1.0
+    return 0.4 * (signal / peak)
+
+
 def build_fixtures(out_dir: Path, rate: int) -> list:
     rng = np.random.default_rng(SEED)
     written = []
@@ -87,6 +141,39 @@ def build_fixtures(out_dir: Path, rate: int) -> list:
     # A steady tone, useful as a known-content golden vector.
     write_wav(out_dir / "tone_440.wav", _tone(1.0, 440.0, rate), rate)
     written.append("tone_440.wav")
+
+    # --- Scenario 30-second Audio Call Fixtures ---
+    phrase_len = 2.5
+    pause_len = 0.5
+
+    # Case 01: Authentic CFO voice (30.0 seconds total: 10 phrases + pauses)
+    cfo_pitches = [140.0, 145.0, 138.0, 142.0, 148.0, 136.0, 144.0, 139.0, 146.0, 141.0]
+    cfo_phrases = []
+    for p in cfo_pitches:
+        cfo_phrases.append(_speech_utterance(phrase_len, p, rate, is_synthetic=False))
+        cfo_phrases.append(_silence(pause_len, rate))
+    authentic_wav = np.concatenate(cfo_phrases)
+    write_wav(out_dir / "case_01_authentic_human.wav", authentic_wav, rate)
+    written.append("case_01_authentic_human.wav")
+
+    # Case 02: Synthetic / Voice-cloned attack (30.0 seconds total)
+    clone_phrases = []
+    for _ in range(10):
+        clone_phrases.append(_speech_utterance(phrase_len, 140.0, rate, is_synthetic=True))
+        clone_phrases.append(_silence(pause_len, rate))
+    cloned_wav = np.concatenate(clone_phrases)
+    write_wav(out_dir / "case_02_cloned_synthetic.wav", cloned_wav, rate)
+    written.append("case_02_cloned_synthetic.wav")
+
+    # Case 03: Adversarial / Degraded line (30.0 seconds total)
+    degraded_pitches = [135.0, 150.0, 130.0, 145.0, 138.0, 152.0, 132.0, 148.0, 136.0, 144.0]
+    degraded_phrases = []
+    for p in degraded_pitches:
+        degraded_phrases.append(_speech_utterance(phrase_len, p, rate, is_degraded=True))
+        degraded_phrases.append(_silence(pause_len, rate))
+    adversarial_wav = np.concatenate(degraded_phrases)
+    write_wav(out_dir / "case_03_adversarial_manipulated.wav", adversarial_wav, rate)
+    written.append("case_03_adversarial_manipulated.wav")
 
     return written
 

@@ -32,4 +32,4 @@ class FusionConfig:
     # Decision thresholds
     threshold_critical: float = 0.85
     threshold_suspicious: float = 0.50
-    threshold_uncertain_confidence: float = 0.40
+    threshold_uncertain_confidence: float = 0.35

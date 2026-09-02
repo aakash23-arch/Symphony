@@ -7,6 +7,7 @@ import {
   Sparkles,
   Square,
   Volume2,
+  VolumeX,
 } from 'lucide-react';
 
 import { Spinner } from '../components/PanelStates';
@@ -29,7 +30,7 @@ export interface DemoScenario {
   name: string;
   badge: string;
   summary: string;
-  fixture: ReplayFixture | 'live_mic';
+  fixture: ReplayFixture;
   callerName: string;
   callerRef: string;
   expectedOutcome: {
@@ -117,8 +118,7 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       urgency: true,
       secrecy: true,
       callback_refusal: true,
-      workflow_state: 'HIGH_VALUE_TRANSFER',
-      sensitive_action: 'WIRE_TRANSFER',
+      workflow_state: 'NONE',
       call_source: 'INBOUND_VOIP',
       voip_mobile_indicator: 'VOIP',
       reputation: 0.12,
@@ -128,7 +128,7 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
     transaction: {
       caller_identity: 'cfo.ananya_sharma',
       amount: '4500000.00',
-      beneficiary: 'Nexus Holdings Offshore Ltd (Unverified Payee)',
+      beneficiary: 'Vanguard Overseas Holdings Ltd (Cayman Islands)',
       beneficiary_novelty: 'NEW',
       currency: 'INR',
       transaction_type: 'WIRE_TRANSFER',
@@ -137,32 +137,41 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
     id: 'case-03-adversarial',
     sectionIndex: '03',
-    name: 'ADVERSARIAL MANIPULATED VOICE',
-    badge: 'Channel Degraded',
+    name: 'ADVERSARIAL MANIPULATION',
+    badge: 'Noise & Tamper',
     summary:
-      'Severely degraded acoustic channel, codec perturbation and noise during a ₹25,00,000 corporate transfer triggering fail-safe step-up verification.',
+      'Adversarially perturbed voice call over degraded channel attempting spoof transfer of ₹12,50,000.',
     fixture: 'case_03_adversarial_manipulated',
-    callerName: 'CFO Office (Degraded Line)',
-    callerRef: '+91 22 4000 9999',
+    callerName: 'Unknown / Distorted Channel',
+    callerRef: '+91 88888 77777',
     expectedOutcome: {
-      label: 'UNCERTAIN / STEP-UP VERIFICATION',
+      label: 'UNCERTAIN / STEP_UP VERIFICATION',
       band: 'UNCERTAIN',
       action: 'STEP_UP',
     },
     context: {
-      claimed_identity: 'cfo.ananya_sharma',
-      enrollment_status: 'ENROLLED',
-      known_contact: 'UNKNOWN',
+      claimed_identity: 'treasury.officer',
+      verified_identity: null,
+      identity_mismatch: false,
+      enrollment_status: 'NOT_ENROLLED',
+      known_contact: 'RARE_CONTACT',
       transaction_type: 'WIRE_TRANSFER',
-      beneficiary_novelty: 'KNOWN',
-      call_source: 'INBOUND_VOIP',
+      beneficiary_novelty: 'RECENT',
+      urgency: true,
+      secrecy: false,
+      callback_refusal: false,
+      workflow_state: 'NONE',
+      call_source: 'INBOUND_PSTN',
+      voip_mobile_indicator: 'UNKNOWN',
+      reputation: 0.50,
+      age_days: 30,
       language: 'en',
     },
     transaction: {
-      caller_identity: 'cfo.ananya_sharma',
-      amount: '2500000.00',
-      beneficiary: 'Apex Infrastructure & Industrial Suppliers Ltd',
-      beneficiary_novelty: 'KNOWN',
+      caller_identity: 'treasury.officer',
+      amount: '1250000.00',
+      beneficiary: 'Zenith Logistics & Commercial Corp',
+      beneficiary_novelty: 'RECENT',
       currency: 'INR',
       transaction_type: 'WIRE_TRANSFER',
     },
@@ -170,7 +179,16 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
 ];
 
 export const DemoControl: React.FC = () => {
-  const { state, startDemo, stopSession, reset, busy } = useSession();
+  const {
+    state,
+    startDemo,
+    stopSession,
+    reset,
+    busy,
+    audioPlaying,
+    audioMuted,
+    toggleMute,
+  } = useSession();
   const [selectedId, setSelectedId] = useState<string>(MANDATED_SCENARIOS[0].id);
   const [policyProfile, setPolicyProfile] = useState<'STANDARD' | 'STRICT' | 'LOW_FRICTION'>('STANDARD');
 
@@ -186,7 +204,7 @@ export const DemoControl: React.FC = () => {
     };
 
     void startDemo({
-      fixture: scenario.fixture as ReplayFixture,
+      fixture: scenario.fixture,
       callerRef: scenario.callerRef,
       scenarioId: scenario.id,
       context: contextWithProfile,
@@ -203,7 +221,6 @@ export const DemoControl: React.FC = () => {
       aria-label="Demo Mode Control Panel"
       className="relative overflow-hidden border border-border bg-surface p-5 transition-all"
     >
-
       {/* Hidden select dropdown to ensure 100% automated test suite compatibility */}
       <select
         id="scenario"
@@ -239,8 +256,19 @@ export const DemoControl: React.FC = () => {
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls & Live Audio Playback Indicator */}
         <div className="flex items-center gap-2.5">
+          {audioPlaying && (
+            <button
+              type="button"
+              onClick={toggleMute}
+              title={audioMuted ? 'Unmute Call Audio' : 'Mute Call Audio'}
+              className="inline-flex items-center gap-1.5 border border-emerald-500/50 bg-emerald-500/10 px-3 py-2 text-xs font-mono font-bold text-emerald-700 animate-pulse"
+            >
+              {audioMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              <span>{audioMuted ? 'AUDIO MUTED' : 'PLAYING CALL AUDIO'}</span>
+            </button>
+          )}
           {finished ? (
             <button
               type="button"

@@ -104,9 +104,8 @@ class StandardBeliefAccumulator(BeliefAccumulator):
         
         for eid, base_w in self.config.expert_weights.items():
             status = evidence.expert_statuses.get(eid)
-            # Only exclude experts that explicitly ABSTAIN (e.g. un-enrolled caller).
-            # If an expert was expected but MODEL_UNAVAILABLE or ERROR, confidence must drop.
-            if status != ExpertStatus.ABSTAIN:
+            # Only exclude experts that explicitly ABSTAIN (e.g. un-enrolled caller) or DEFERRED by scope.
+            if status != ExpertStatus.ABSTAIN and status != ExpertStatus.DEFERRED:
                 w_base_sum += base_w
                 if status == ExpertStatus.OK:
                     c_i = evidence.expert_confidences.get(eid, 1.0)

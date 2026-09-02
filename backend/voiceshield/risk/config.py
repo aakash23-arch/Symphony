@@ -153,7 +153,7 @@ class ConfidenceParams:
     quality_weight: float = 0.15
 
     #: Below this the engine must not assert a scored band (fail-safe P5).
-    min_actionable: float = 0.40
+    min_actionable: float = 0.35
 
     #: Context completeness below this marks the assessment context-degraded.
     min_context_completeness: float = 0.25

@@ -315,16 +315,21 @@ class AnalysisOrchestrator:
         """Drain the frame queue, running the fast and slow clocks."""
         state = self.store.get(session_id)
         try:
+            last_processed_frame = None
             while True:
                 frame = await state.frame_queue.get()
                 if frame is _SENTINEL:
                     break
+                last_processed_frame = frame
                 if self._should_decimate(state):
                     state.frames_decimated += 1
                     continue
                 await self._fast_tick(state, frame)
                 if self._slow_due(state, frame):
                     await self._slow_tick(state, frame)
+
+            if state.latest_decision is None and state.latest_belief_fast is not None and last_processed_frame is not None:
+                await self._slow_tick(state, last_processed_frame)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # noqa: BLE001 - a worker crash must not be silent

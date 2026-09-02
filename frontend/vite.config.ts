@@ -15,6 +15,7 @@ export default defineConfig({
       '/ws': { target: BACKEND, changeOrigin: true, ws: true },
       // Spec §12 surface, kept for the audio ingress socket.
       '/v1': { target: BACKEND, changeOrigin: true, ws: true },
+      '/demo': { target: BACKEND, changeOrigin: true },
       '/health': { target: BACKEND, changeOrigin: true },
     },
   },

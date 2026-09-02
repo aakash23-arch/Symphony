@@ -63,7 +63,7 @@ async def verify_clean_start():
             sid = s.get("scenario_id")
             title = s.get("title")
             fixture = s.get("audio_fixture")
-            expected = s.get("expected_outcome", {}).get("decision_label", "N/A")
+            expected = (s.get("expected_outcome") or {}).get("decision_label", "N/A")
             print(f"     * [{sid}] {title} | Fixture: {fixture}.wav (Expected: {expected})")
 
         # 4. Launch Case 01 (Authentic Human Voice)

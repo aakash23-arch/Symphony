@@ -261,6 +261,13 @@ def create_app() -> FastAPI:
     app.include_router(ws_events_router)
     app.include_router(ws_session_router)
 
+    # Mount static demo audio files directory for real-time browser playback
+    audio_dir = Path("demo/audio")
+    if audio_dir.exists():
+        from fastapi.staticfiles import StaticFiles
+        app.mount("/demo/audio", StaticFiles(directory=str(audio_dir)), name="demo_audio")
+        app.mount("/api/demo/audio", StaticFiles(directory=str(audio_dir)), name="api_demo_audio")
+
     return app
 
 

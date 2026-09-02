@@ -84,6 +84,12 @@ export interface SessionContextValue {
   holdTransaction: (reason: string) => Promise<void>;
   releaseTransaction: (verificationReference: string, approve: boolean) => Promise<void>;
   busy: boolean;
+  audioPlaying: boolean;
+  audioMuted: boolean;
+  toggleMute: () => void;
+  audioCurrentTime: number;
+  audioDuration: number;
+  audioAnalyserRef: React.RefObject<AnalyserNode | null>;
 }
 
 export const SessionContext = createContext<SessionContextValue | null>(null);
@@ -94,11 +100,30 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [healthError, setHealthError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
+  const [audioPlaying, setAudioPlaying] = React.useState(false);
+  const [audioMuted, setAudioMuted] = React.useState(false);
+  const [audioCurrentTime, setAudioCurrentTime] = React.useState(0);
+  const [audioDuration, setAudioDuration] = React.useState(0);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+
   const socketRef = useRef<SessionSocket | null>(null);
   const refreshTimer = useRef<number | undefined>(undefined);
   const abortRef = useRef<AbortController | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
+
+  const toggleMute = useCallback(() => {
+    setAudioMuted((prev) => {
+      const next = !prev;
+      if (audioRef.current) {
+        audioRef.current.muted = next;
+      }
+      return next;
+    });
+  }, []);
 
 
   useEffect(() => {
@@ -403,6 +428,81 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         openSocket(sessionId);
         await api.startSession(sessionId);
         await api.startReplay(sessionId, options.fixture);
+
+        // Initiate real audio playback in the browser for scenario call evaluation
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+        try {
+          const audio = new Audio(`/api/demo/audio/${options.fixture}.wav`);
+          audio.muted = audioMuted;
+          audio.crossOrigin = 'anonymous';
+
+          setAudioCurrentTime(0);
+          setAudioDuration(0);
+
+          audio.ontimeupdate = () => {
+            if (mountedRef.current) {
+              setAudioCurrentTime(audio.currentTime);
+              if (audio.duration && !isNaN(audio.duration)) {
+                setAudioDuration(audio.duration);
+              }
+            }
+          };
+
+          try {
+            const AudioContextClass =
+              window.AudioContext ||
+              (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+            if (AudioContextClass) {
+              if (!audioContextRef.current) {
+                audioContextRef.current = new AudioContextClass();
+              }
+              const ctx = audioContextRef.current;
+              if (ctx.state === 'suspended') {
+                void ctx.resume();
+              }
+              const analyser = ctx.createAnalyser();
+              analyser.fftSize = 64;
+              analyser.smoothingTimeConstant = 0.8;
+
+              const source = ctx.createMediaElementSource(audio);
+              source.connect(analyser);
+              analyser.connect(ctx.destination);
+
+              analyserRef.current = analyser;
+            }
+          } catch (err) {
+            console.warn('Web Audio API Analyser setup notice:', err);
+          }
+
+          audio.onerror = () => {
+            if (mountedRef.current) {
+              setAudioPlaying(false);
+              safeDispatch({ type: 'AUDIO_FINISHED' });
+            }
+          };
+          audio.onended = () => {
+            if (mountedRef.current) {
+              setAudioPlaying(false);
+              safeDispatch({ type: 'AUDIO_FINISHED' });
+            }
+          };
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                if (mountedRef.current) setAudioPlaying(true);
+              })
+              .catch(() => {
+                if (mountedRef.current) setAudioPlaying(false);
+              });
+          }
+          audioRef.current = audio;
+        } catch {
+          if (mountedRef.current) setAudioPlaying(false);
+        }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Could not start the session';
         const code = error instanceof api.ApiError ? error.code : 'START_FAILED';
@@ -411,11 +511,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (mountedRef.current) setBusy(false);
       }
     },
-    [openSocket, safeDispatch],
+    [openSocket, safeDispatch, audioMuted],
   );
 
 
+
+
   const stopSession = useCallback(async () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setAudioPlaying(false);
+
     const sessionId = sessionIdRef.current;
     if (!sessionId) return;
     setBusy(true);
@@ -431,6 +539,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [refresh]);
 
   const reset = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setAudioPlaying(false);
     socketRef.current?.close();
     socketRef.current = null;
     abortRef.current?.abort();
@@ -495,8 +608,29 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       holdTransaction,
       releaseTransaction,
       busy,
+      audioPlaying,
+      audioMuted,
+      toggleMute,
+      audioCurrentTime,
+      audioDuration,
+      audioAnalyserRef: analyserRef,
     }),
-    [state, health, healthError, startDemo, stopSession, reset, holdTransaction, releaseTransaction, busy],
+    [
+      state,
+      health,
+      healthError,
+      startDemo,
+      stopSession,
+      reset,
+      holdTransaction,
+      releaseTransaction,
+      busy,
+      audioPlaying,
+      audioMuted,
+      toggleMute,
+      audioCurrentTime,
+      audioDuration,
+    ],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

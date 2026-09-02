@@ -21,18 +21,19 @@ export interface DecisionPipelineFlowProps {
  *  - Stage 5 (ACTION): Active when security directive is confirmed
  */
 export const DecisionPipelineFlow: React.FC<DecisionPipelineFlowProps> = ({ className }) => {
-  const { state } = useSession();
+  const { state, audioPlaying } = useSession();
   const decision = state.decision;
   const isStreaming = Boolean(state.sessionId && state.sourceType);
+  const isAudioActive = audioPlaying || state.isAnalyzing;
 
-  // Compute active stage index (1 to 5)
-  const activeStage = decision
+  // Compute active stage index (1 to 5):
+  // While audio is actively playing, stages process live frames continuously.
+  // Stage 5 (ACTION) is finalized only after audio playback completes or session stops.
+  const activeStage = !isAudioActive && decision
     ? 5
-    : state.evidence
-    ? 3
+    : isAudioActive
+    ? 2 + (state.framesScored % 3)
     : isStreaming
-    ? 2
-    : state.sessionId
     ? 1
     : 0;
 
@@ -126,7 +127,11 @@ export const DecisionPipelineFlow: React.FC<DecisionPipelineFlowProps> = ({ clas
               </div>
 
               <div className="mt-4 border-t border-border/40 pt-2 text-[0.625rem] uppercase">
-                {isCurrent ? (
+                {isAudioActive && isCurrent ? (
+                  <span className="text-emerald-600 font-bold animate-pulse">● EVALUATING LIVE</span>
+                ) : !isAudioActive && isPassed ? (
+                  <span className="text-emerald-600 font-semibold">✓ COMPLETED</span>
+                ) : isCurrent ? (
                   <span className="text-fg-primary font-bold animate-pulse">● EXECUTING NOW</span>
                 ) : isPassed ? (
                   <span className="text-emerald-600 font-semibold">✓ COMPLETED</span>

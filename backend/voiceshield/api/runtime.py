@@ -81,9 +81,12 @@ class L1Runtime:
         self.transactions = TransactionSimulator()
         #: L1 -> L2 -> L3 -> L4 -> L5 wiring. EventBus satisfies the EventSink
         #: protocol structurally, so orchestration never imports this module.
+        from voiceshield.models.bootstrap import register_experts
+
         self.orchestrator = AnalysisOrchestrator(
             events=self.events, transactions=self.transactions
         )
+        register_experts(self.orchestrator.registry)
         #: Strong references to detached background tasks.
         #:
         #: asyncio only holds a WEAK reference to a task, so a fire-and-forget

@@ -13,7 +13,7 @@ import { TransactionPanel } from '../panels/TransactionPanel';
 import type { TimelineEntry } from '../types/contracts';
 
 export const LiveDetectionSection: React.FC = () => {
-  const { state, reset } = useSession();
+  const { state, reset, audioPlaying } = useSession();
   const [activeTab, setActiveTab] = React.useState<'overview' | 'dossier'>('overview');
   
   const isStreaming = Boolean(state.sessionId && state.sourceType);
@@ -56,9 +56,14 @@ export const LiveDetectionSection: React.FC = () => {
                 <div className="border border-border p-4 bg-surface shadow-sm">
                   <div className="text-fg-tertiary mb-2">SIGNAL STREAM</div>
                   <div className="text-fg font-bold flex items-center gap-2">
-                    {isStreaming && <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />}
-                    {isStreaming ? `FRAMES: ${state.framesScored}` : 'COMPLETED'}
-                  </div>
+                    {isStreaming && (audioPlaying || state.isAnalyzing) && (
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    )}
+                    {isStreaming
+                      ? audioPlaying || state.isAnalyzing
+                        ? 'ACTIVE STREAMING'
+                        : 'STREAM COMPLETE'
+                      : 'OFFLINE'}</div>
                 </div>
 
                 <div className="border border-border p-4 bg-surface shadow-sm">

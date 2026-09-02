@@ -15,6 +15,7 @@
 
 import type {
   DemoTransaction,
+  RiskAssessment,
   RiskDecision,
   SessionEvidenceResponse,
   SessionLifecycleState,
@@ -46,6 +47,17 @@ export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 export const TIMELINE_CAP = 200;
 
+export interface LiveAnalysisPoint {
+  frameId: number;
+  tEnd: number;
+  spoofProbability: number | null;
+  confidence: number;
+  band: string;
+  riskScore?: number;
+  riskBand?: string;
+  action?: string;
+}
+
 export interface SessionState {
   sessionId: string | null;
   sessionState: SessionLifecycleState | null;
@@ -68,6 +80,9 @@ export interface SessionState {
 
   belief: VoiceBelief | null;
   beliefLive: BeliefUpdate | null;
+
+  liveAnalysisPoints: LiveAnalysisPoint[];
+  isAnalyzing: boolean;
 
   evidence: SessionEvidenceResponse | null;
   evidenceStatus: LoadStatus;
@@ -109,6 +124,8 @@ export const initialSessionState: SessionState = {
   riskMessage: null,
   belief: null,
   beliefLive: null,
+  liveAnalysisPoints: [],
+  isAnalyzing: false,
   evidence: null,
   evidenceStatus: 'idle',
   lastFrame: null,
@@ -169,6 +186,10 @@ export type SessionAction =
     }
   | { type: 'ERROR'; code: string; message: string; retriable: boolean }
   | { type: 'CLEAR_ERROR' }
+  | { type: 'AUDIO_FINISHED' }
+  | { type: 'ERROR'; code: string; message: string; retriable: boolean }
+  | { type: 'CLEAR_ERROR' }
+  | { type: 'AUDIO_FINISHED' }
   | { type: 'RESYNCED' };
 
 /** Merge timeline entries by seq: dedupe, sort ascending, cap at TIMELINE_CAP. */
@@ -212,7 +233,9 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       };
 
     case 'SESSION_RESET':
-      return { ...initialSessionState };
+      return {
+        ...initialSessionState,
+      };
 
     case 'CONNECTION':
       return {
@@ -259,6 +282,8 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         sourceType: action.data.source_type,
         scenarioId: action.data.scenario_id,
         startedAt: action.data.started_at,
+        isAnalyzing: true,
+        liveAnalysisPoints: [],
       };
 
     case 'SESSION_STOPPED':
@@ -269,6 +294,13 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
         framesPublished: action.data.frames_published,
         connection: 'closed_terminal',
         stoppedAt: action.at,
+        isAnalyzing: false,
+      };
+
+    case 'AUDIO_FINISHED':
+      return {
+        ...state,
+        isAnalyzing: false,
       };
 
     case 'FRAME': {
@@ -282,55 +314,97 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       };
     }
 
-    case 'BELIEF_PATCH':
-      return { ...state, ...trackSeq(state, action.seq, action.at), beliefLive: action.data };
+    case 'BELIEF_PATCH': {
+      const b = action.data;
+      const newPoint: LiveAnalysisPoint = {
+        frameId: b.frame_id,
+        tEnd: b.t_end,
+        spoofProbability: b.P_spoof,
+        confidence: b.confidence,
+        band: b.band,
+        riskScore: state.decision?.risk.risk_score,
+        riskBand: state.decision?.risk.risk_band,
+        action: state.decision?.action,
+      };
+      const existingIdx = state.liveAnalysisPoints.findIndex((p) => p.frameId === b.frame_id);
+      let updatedPoints: LiveAnalysisPoint[];
+      if (existingIdx >= 0) {
+        updatedPoints = [...state.liveAnalysisPoints];
+        updatedPoints[existingIdx] = { ...updatedPoints[existingIdx], ...newPoint };
+      } else {
+        updatedPoints = [...state.liveAnalysisPoints, newPoint];
+      }
+      if (updatedPoints.length > 60) {
+        updatedPoints = updatedPoints.slice(updatedPoints.length - 60);
+      }
+      return {
+        ...state,
+        ...trackSeq(state, action.seq, action.at),
+        beliefLive: action.data,
+        liveAnalysisPoints: updatedPoints,
+      };
+    }
 
     case 'RISK_PATCH': {
       const u = action.data;
-      // Patch the scalars onto the existing decision. If none exists yet the
-      // thin payload cannot construct a full RiskDecision, so leave it null and
-      // let the REST refetch supply top_factors and evidence refs.
-      const decision: RiskDecision | null = state.decision
-        ? {
-            ...state.decision,
-            risk: {
-              ...state.decision.risk,
-              risk_score: u.risk_score,
-              risk_band: u.risk_band,
-              risk_confidence: u.risk_confidence,
-              score_semantics: u.score_semantics,
-              score_label: u.score_label,
-              timestamp: u.timestamp,
-            },
-            action: u.action,
-            matched_policy: u.matched_policy,
-            reason_codes: u.reason_codes,
-            fail_safe_engaged: u.fail_safe_engaged,
-            policy_version: u.policy_version,
-            timestamp: u.timestamp,
-          }
-        : null;
+      const riskAssessment: RiskAssessment = {
+        session_id: state.sessionId ?? '',
+        risk_score: u.risk_score,
+        risk_confidence: u.risk_confidence,
+        risk_band: u.risk_band,
+        contributions: state.decision?.risk.contributions ?? [],
+        context_degraded: state.decision?.risk.context_degraded ?? false,
+        score_semantics: u.score_semantics,
+        score_label: u.score_label,
+        timestamp: u.timestamp,
+      };
+
+      const decision: RiskDecision = {
+        session_id: state.sessionId ?? '',
+        risk: riskAssessment,
+        action: u.action,
+        matched_policy: u.matched_policy,
+        transaction_tier: state.decision?.transaction_tier ?? ('STANDARD' as any),
+        reason_codes: u.reason_codes,
+        top_factors: state.decision?.top_factors ?? [],
+        evidence_refs: state.decision?.evidence_refs ?? [],
+        recommended_verifications: state.decision?.recommended_verifications ?? [],
+        fail_safe_engaged: u.fail_safe_engaged,
+        policy_version: u.policy_version,
+        timestamp: u.timestamp,
+      };
+
+      // Associate risk information with the most recent live analysis points
+      const updatedPoints = state.liveAnalysisPoints.map((pt, idx) => {
+        if (idx === state.liveAnalysisPoints.length - 1) {
+          return { ...pt, riskScore: u.risk_score, riskBand: u.risk_band, action: u.action };
+        }
+        return pt;
+      });
+
       return {
         ...state,
         ...trackSeq(state, action.seq, action.at),
         decision,
-        riskStatus: decision ? 'ready' : 'awaiting_first',
+        riskStatus: 'ready',
+        liveAnalysisPoints: updatedPoints,
       };
     }
 
-    case 'DECISION_PATCH':
+    case 'DECISION_PATCH': {
+      const d = action.data;
+      if (!state.decision) return state;
       return {
         ...state,
         ...trackSeq(state, action.seq, action.at),
-        decision: state.decision
-          ? {
-              ...state.decision,
-              action: action.data.action,
-              matched_policy: action.data.matched_policy,
-              recommended_verifications: action.data.recommended_verifications,
-            }
-          : null,
+        decision: {
+          ...state.decision,
+          action: d.action,
+          matched_policy: d.matched_policy,
+          recommended_verifications: d.recommended_verifications,
+        },
       };
+    }
 
     case 'TIMELINE_APPEND':
       return {

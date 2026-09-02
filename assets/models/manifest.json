@@ -1,15 +1,22 @@
 {
-  "generated_at": "2026-08-28T06:28:30.860436+00:00",
+  "generated_at": "2026-09-02T17:10:33.980369+00:00",
   "models": {
     "wav2vec2_deepfake": {
       "family": "wav2vec2-seq-cls",
       "files": {
         ".cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
-        ".cache/huggingface/download/README.md.metadata": "5918f33d833a33ec9b502c393a1fcfecb992286930993aa31b36861d596f18c5",
-        ".cache/huggingface/download/config.json.metadata": "095a6c0fcb617a2b3a0d572e2c44df986e935cfd223bc3aa909c0edfda133f47",
-        ".cache/huggingface/download/model.safetensors.metadata": "d49f89de908f8a8aa694371418c9bea08e120b8a5d94a5fc07a8e79df8e1c6d7",
-        ".cache/huggingface/download/preprocessor_config.json.metadata": "3865952d62070556e011f2aaa0d4f13af135c2d447526a3e3d8743482552516a",
-        ".cache/huggingface/download/training_args.bin.metadata": "4b199a6fc9d8a61d8b70e56fa374f5d753cf09a5736fd1c525c2c1d5454ef490",
+        ".cache/huggingface/CACHEDIR.TAG": "f6572428f6d5e1575e73a1502895a8731f10757dfbb634909c6e154b849af91d",
+        ".cache/huggingface/download/README.md.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/README.md.metadata": "10c907b87fdf8425e1a5ccff843a7aa0d86ee5b2853ca6dbf500e2b7d6f64849",
+        ".cache/huggingface/download/config.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/config.json.metadata": "7dc1991b6f902f61f0c8e34fab2c2d2e226effafb759a147e493d6890b3a07af",
+        ".cache/huggingface/download/model.safetensors.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/model.safetensors.metadata": "6f240f028d3d8a37ae61acf29ca015da92cad75a6b4e7a9c0745df330914033c",
+        ".cache/huggingface/download/preprocessor_config.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/preprocessor_config.json.metadata": "bd142e7e9161e71c281459ea82189f1d66fb3753465001776301c0399ae5322e",
+        ".cache/huggingface/download/training_args.bin.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/training_args.bin.metadata": "48c9c16faa33aae2ad7b2bcfd14272d2b34f623e4bd000baa7e47d3aa40e3ddf",
+        ".cache/huggingface/trees/e4d9874b493362149cec96ced85f00b00b1a04c0.json": "b5e5595e29a1d45c44f9104b26d935df7ad7e152cd3e2368e7abdf3b82cea4e5",
         "README.md": "03455ee0faaeeb7d50c9d89d2d68e67a0398d168a01eb38d0f6d363a177df459",
         "config.json": "137fdeaec6596cae32e126b1672657a49f5c3da45296584606807c1263a09b43",
         "model.safetensors": "6eaf9d5638b6e32ffa93ba784523d664d37d4105021e83dedcdd5f99a2505f25",
@@ -23,16 +30,22 @@
       "repo_id": "mo-thecreator/Deepfake-audio-detection",
       "revision": "e4d9874b493362149cec96ced85f00b00b1a04c0",
       "substitution_note": "The specification (\u00a76.2, C-21) names a RawNet2-class raw-waveform anti-spoof model. No RawNet2 checkpoint is available in a loadable form here. This is a wav2vec2 sequence classifier fine-tuned for deepfake audio detection. IT IS NOT RawNet2 AND IT IS NOT AASIST. It occupies E2 because it consumes raw waveform, matching C-21's declared input; E1 (AASIST, spectral input) remains unavailable.",
-      "total_bytes": 378312462
+      "total_bytes": 378315470
     },
     "wavlm_base_plus_sv": {
       "family": "wavlm-xvector",
       "files": {
         ".cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
-        ".cache/huggingface/download/README.md.metadata": "2aa359088c6e2ddf6a73ed0cdae30824650139897df67e91b8b2ae63bf5a7323",
-        ".cache/huggingface/download/config.json.metadata": "eaac3e5dad9758a1982581bd2e888c12f879188239b1b5b3d467d13681db93ec",
-        ".cache/huggingface/download/preprocessor_config.json.metadata": "b1155e189dfc69b73f70e6529abdc99147ec0a1d3f82e6ba31f69b708ebbc151",
-        ".cache/huggingface/download/pytorch_model.bin.metadata": "360fd751be8f14f8ffaa21ac8022e8e72cc37f46780288e907d6d05b8e3cb88c",
+        ".cache/huggingface/CACHEDIR.TAG": "f6572428f6d5e1575e73a1502895a8731f10757dfbb634909c6e154b849af91d",
+        ".cache/huggingface/download/README.md.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/README.md.metadata": "9230bb6b8b87fced4726fd66fd5a4fed50b9d85cd3995764927b9ef91cbbeb66",
+        ".cache/huggingface/download/config.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/config.json.metadata": "37ae746fc617338c1a4d62bc97ed45e3f42dbe9a1b4aa6369317ceaf6a3919dc",
+        ".cache/huggingface/download/preprocessor_config.json.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/preprocessor_config.json.metadata": "c95141a8183865bd3f82b67612203220992f98851b61a908d2ddcb62792201ac",
+        ".cache/huggingface/download/pytorch_model.bin.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".cache/huggingface/download/pytorch_model.bin.metadata": "aac9ee7b7d2d07835d37e433102690fd48de77e97db2475357e3403fb415c6a4",
+        ".cache/huggingface/trees/feb593a6c23c1cc3d9510425c29b0a14d2b07b1e.json": "8ece59e9b0b8345cbd97312a5731dcef4d7228f9cb09f778d0eb9f119d130feb",
         "README.md": "97f5513cde351b3adb4e182b60ec23154dadba7ca83e667ceace237177855b8e",
         "config.json": "c6ac8c0ce55b18d4612677931036fe5ce78093e87361c552a173f00a0bb07514",
         "preprocessor_config.json": "99272fe8ccfab114b68b478681ea47ee3a1ce62bb788cb92dd6e4f69fb1f1da2",
@@ -45,7 +58,7 @@
       "repo_id": "microsoft/wavlm-base-plus-sv",
       "revision": "feb593a6c23c1cc3d9510425c29b0a14d2b07b1e",
       "substitution_note": "The specification (\u00a76.2, C-23) names an ECAPA-TDNN speaker encoder via SpeechBrain. SpeechBrain is not installable in this environment (it requires torchaudio, which is absent), so E4 uses WavLMForXVector instead. Embedding dimensionality differs: 512-d here vs 192-d for ECAPA.",
-      "total_bytes": 404610397
+      "total_bytes": 404611326
     }
   },
   "schema_version": 1
