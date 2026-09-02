@@ -262,10 +262,13 @@ class StandardRiskEngine(RiskEngine):
         try:
             return self._assess(session_id, belief, context, now)
         except Exception as exc:  # noqa: BLE001 - deliberate fail-safe boundary
+            import traceback
+            tb = traceback.format_exc()
             logger.error(
                 "risk evaluation failed; falling back to UNCERTAIN",
-                extra={"extra_fields": {"session_id": session_id, "error": repr(exc)}},
+                extra={"extra_fields": {"session_id": session_id, "error": repr(exc), "traceback": tb}},
             )
+            print(f"EVALUATION_ERROR TRACEBACK: {tb}")
             return self._fail_safe_decision(session_id, now, f"EVALUATION_ERROR: {type(exc).__name__}")
 
     def _assess(

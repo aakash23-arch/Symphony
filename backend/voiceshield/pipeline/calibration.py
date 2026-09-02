@@ -14,7 +14,7 @@ class ConfidenceCalibrator:
         evidence: ForensicEvidence,
         preprocessing: PreprocessingSummary,
     ) -> CalibratedScore:
-        """Apply Platt/Sigmoid calibration with SNR-conditioned shrinkage."""
+        """Apply quality-conditioned probability adjustment and uncertainty range."""
         p_raw = fused.fused_p_synthetic
         conf_raw = fused.raw_confidence
 

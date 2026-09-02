@@ -6,7 +6,7 @@ import sqlite3
 import sys
 from datetime import datetime, timezone
 from typing import Any, Dict
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from voiceshield.config import settings
@@ -205,7 +205,7 @@ async def get_health() -> HealthResponse:
     status_code=status.HTTP_200_OK,
     summary="API SIH Demo Readiness Check",
 )
-async def get_readiness() -> ReadinessResponse:
+async def get_readiness(response: Response) -> ReadinessResponse:
     """Verify preloaded models, demo audio assets, and operational pipeline readiness."""
     from pathlib import Path
     import soundfile as sf
@@ -264,6 +264,8 @@ async def get_readiness() -> ReadinessResponse:
             assets_ok = False
 
     is_ready = models_ok and assets_ok
+    if not is_ready:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
     return ReadinessResponse(
         status="ready" if is_ready else "not_ready",

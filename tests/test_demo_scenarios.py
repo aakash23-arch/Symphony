@@ -28,9 +28,9 @@ from voiceshield.contracts import (
 )
 from voiceshield.demo.engine import (
     MANDATED_SCENARIOS,
-    SCENARIO_1_GENUINE_EXECUTIVE,
-    SCENARIO_2_AI_IMPERSONATION,
-    SCENARIO_3_POOR_AUDIO,
+    CASE_01_AUTHENTIC,
+    CASE_02_CLONED,
+    CASE_03_ADVERSARIAL,
     ScenarioDefinition,
     StandardScenarioEngine,
     default_scenario_engine,
@@ -59,25 +59,25 @@ class TestScenarioCatalogAndImmutability:
         scenarios = engine.list_scenarios()
         scenario_ids = [s["scenario_id"] for s in scenarios]
 
-        assert "genuine-executive" in scenario_ids
-        assert "ai-impersonation" in scenario_ids
-        assert "poor-audio" in scenario_ids
+        assert "case-01-authentic" in scenario_ids
+        assert "case-02-cloned" in scenario_ids
+        assert "case-03-adversarial" in scenario_ids
 
     def test_mandated_scenarios_specify_expected_amounts_and_callers(self):
-        s1 = default_scenario_engine.get_scenario("genuine-executive")
+        s1 = default_scenario_engine.get_scenario("case-01-authentic")
         assert s1 is not None
         assert "CFO" in s1.caller_name
         assert s1.transaction["amount"] == "2500000.00"
         assert s1.transaction["currency"] == "INR"
 
-        s2 = default_scenario_engine.get_scenario("ai-impersonation")
+        s2 = default_scenario_engine.get_scenario("case-02-cloned")
         assert s2 is not None
         assert "CFO" in s2.caller_name
         assert s2.transaction["amount"] == "2500000.00"
 
-        s3 = default_scenario_engine.get_scenario("poor-audio")
+        s3 = default_scenario_engine.get_scenario("case-03-adversarial")
         assert s3 is not None
-        assert s3.audio_fixture == "noisy_speechlike"
+        assert s3.audio_fixture == "case_03_adversarial_manipulated"
 
     def test_scenario_context_cannot_contain_scoring_fields(self):
         """A scenario that smuggled a score would compromise the demo invariant."""
@@ -105,7 +105,7 @@ class TestScenarioDecisionsViaRealPipeline:
         risk_engine = clean_runtime.orchestrator.risk
         context_engine = clean_runtime.orchestrator.context_engine
 
-        scenario = SCENARIO_1_GENUINE_EXECUTIVE
+        scenario = CASE_01_AUTHENTIC
         session_id = "s_demo_gen_exec"
 
         # 1. Ingest scenario context into ContextEngine (real pipeline)
@@ -140,7 +140,7 @@ class TestScenarioDecisionsViaRealPipeline:
         risk_engine = clean_runtime.orchestrator.risk
         context_engine = clean_runtime.orchestrator.context_engine
 
-        scenario = SCENARIO_2_AI_IMPERSONATION
+        scenario = CASE_02_CLONED
         session_id = "s_demo_ai_spoof"
 
         # 1. Ingest scenario context (identity mismatch, VoIP, urgent, new offshore beneficiary)
@@ -183,7 +183,7 @@ class TestScenarioDecisionsViaRealPipeline:
         risk_engine = clean_runtime.orchestrator.risk
         context_engine = clean_runtime.orchestrator.context_engine
 
-        scenario = SCENARIO_3_POOR_AUDIO
+        scenario = CASE_03_ADVERSARIAL
         session_id = "s_demo_poor_audio"
 
         # 1. Ingest scenario context
@@ -227,10 +227,10 @@ class TestDemoControlAPI:
             assert "DEMO" in body["environment"].upper()
 
     def test_get_scenario_by_id(self, api):
-        response = api.get("/api/demo/scenarios/genuine-executive")
+        response = api.get("/api/demo/scenarios/case-01-authentic")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        assert data["scenario_id"] == "genuine-executive"
+        assert data["scenario_id"] == "case-01-authentic"
         assert "CFO" in data["caller_name"]
         assert data["transaction"]["amount"] == "2500000.00"
 
@@ -240,14 +240,14 @@ class TestDemoControlAPI:
 
     def test_start_named_scenario_creates_session_and_transaction(self, api):
         response = api.post(
-            "/api/demo/scenarios/genuine-executive/start",
+            "/api/demo/scenarios/case-01-authentic/start",
             params={"speed": 64.0},
         )
         assert response.status_code == status.HTTP_202_ACCEPTED
         body = response.json()
         session_id = body["session_id"]
         assert session_id
-        assert body["scenario_id"] == "genuine-executive"
+        assert body["scenario_id"] == "case-01-authentic"
         assert body["transaction_id"] is not None
 
         # Verify transaction was created in transaction simulator

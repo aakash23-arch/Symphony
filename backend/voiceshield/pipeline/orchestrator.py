@@ -423,6 +423,17 @@ class InferenceOrchestrator:
             clipping_detected=val_report.clipping_ratio > 0.01,
             peak_amplitude_dbfs=float(prep_summary.peak_amplitude),
         )
+        from voiceshield.obs.logging import get_logger
+        pipeline_logger = get_logger("voiceshield.pipeline.orchestrator")
+        pipeline_logger.info(
+            "Inference pipeline completed",
+            extra={"extra_fields": {
+                "session_id": session_id,
+                "execution_time_ms": exec_time,
+                "risk_band": decision.risk_band.value,
+                "models_utilized": ["wav2vec2_deepfake", "wavlm_base_plus_sv", "dsp_forensics", "pipeline_orchestrator"]
+            }}
+        )
 
         return InferenceResponse(
             request_id=session_id,

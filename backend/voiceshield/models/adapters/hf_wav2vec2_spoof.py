@@ -14,10 +14,10 @@ SUBSTITUTION NOTICE
     ``ModelDescriptor.is_substitution`` carries this fact in machine-readable
     form so it reaches the availability report and cannot be lost.
 
-NO ACCURACY CLAIM
-    No accuracy, EER or detection rate is asserted for this model. No evaluation
-    set exists in this workspace. The probability it emits is the model's raw
-    output, uncalibrated; L4 treats it as a prior-weighted expert, not as truth.
+NEURAL ANTI-SPOOFING SCORE
+    Provides a neural anti-spoofing score. No generic accuracy or detection rate is asserted.
+    The probability it emits is the model's raw output, uncalibrated; L4 treats it as a
+    quality-weighted expert, not as absolute truth.
 """
 
 from __future__ import annotations

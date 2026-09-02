@@ -79,7 +79,6 @@ export interface SessionContextValue {
   health: HealthResponse | null;
   healthError: string | null;
   startDemo: (options: StartOptions) => Promise<void>;
-  startMic: (options: StartMicOptions) => Promise<void>;
   stopSession: () => Promise<void>;
   reset: () => void;
   holdTransaction: (reason: string) => Promise<void>;
@@ -101,43 +100,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const sessionIdRef = useRef<string | null>(null);
   const mountedRef = useRef(true);
 
-  // Live microphone ingress references
-  const micSocketRef = useRef<WebSocket | null>(null);
-  const micStreamRef = useRef<MediaStream | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
-
-  const cleanupMic = useCallback(() => {
-    if (processorRef.current) {
-      try {
-        processorRef.current.disconnect();
-      } catch {}
-      processorRef.current = null;
-    }
-    if (audioCtxRef.current) {
-      try {
-        void audioCtxRef.current.close();
-      } catch {}
-      audioCtxRef.current = null;
-    }
-    if (micStreamRef.current) {
-      try {
-        micStreamRef.current.getTracks().forEach((track) => track.stop());
-      } catch {}
-      micStreamRef.current = null;
-    }
-    if (micSocketRef.current) {
-      try {
-        if (
-          micSocketRef.current.readyState === WebSocket.OPEN ||
-          micSocketRef.current.readyState === WebSocket.CONNECTING
-        ) {
-          micSocketRef.current.close(1000, 'mic session closed');
-        }
-      } catch {}
-      micSocketRef.current = null;
-    }
-  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -393,12 +355,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(
     () => () => {
-      cleanupMic();
       socketRef.current?.close();
       abortRef.current?.abort();
       if (refreshTimer.current !== undefined) window.clearTimeout(refreshTimer.current);
     },
-    [cleanupMic],
+    [],
   );
 
   // --- actions ----------------------------------------------------------------
@@ -451,114 +412,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (mountedRef.current) setBusy(false);
       }
     },
-    [cleanupMic, openSocket, safeDispatch],
+    [openSocket, safeDispatch],
   );
 
-  const startMic = useCallback(
-    async (options: StartMicOptions) => {
-      setBusy(true);
-      try {
-        cleanupMic();
-        safeDispatch({ type: 'SESSION_RESET' });
-
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            sampleRate: 16000,
-            channelCount: 1,
-            echoCancellation: true,
-            noiseSuppression: false,
-          },
-        });
-        micStreamRef.current = stream;
-
-        const callerRef = options.callerRef ?? '+91 98765 43210 (Live Mic)';
-        const created = await api.createSession({
-          source_type: 'mic',
-          caller_ref: callerRef,
-        });
-        const sessionId = created.session_id;
-        sessionIdRef.current = sessionId;
-
-        safeDispatch({
-          type: 'SESSION_CREATED',
-          sessionId,
-          sourceType: 'mic',
-          scenarioId: 'live-mic',
-          callerRef,
-        });
-
-        if (options.transaction) {
-          const createdTx = await api.createTransaction({
-            ...options.transaction,
-            session_id: sessionId,
-          });
-          safeDispatch({ type: 'TRANSACTION_LOADED', transaction: createdTx.transaction });
-        }
-
-        if (options.context) {
-          await api.postContext(sessionId, options.context);
-        }
-
-        openSocket(sessionId);
-        await api.startSession(sessionId);
-
-        // Open Audio Ingress WebSocket
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const audioWsUrl = `${protocol}//${window.location.host}/v1/sessions/${encodeURIComponent(sessionId)}/audio`;
-        const audioWs = new WebSocket(audioWsUrl);
-        micSocketRef.current = audioWs;
-        audioWs.binaryType = 'arraybuffer';
-
-        audioWs.onopen = () => {
-          audioWs.send(
-            JSON.stringify({
-              type: 'audio.header',
-              sample_rate: 16000,
-              channels: 1,
-              encoding: 'pcm_s16le',
-            }),
-          );
-
-          const AudioContextClass =
-            window.AudioContext ||
-            (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-          const audioCtx = new AudioContextClass({ sampleRate: 16000 });
-          audioCtxRef.current = audioCtx;
-
-          const sourceNode = audioCtx.createMediaStreamSource(stream);
-          const processor = audioCtx.createScriptProcessor(4096, 1, 1);
-          processorRef.current = processor;
-
-          processor.onaudioprocess = (e) => {
-            if (audioWs.readyState !== WebSocket.OPEN) return;
-            const input = e.inputBuffer.getChannelData(0);
-            const pcm = new Int16Array(input.length);
-            for (let i = 0; i < input.length; i++) {
-              const s = Math.max(-1, Math.min(1, input[i]));
-              pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-            }
-            audioWs.send(pcm.buffer);
-          };
-
-          sourceNode.connect(processor);
-          processor.connect(audioCtx.destination);
-        };
-      } catch (error: unknown) {
-        cleanupMic();
-        const message =
-          error instanceof Error ? error.message : 'Could not start live microphone session';
-        safeDispatch({ type: 'ERROR', code: 'MIC_START_FAILED', message, retriable: true });
-      } finally {
-        if (mountedRef.current) setBusy(false);
-      }
-    },
-    [cleanupMic, openSocket, safeDispatch],
-  );
 
   const stopSession = useCallback(async () => {
     const sessionId = sessionIdRef.current;
-    cleanupMic();
     if (!sessionId) return;
     setBusy(true);
     try {
@@ -570,16 +429,15 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       if (mountedRef.current) setBusy(false);
     }
-  }, [cleanupMic, refresh]);
+  }, [refresh]);
 
   const reset = useCallback(() => {
-    cleanupMic();
     socketRef.current?.close();
     socketRef.current = null;
     abortRef.current?.abort();
     sessionIdRef.current = null;
     safeDispatch({ type: 'SESSION_RESET' });
-  }, [cleanupMic, safeDispatch]);
+  }, [safeDispatch]);
 
   const holdTransaction = useCallback(
     async (reason: string) => {
@@ -633,14 +491,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       health,
       healthError,
       startDemo,
-      startMic,
       stopSession,
       reset,
       holdTransaction,
       releaseTransaction,
       busy,
     }),
-    [state, health, healthError, startDemo, startMic, stopSession, reset, holdTransaction, releaseTransaction, busy],
+    [state, health, healthError, startDemo, stopSession, reset, holdTransaction, releaseTransaction, busy],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

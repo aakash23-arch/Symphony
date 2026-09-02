@@ -141,6 +141,10 @@ class ReplaySimulator:
                 extra={"extra_fields": {"session_id": self.session_id, "error": str(exc)}},
             )
             raise
+        finally:
+            if self._source is not None:
+                await self._source.close()
+                self._source = None
 
         self._state = ReplayState.STOPPED
         return self.frames_published

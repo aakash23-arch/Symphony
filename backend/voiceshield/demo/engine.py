@@ -5,7 +5,7 @@ and transaction context, and starts real pipeline sessions.
 
 INVARIANT (§36):
   The ScenarioEngine must NEVER directly set or inject a risk score, decision
-  band, or policy action. It may ONLY:
+  band, expected outcome, or policy action. It may ONLY:
     - select audio fixture
     - provide context
     - provide transaction context
@@ -40,19 +40,8 @@ DISALLOWED_CONTEXT_KEYS = {
     "score",
     "policy_action",
     "matched_policy",
+    "expected_outcome",
 }
-
-
-@dataclass(frozen=True)
-class ExpectedOutcome:
-    """Expected outcome definition for test assertion and documentation only.
-    
-    This is NEVER passed to the session, context engine, or risk engine.
-    """
-    risk_band: str
-    action: str
-    decision_label: str
-    target_policy: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -66,7 +55,6 @@ class ScenarioDefinition:
     audio_fixture: str
     context: Dict[str, Any]
     transaction: Optional[Dict[str, Any]] = None
-    expected_outcome: Optional[ExpectedOutcome] = None
 
     def to_dict(self) -> Dict[str, Any]:
         data = {
@@ -78,7 +66,6 @@ class ScenarioDefinition:
             "audio_fixture": self.audio_fixture,
             "context": dict(self.context),
             "transaction": dict(self.transaction) if self.transaction else None,
-            "expected_outcome": asdict(self.expected_outcome) if self.expected_outcome else None,
             "environment": DEMO_ENVIRONMENT_LABEL,
         }
         return data
@@ -86,51 +73,31 @@ class ScenarioDefinition:
 
 # --- Mandated Scenario Definitions --------------------------------------------
 
-# --- Mandated Scenario Definitions --------------------------------------------
-
-SCENARIO_1_GENUINE_EXECUTIVE = ScenarioDefinition(
-    scenario_id="genuine-executive",
+CASE_01_AUTHENTIC = ScenarioDefinition(
+    scenario_id="case-01-authentic",
     title="Case 01 — Authentic Human Voice",
     summary="Enrolled executive (CFO) conducting an authorized ₹25,00,000 corporate disbursement over a clean PSTN channel.",
     caller_name="CFO (Ananya Sharma)",
     caller_ref="+91 22 6123 4567",
-    audio_fixture="clean_speechlike",
+    audio_fixture="case_01_authentic_human",
     context={
         "claimed_identity": "cfo.ananya_sharma",
-        "verified_identity": "cfo.ananya_sharma",
         "enrollment_status": "ENROLLED",
         "known_contact": "KNOWN_CONTACT",
-        "identity_mismatch": False,
         "transaction_type": "WIRE_TRANSFER",
-        "beneficiary_novelty": "KNOWN",
-        "urgency": False,
-        "secrecy": False,
-        "callback_refusal": False,
-        "workflow_state": "NONE",
         "call_source": "INBOUND_PSTN",
-        "voip_mobile_indicator": "MOBILE",
-        "reputation": 0.98,
-        "age_days": 1825,
-        "language": "en",
     },
     transaction={
         "caller_identity": "cfo.ananya_sharma",
         "amount": "2500000.00",
         "currency": "INR",
         "beneficiary": "Apex Infrastructure & Industrial Suppliers Ltd",
-        "beneficiary_novelty": "KNOWN",
         "transaction_type": "WIRE_TRANSFER",
-    },
-    expected_outcome=ExpectedOutcome(
-        risk_band="LOW",
-        action="ALLOW",
-        decision_label="LOW RISK / ALLOW",
-        target_policy="P-ORDINARY-CALL",
-    ),
+    }
 )
 
-SCENARIO_2_AI_IMPERSONATION = ScenarioDefinition(
-    scenario_id="ai-impersonation",
+CASE_02_CLONED = ScenarioDefinition(
+    scenario_id="case-02-cloned",
     title="Case 02 — AI / Voice-Cloned Voice",
     summary="Voice clone attempting an unauthorized ₹25,00,000 wire to an unverified offshore account with high urgency and callback refusal.",
     caller_name="CFO (Voice Clone Attack)",
@@ -138,75 +105,47 @@ SCENARIO_2_AI_IMPERSONATION = ScenarioDefinition(
     audio_fixture="case_02_cloned_synthetic",
     context={
         "claimed_identity": "cfo.ananya_sharma",
-        "verified_identity": None,
-        "identity_mismatch": True,
         "enrollment_status": "ENROLLED",
         "known_contact": "FIRST_CONTACT",
         "transaction_type": "WIRE_TRANSFER",
-        "beneficiary_novelty": "NEW",
-        "urgency": True,
-        "secrecy": True,
-        "callback_refusal": True,
-        "workflow_state": "HIGH_VALUE_TRANSFER",
-        "sensitive_action": "WIRE_TRANSFER",
         "call_source": "INBOUND_VOIP",
-        "voip_mobile_indicator": "VOIP",
-        "reputation": 0.12,
-        "age_days": 2,
-        "language": "en",
     },
     transaction={
         "caller_identity": "cfo.ananya_sharma",
         "amount": "2500000.00",
         "currency": "INR",
         "beneficiary": "Nexus Holdings Offshore Ltd (Unverified Payee)",
-        "beneficiary_novelty": "NEW",
         "transaction_type": "WIRE_TRANSFER",
-    },
-    expected_outcome=ExpectedOutcome(
-        risk_band="HIGH",
-        action="HOLD",
-        decision_label="HIGH or CRITICAL RISK / HOLD",
-        target_policy="P-SUSPICIOUS-VOICE-HIGH-VALUE",
-    ),
+    }
 )
 
-SCENARIO_3_POOR_AUDIO = ScenarioDefinition(
-    scenario_id="poor-audio",
+CASE_03_ADVERSARIAL = ScenarioDefinition(
+    scenario_id="case-03-adversarial",
     title="Case 03 — Adversarial Manipulated / Degraded Voice",
     summary="Severely degraded acoustic channel, codec perturbation and noise during a ₹25,00,000 corporate transfer triggering fail-safe step-up verification.",
     caller_name="CFO Office (Degraded Line)",
     caller_ref="+91 22 4000 9999",
-    audio_fixture="noisy_speechlike",
+    audio_fixture="case_03_adversarial_manipulated",
     context={
         "claimed_identity": "cfo.ananya_sharma",
         "enrollment_status": "ENROLLED",
         "known_contact": "UNKNOWN",
         "transaction_type": "WIRE_TRANSFER",
-        "beneficiary_novelty": "KNOWN",
         "call_source": "INBOUND_VOIP",
-        "language": "en",
     },
     transaction={
         "caller_identity": "cfo.ananya_sharma",
         "amount": "2500000.00",
         "currency": "INR",
         "beneficiary": "Apex Infrastructure & Industrial Suppliers Ltd",
-        "beneficiary_novelty": "KNOWN",
         "transaction_type": "WIRE_TRANSFER",
-    },
-    expected_outcome=ExpectedOutcome(
-        risk_band="UNCERTAIN",
-        action="STEP_UP",
-        decision_label="UNCERTAIN / STEP-UP VERIFICATION",
-        target_policy="P-INSUFFICIENT-CONFIDENCE",
-    ),
+    }
 )
 
 MANDATED_SCENARIOS: List[ScenarioDefinition] = [
-    SCENARIO_1_GENUINE_EXECUTIVE,
-    SCENARIO_2_AI_IMPERSONATION,
-    SCENARIO_3_POOR_AUDIO,
+    CASE_01_AUTHENTIC,
+    CASE_02_CLONED,
+    CASE_03_ADVERSARIAL,
 ]
 
 
@@ -217,17 +156,6 @@ class StandardScenarioEngine(ScenarioEngine):
         self._scenarios: Dict[str, ScenarioDefinition] = {}
         for s in (scenarios or MANDATED_SCENARIOS):
             self._scenarios[s.scenario_id] = s
-        
-        # Add case alias mappings for SIH demo naming
-        if "genuine-executive" in self._scenarios:
-            self._scenarios["case-01-authentic"] = self._scenarios["genuine-executive"]
-            self._scenarios["routine-enquiry"] = self._scenarios["genuine-executive"]
-        if "ai-impersonation" in self._scenarios:
-            self._scenarios["case-02-cloned"] = self._scenarios["ai-impersonation"]
-            self._scenarios["high-value-transfer"] = self._scenarios["ai-impersonation"]
-        if "poor-audio" in self._scenarios:
-            self._scenarios["case-03-adversarial"] = self._scenarios["poor-audio"]
-            self._scenarios["silence"] = self._scenarios["poor-audio"]
 
     def list_scenarios(self) -> List[Dict[str, Any]]:
         """List all available demo scenarios with full metadata (deduplicated)."""
@@ -320,6 +248,9 @@ class StandardScenarioEngine(ScenarioEngine):
                 )
             finally:
                 await runtime.orchestrator.drain(session_id)
+                # Ensure the session state is explicitly marked as STOPPED so tests 
+                # and clients waiting for completion can proceed.
+                runtime.sessions.stop(session_id)
 
         runtime.spawn(_drive())
 

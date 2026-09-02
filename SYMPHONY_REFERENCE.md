@@ -478,7 +478,7 @@ log O_t = decay(log O_(t-1)) + bounded evidence contribution
 P_spoof = O / (1 + O)
 ```
 
-Bayesian log-odds accumulation with evidence decay.
+Heuristic log-odds accumulation with evidence decay.
 
 **Why this matters:** the judge sees `12% → 19% → 31% → 44% → 61% → 78% → 91%` instead of a score that jumps around randomly.
 

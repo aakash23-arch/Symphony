@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 
 class Calibrator(ABC):
-    """Abstract interface for probability calibration (Platt/Isotonic priors)."""
+    """Abstract interface for probability calibration (Heuristic Shrinkage)."""
 
     @abstractmethod
     def calibrate(self, expert_id: str, raw_score: float) -> float:

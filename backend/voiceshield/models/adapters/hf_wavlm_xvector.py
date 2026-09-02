@@ -19,8 +19,8 @@ SCORE POLARITY
     P(inauthentic) uniformly, and preserves the raw cosine in extra["cosine"].
     See interfaces.P_MEANS_PROBABILITY_INAUTHENTIC.
 
-NO ACCURACY CLAIM
-    No EER, accuracy or detection rate is asserted. No evaluation set exists.
+SPEAKER-CONSISTENCY EVIDENCE
+    Provides speaker-consistency evidence. No generic accuracy or detection rate is asserted.
 """
 
 from __future__ import annotations

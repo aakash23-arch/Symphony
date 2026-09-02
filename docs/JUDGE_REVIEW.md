@@ -94,7 +94,7 @@ The 5-layer architecture maps directly to the national SIH problem statement req
 1. **L1 Ingestion:** Streaming audio ring buffer.
 2. **L2 Signal Processing:** Real-time acoustic feature extraction.
 3. **L3 Forensic Models:** Multi-expert neural detection ensemble.
-4. **L4 Fusion & Context:** Bayesian belief state + contextual risk scaling.
+4. **L4 Fusion & Context:** Quality-weighted belief state + contextual risk scaling.
 5. **L5 Policy Engine:** Actionable decision-making & tamper-evident audit chaining.
 
 ### 13. Is privacy addressed?
@@ -146,7 +146,7 @@ The scenario engine does **not** hardcode the risk scores or override the policy
 
 ### Q1: "Why are E1 and E3 showing as 'Unavailable' in the model panel?"
 > **Winning Answer:**  
-> *"To ensure this repository is 100% runnable offline on standard developer machines without requiring a multi-gigabyte download or proprietary GPU cluster during the evaluation, we pinned and bundled the two primary forensic neural models: E2 (Wav2Vec2 Deepfake Detector) and E4 (WavLM Speaker Verification). E1 (AASIST graph neural network) and E3 (Self-Supervised Probe) adhere to the exact same abstract contract `AntiSpoofingExpert`. Our L4 Fusion engine dynamically re-weights its Bayesian belief state based on available expert confidence ($C_t$), demonstrating graceful degradation rather than system failure."*
+> *"To ensure this repository is 100% runnable offline on standard developer machines without requiring a multi-gigabyte download or proprietary GPU cluster during the evaluation, we pinned and bundled the two primary forensic neural models: E2 (Wav2Vec2 Deepfake Detector) and E4 (WavLM Speaker Verification). E1 (AASIST graph neural network) and E3 (Self-Supervised Probe) adhere to the exact same abstract contract `AntiSpoofingExpert`. Our L4 Fusion engine dynamically re-weights its quality-weighted belief state based on available expert confidence ($C_t$), demonstrating graceful degradation rather than system failure."*
 
 ---
 

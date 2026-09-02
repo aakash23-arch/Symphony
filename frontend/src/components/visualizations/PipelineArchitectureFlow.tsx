@@ -48,7 +48,7 @@ export const PIPELINE_LAYERS: PipelineLayer[] = [
     name: 'FUSION / RISK',
     summary: 'Evidence is synthesized with real-time call and financial transaction context.',
     input: 'Fused L3 Expert Probabilities + L2 Quality + Caller & Transaction Metadata',
-    processing: 'Bayesian Belief Update (P_spoof), Contextual Weighting, Transaction Tier Escalation',
+    processing: 'Quality-Weighted Belief Update (P_spoof), Contextual Risk Escalation',
     output: 'Uncalibrated Composite Threat Score (0.00–1.00) & Threat Band (LOW, HIGH, CRITICAL, UNCERTAIN)',
   },
   {

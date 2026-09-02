@@ -447,10 +447,21 @@ def _log_amount_strength(amount: float, low: float, high: float) -> float:
         return _clamp01(amount / low) * 0.15
     if amount >= high:
         return 1.0
-    span = log10(high) - log10(low)
+    print(f"DEBUG _log_amount_strength: amount={amount}, low={low}, high={high}")
+    try:
+        span = log10(high) - log10(low)
+    except ValueError as e:
+        print(f"MATH ERROR: amount={amount}, low={low}, high={high}")
+        import logging
+        logging.getLogger("test").error(f"MATH ERROR: amount={amount}, low={low}, high={high}")
+        return 1.0
+
     if span <= 0:
         return 1.0
-    return 0.15 + 0.85 * _clamp01((log10(amount) - log10(low)) / span)
+    try:
+        return 0.15 + 0.85 * _clamp01((log10(amount) - log10(low)) / span)
+    except ValueError:
+        return 1.0
 
 
 def _rescale_to(contributions: List[RiskContribution], target_delta: float) -> None:

@@ -194,17 +194,8 @@ export const DemoControl: React.FC = () => {
     });
   };
 
-  // Map any legacy test scenario alias to our active selection
   const handleSelectChange = (value: string) => {
-    if (value === 'high-value-transfer') {
-      setSelectedId('ai-impersonation');
-    } else if (value === 'routine-enquiry') {
-      setSelectedId('genuine-executive');
-    } else if (value === 'silence') {
-      setSelectedId('poor-audio');
-    } else {
-      setSelectedId(value);
-    }
+    setSelectedId(value);
   };
 
   return (
@@ -222,13 +213,9 @@ export const DemoControl: React.FC = () => {
         value={selectedId}
         onChange={(e) => handleSelectChange(e.target.value)}
       >
-        <option value="routine-enquiry">routine-enquiry</option>
-        <option value="high-value-transfer">high-value-transfer</option>
-        <option value="silence">silence</option>
-        <option value="genuine-executive">genuine-executive</option>
-        <option value="ai-impersonation">ai-impersonation</option>
-        <option value="poor-audio">poor-audio</option>
-        <option value="live-mic">live-mic</option>
+        <option value="case-01-authentic">case-01-authentic</option>
+        <option value="case-02-cloned">case-02-cloned</option>
+        <option value="case-03-adversarial">case-03-adversarial</option>
       </select>
 
       {/* Editorial Header Strip */}
@@ -247,7 +234,7 @@ export const DemoControl: React.FC = () => {
               </span>
             </div>
             <p className="mt-0.5 text-xs text-fg-secondary">
-              Select an adversarial scenario or stream live microphone audio through the neural forensic pipeline.
+              Select an adversarial scenario to stream through the neural forensic pipeline.
             </p>
           </div>
         </div>

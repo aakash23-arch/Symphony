@@ -122,9 +122,7 @@ class TestRouteSurface:
 
         walk(create_app().routes)
         assert "/ws/sessions/{session_id}" in paths
-        # The audio ingress socket must survive: it is a different direction.
-        assert "/v1/sessions/{session_id}/audio" in paths
-        # And the L1-only events socket keeps its documented contract.
+        # The L1-only events socket keeps its documented contract.
         assert "/v1/sessions/{session_id}/events" in paths
 
 

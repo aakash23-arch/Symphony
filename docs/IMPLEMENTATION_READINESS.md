@@ -139,7 +139,7 @@ These constitute the vertical slice. `SYMPHONY_REFERENCE.md` §24 states the gov
 | A13 | `EvidenceVector` contract | §7 | **Real** |
 | A14 | Quality-conditioned expert weighting (`weight_i = f(q_t, codec_vec, reliability)`) | §8.1 | **Real** |
 | A15 | Score calibration layer | §8, §15 | **Real** |
-| A16 | Bayesian log-odds temporal accumulation with evidence decay | §8.2 | **Real** |
+| A16 | Heuristic log-odds temporal accumulation with evidence decay | §8.2 | **Real** |
 | A17 | Two-clock architecture — fast 100–250 ms, slow 1–3 s rolling window | §8.3 | **Real** |
 | A18 | Uncertainty estimation and `uncertainty_reason` | §8, §8.6 | **Real** |
 | A19 | `VoiceBelief` contract including `trajectory[]` and `contributing_experts[]` | §8.6 | **Real** |

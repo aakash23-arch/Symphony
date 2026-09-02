@@ -29,9 +29,15 @@ def compute_mfcc(pcm: np.ndarray, spec_config: SpectrogramConfig, mfcc_config: M
     delta_delta = np.array([[]])
     
     if mfcc_config.include_delta and mfcc.shape[1] > 2:
-        delta = librosa.feature.delta(mfcc)
+        width = min(9, mfcc.shape[1])
+        if width % 2 == 0:
+            width -= 1
+        delta = librosa.feature.delta(mfcc, width=width)
         
     if mfcc_config.include_delta_delta and mfcc.shape[1] > 2:
-        delta_delta = librosa.feature.delta(mfcc, order=2)
+        width = min(9, mfcc.shape[1])
+        if width % 2 == 0:
+            width -= 1
+        delta_delta = librosa.feature.delta(mfcc, order=2, width=width)
         
     return mfcc, delta, delta_delta, timestamps

@@ -57,7 +57,7 @@ export const DecisionPipelineFlow: React.FC<DecisionPipelineFlowProps> = ({ clas
       id: 3,
       name: 'FUSION',
       label: 'Context Synthesis',
-      metric: decision ? `Score ${decision.risk.risk_score.toFixed(2)}` : 'Bayesian Belief',
+      metric: decision ? `Score ${decision.risk.risk_score.toFixed(2)}` : 'Quality-Weighted Belief',
       desc: 'Acoustic evidence weighted against amount tier and payee novelty.',
       icon: Layers,
     },

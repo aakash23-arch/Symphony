@@ -24,7 +24,6 @@ from .routes import (
     transactions_router,
     v1_detect_router,
 )
-from .ws_audio import router as ws_audio_router
 from .ws_events import router as ws_events_router
 from .ws_session import router as ws_session_router
 
@@ -84,6 +83,7 @@ async def lifespan(app: FastAPI):
         logger.info(f"Preloaded neural detectors: Wav2Vec2 ({w2v.model_version}), WavLM ({wavlm.model_version})")
     except Exception as exc:
         logger.error(f"Neural detector preload error: {exc}")
+        raise RuntimeError(f"Failed to preload critical neural detectors: {exc}") from exc
 
     # 3. Validate demo audio assets
     audio_dir = Path("demo/audio")
@@ -106,7 +106,8 @@ async def lifespan(app: FastAPI):
                 missing.append(asset)
 
     if missing:
-        logger.warning(f"Demo assets missing or corrupted: {missing}")
+        logger.error(f"Demo assets missing or corrupted: {missing}")
+        raise RuntimeError(f"Required demo audio assets missing or corrupted: {missing}")
 
     # 4. Pipeline Warmup
     try:
@@ -117,7 +118,8 @@ async def lifespan(app: FastAPI):
         default_orchestrator.process_audio(audio_bytes=bio.getvalue(), session_id="warmup-init")
         logger.info("Forensic inference pipeline JIT warmup completed.")
     except Exception as exc:
-        logger.warning(f"Pipeline warmup note: {exc}")
+        logger.error(f"Pipeline warmup failed: {exc}")
+        raise RuntimeError(f"Pipeline warmup failed: {exc}") from exc
 
     logger.info("VoiceShield SIH Demo Backend is ONLINE and READY for live judging.")
     yield
@@ -256,7 +258,6 @@ def create_app() -> FastAPI:
     app.include_router(detect_router)
     app.include_router(v1_detect_router)
     app.include_router(api_detect_router)
-    app.include_router(ws_audio_router)
     app.include_router(ws_events_router)
     app.include_router(ws_session_router)
 

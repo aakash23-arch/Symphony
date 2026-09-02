@@ -31,7 +31,7 @@ class ScoreFusion:
         detectors: List[DetectorResult],
         evidence: ForensicEvidence,
     ) -> FusedScore:
-        """Perform dynamic Bayesian-style quality-weighted score fusion."""
+        """Perform dynamic quality-weighted expert score fusion."""
         active_detectors = [d for d in detectors if d.status == "OK"]
         if not active_detectors:
             return FusedScore(
@@ -78,5 +78,5 @@ class ScoreFusion:
             fused_p_synthetic=float(np.clip(fused_p, 0.0, 1.0)),
             raw_confidence=float(np.clip(fused_conf, 0.0, 1.0)),
             detector_weights=normalized_weights,
-            fusion_method="BAYESIAN_QUALITY_WEIGHTED",
+            fusion_method="QUALITY_WEIGHTED_EXPERT_FUSION",
         )

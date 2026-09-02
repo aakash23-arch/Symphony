@@ -144,7 +144,7 @@ class FusedScore(BaseModel):
     fused_p_synthetic: float
     raw_confidence: float
     detector_weights: Dict[str, float]
-    fusion_method: str = "BAYESIAN_QUALITY_WEIGHTED"
+    fusion_method: str = "QUALITY_WEIGHTED_EXPERT_FUSION"
 
 
 class CalibratedScore(BaseModel):

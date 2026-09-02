@@ -87,7 +87,8 @@ class StandardBeliefAccumulator(BeliefAccumulator):
         # But for strict EMA independent of actual frame rate, we can just use a fixed alpha, or estimate from tau.
         # Let's use a fixed beta for now assuming ~50 frames per sec. 
         # beta = 1.0 if not initialized, else based on tau
-        dt = 0.02 # Assuming 20ms per frame
+        # A typical frame is 250ms (4000 samples at 16kHz)
+        dt = 0.25
         beta = min(1.0, dt / self.config.smoothing_time_constant) if self.config.smoothing_time_constant > 0 else 1.0
         
         if not state['trajectory'] and has_experts:
@@ -102,8 +103,11 @@ class StandardBeliefAccumulator(BeliefAccumulator):
         w_base_sum = 0.0
         
         for eid, base_w in self.config.expert_weights.items():
-            w_base_sum += base_w
-            if evidence.expert_statuses.get(eid) == ExpertStatus.OK:
+            status = evidence.expert_statuses.get(eid)
+            # Only include expert in w_base_sum if it actually ran and did not abstain/fail.
+            # This ensures we don't artificially drop confidence for missing weights (E1) or expected abstentions (E4).
+            if status == ExpertStatus.OK:
+                w_base_sum += base_w
                 c_i = evidence.expert_confidences.get(eid, 1.0)
                 alpha = self.config.quality_sensitivities.get(eid, 0.0)
                 q_factor = max(0.0, 1.0 - alpha * (1.0 - q_t))
