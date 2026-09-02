@@ -51,7 +51,8 @@ pre {
     line-height: 0.96;
     font-weight: 800;
     letter-spacing: -0.05em;
-    color: #0A0A0A;
+    /* Color intentionally omitted — set per usage via a Tailwind text-* class
+       so the same headline works on both light and dark section backgrounds. */
   }
 
   .display-xl {
@@ -60,7 +61,6 @@ pre {
     line-height: 1.02;
     font-weight: 700;
     letter-spacing: -0.04em;
-    color: #0A0A0A;
   }
 
   .green-aura-mesh {
@@ -80,7 +80,6 @@ pre {
     line-height: 1.15;
     font-weight: 700;
     letter-spacing: -0.035em;
-    color: #0A0A0A;
   }
 
   .display-md {
@@ -89,7 +88,6 @@ pre {
     line-height: 1.22;
     font-weight: 600;
     letter-spacing: -0.025em;
-    color: #09090B;
   }
 
   .section-title {
@@ -98,7 +96,6 @@ pre {
     line-height: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    color: #09090B;
   }
 
   .section-index {
@@ -108,7 +105,6 @@ pre {
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #888888;
   }
 
   .body-lg {
@@ -116,7 +112,6 @@ pre {
     font-size: 1.0625rem;
     line-height: 1.625rem;
     font-weight: 400;
-    color: #666666;
   }
 
   .body {
@@ -124,7 +119,6 @@ pre {
     font-size: 0.9375rem;
     line-height: 1.4375rem;
     font-weight: 400;
-    color: #666666;
   }
 
   .body-sm {
@@ -132,7 +126,6 @@ pre {
     font-size: 0.8125rem;
     line-height: 1.25rem;
     font-weight: 400;
-    color: #666666;
   }
 
   .technical-label {
@@ -142,7 +135,6 @@ pre {
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #666666;
   }
 
   .technical-value {
@@ -152,7 +144,6 @@ pre {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
-    color: #0A0A0A;
   }
 
   .micro-label {
@@ -162,7 +153,6 @@ pre {
     font-weight: 600;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #888888;
   }
 }
 
@@ -234,6 +224,24 @@ pre {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Ticker marquee: two copies of the content translate together so the loop
+   is seamless; pausing/disabling honors prefers-reduced-motion below. */
+.marquee-track {
+  animation: marquee-scroll 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .reveal-fade,
+  .reveal-slide-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 

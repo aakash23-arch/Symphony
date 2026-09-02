@@ -65,7 +65,7 @@ export const SystemTimeline: React.FC<SystemTimelineProps> = ({
             <li
               key={item.id}
               className={cn(
-                'border border-border bg-surface p-3 border-l-4 transition-colors hover:border-r-fg-primary hover:border-y-fg-primary hover:bg-surface-elevated',
+                'rounded-sm border border-border bg-surface p-3 border-l-4 transition-colors hover:border-r-fg-primary hover:border-y-fg-primary hover:bg-surface-elevated',
                 borderStyle,
               )}
             >

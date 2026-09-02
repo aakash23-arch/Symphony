@@ -7,3 +7,6 @@ export * from './RiskStateTransition';
 export * from './DecisionPipelineFlow';
 export * from './EvidenceChainAudit';
 export * from './TransactionInterventionFlow';
+export * from './SignalFragmentComparison';
+export * from './NarrativeFeatureGrid';
+export * from './ExpertPipelineDiagram';

@@ -18,3 +18,8 @@ export * from './SystemTimeline';
 export * from './Reveal';
 export * from './ScrollProgress';
 export * from './TechnicalDisclosure';
+export * from './TickerMarquee';
+export * from './GhostWordmark';
+export * from './CursorMatrixField';
+export * from './DecryptText';
+export * from './CountUp';

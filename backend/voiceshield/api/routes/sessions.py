@@ -176,6 +176,9 @@ class ReplayFixture(str, Enum):
     only ever needs these five.
     """
 
+    CASE_01_AUTHENTIC_HUMAN = "case_01_authentic_human"
+    CASE_02_CLONED_SYNTHETIC = "case_02_cloned_synthetic"
+    CASE_03_ADVERSARIAL_MANIPULATED = "case_03_adversarial_manipulated"
     CLEAN_SPEECHLIKE = "clean_speechlike"
     NOISY_SPEECHLIKE = "noisy_speechlike"
     NARROWBAND_SPEECHLIKE = "narrowband_speechlike"

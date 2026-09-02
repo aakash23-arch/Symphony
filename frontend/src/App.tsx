@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
 import { HeaderBar } from './panels/HeaderBar';
+import { FooterBar } from './panels/FooterBar';
 import { 
   ProblemSection, 
   SignalSection, 
@@ -48,6 +49,8 @@ const Dashboard: React.FC = () => {
           </div>
         )}
       </main>
+
+      {viewMode === 'narrative' && <FooterBar />}
     </div>
   );
 };

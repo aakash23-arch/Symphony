@@ -72,6 +72,12 @@ export default {
           hover: '#27272A',
           light: '#52525B',
           glow: 'rgba(0, 0, 0, 0.05)',
+          // Single bright accent reserved for primary CTAs / key highlighted
+          // metrics only — mirrors SignalIQ's single neon-green CTA against
+          // an otherwise monochrome palette.
+          bright: '#00E28A',
+          'bright-hover': '#00C77A',
+          'bright-ink': '#041F14',
         },
       },
       fontFamily: {
@@ -109,8 +115,13 @@ export default {
         'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
         'signal-sweep': 'signal-sweep 3s ease-in-out infinite',
         'fade-in': 'fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'marquee-scroll': 'marquee-scroll 32s linear infinite',
       },
       keyframes: {
+        'marquee-scroll': {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
         'pulse-edge': {
           '0%, 100%': { borderColor: 'rgba(239, 68, 68, 0.45)', boxShadow: '0 0 15px rgba(239, 68, 68, 0.15)' },
           '50%': { borderColor: 'rgba(239, 68, 68, 0.95)', boxShadow: '0 0 25px rgba(239, 68, 68, 0.35)' },

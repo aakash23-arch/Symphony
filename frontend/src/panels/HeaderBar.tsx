@@ -9,11 +9,9 @@ export interface HeaderBarProps {
 }
 
 /**
- * Symphony Minimalist Editorial Header.
- *
- * Provides monochrome SignalIQ branding, discrete live connection indicator,
- * dual-mode switching between Editorial Narrative & Operational Testing Console,
- * and direct testing action triggers.
+ * Symphony's editorial header. Dual-mode switching between the narrative
+ * scroll story and the live detection console, plus a discrete connection
+ * indicator once a session is active.
  */
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   viewMode = 'narrative',
@@ -91,7 +89,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             <MagneticButton
               type="button"
               onClick={handleOpenConsole}
-              className="inline-flex items-center gap-2 border border-fg bg-fg px-4 py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-background hover:bg-fg/90 transition-transform hover:-translate-y-[1px] active:translate-y-[1px]"
+              className="rounded-sm inline-flex items-center gap-2 border border-accent-bright bg-accent-bright px-4 py-2 font-mono text-micro-label font-bold uppercase tracking-wider text-accent-bright-ink hover:bg-accent-bright-hover transition-all duration-200 ease-out hover:-translate-y-[1px] active:translate-y-[1px]"
             >
               <span>RUN DETECTION</span>
               <ArrowUpRight className="h-3.5 w-3.5" />

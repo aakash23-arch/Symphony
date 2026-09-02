@@ -368,7 +368,6 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     async (options: StartOptions) => {
       setBusy(true);
       try {
-        cleanupMic();
         safeDispatch({ type: 'SESSION_RESET' });
 
         const created = await api.createSession({

@@ -87,7 +87,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="dossier-title" className="text-xl font-bold tracking-tight text-fg print:text-black">
-                  VoiceShield Forensic Evidence Dossier
+                  Symphony Forensic Evidence Dossier
                 </h2>
                 <span className="border border-border bg-surface px-2 py-0.5 font-mono text-[0.625rem] font-bold text-fg-primary print:border print:border-neutral-300">
                   DEFENSE AUDIT
@@ -307,7 +307,7 @@ export const ForensicDossierModal: React.FC<ForensicDossierModalProps> = ({
         {/* Footer Notice */}
         <div className="mt-6 border-t border-border/80 pt-3.5 text-center font-mono text-[0.6875rem] text-fg-tertiary print:border-neutral-300 print:text-neutral-500">
           <p>
-            VoiceShield Real-Time Defense Engine · Certified L1–L5 Forensic Ingestion &amp; Decision Protocol.
+            Symphony Real-Time Defense Engine · Certified L1–L5 Forensic Ingestion &amp; Decision Protocol.
           </p>
         </div>
       </div>
