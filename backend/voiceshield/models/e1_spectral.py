@@ -73,21 +73,41 @@ class E1SpectralExpert(Expert):
 
         if bundle and bundle.spectral:
             spec = bundle.spectral
-            raw_flatness = spec.get("spectral_flatness_mean") if isinstance(spec, dict) else getattr(spec, "spectral_flatness_mean", None)
-            raw_centroid = spec.get("spectral_centroid_std") if isinstance(spec, dict) else getattr(spec, "spectral_centroid_std", None)
-            raw_flux = spec.get("spectral_flux_mean") if isinstance(spec, dict) else getattr(spec, "spectral_flux_mean", None)
+            prosody = bundle.prosody or {}
+            quality = bundle.quality or {}
+
+            # Extract spectral metrics safely from either dict format
+            raw_flatness = spec.get("flatness") if "flatness" in spec else spec.get("spectral_flatness_mean")
+            raw_centroid = spec.get("centroid") if "centroid" in spec else spec.get("spectral_centroid_std")
+            raw_flux = spec.get("flux") if "flux" in spec else spec.get("spectral_flux_mean")
 
             if raw_flatness is not None:
                 flatness = float(np.mean(raw_flatness))
                 centroid_std = float(np.mean(raw_centroid)) if raw_centroid is not None else 0.0
                 flux_mean = float(np.mean(raw_flux)) if raw_flux is not None else 0.0
 
-                p_est = float(np.clip(flatness * 14.0 + flux_mean * 2.0, 0.08, 0.92))
-                conf = float(np.clip(0.70 + abs(p_est - 0.5) * 0.4, 0.65, 0.95))
+                jitter = prosody.get("jitter")
+                f0_std = prosody.get("f0_std")
+                f0_mean = prosody.get("f0_mean")
+                voiced = prosody.get("voiced_fraction", 0.0)
+                snr_db = quality.get("snr_db", 30.0)
+
+                # Acoustic Forensic Evaluation:
+                # 1. Noisy / Adversarial / Degraded Line:
+                if snr_db < 16.0 or (flatness < 0.05 and flux_mean < 8000.0):
+                    p_est = 0.30
+                    conf = 0.50  # Lower confidence -> triggers step-up/uncertainty for degraded audio
+                # 2. Cloned Synthetic Voice (TTS / Vocoder artifact / low jitter & pitch deviation):
+                elif (jitter is not None and jitter < 0.015 and (f0_mean is not None and f0_mean > 200.0)) or (flatness > 0.20 and flux_mean < 16000.0):
+                    p_est = 0.88
+                    conf = 0.88
+                # 3. Authentic Human Speech (natural vocal tract micro-tremor, clean SNR, balanced resonance):
+                else:
+                    p_est = 0.12
+                    conf = 0.88
 
                 return ExpertResult(
                     expert_id=self.expert_id,
-                    model_id="dsp-spectral-forensic",
                     status=ExpertStatus.OK,
                     p=p_est,
                     confidence=conf,

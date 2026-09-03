@@ -64,17 +64,37 @@ export const LiveDetectionSection: React.FC = () => {
     MANDATED_SCENARIOS.find((s) => s.id === (state.scenarioId || selectedScenarioId)) ||
     MANDATED_SCENARIOS[0];
 
-  // Active risk & decision scores
-  const score = risk?.risk_score ?? liveBelief?.P_spoof ?? null;
-  const band = risk?.risk_band ?? (liveBelief?.band as any) ?? null;
-  const action = decision?.action ?? null;
-  const confidence = risk?.risk_confidence ?? liveBelief?.confidence ?? null;
+  // Active risk & decision scores (prefer live streaming belief during active call)
+  const score = isCurrentlyActive
+    ? (liveBelief?.P_spoof ?? risk?.risk_score ?? null)
+    : (risk?.risk_score ?? liveBelief?.P_spoof ?? null);
+
+  // Dynamic band derived directly from live score so title updates instantaneously with oscillation
+  const scoreBand = score != null
+    ? (score >= 0.75 ? 'CRITICAL' : score >= 0.60 ? 'HIGH' : score >= 0.35 ? 'UNCERTAIN' : 'LOW')
+    : null;
+
+  const band = isCurrentlyActive
+    ? ((liveBelief?.band as any) || scoreBand || risk?.risk_band || null)
+    : (risk?.risk_band ?? (liveBelief?.band as any) ?? scoreBand ?? null);
+
+  const action = decision?.action ?? (band === 'CRITICAL' || band === 'HIGH' ? 'ESCALATE' : band === 'UNCERTAIN' ? 'STEP_UP' : 'ALLOW');
+  const confidence = isCurrentlyActive
+    ? (liveBelief?.confidence ?? risk?.risk_confidence ?? null)
+    : (risk?.risk_confidence ?? liveBelief?.confidence ?? null);
 
   // Timeline entries (most recent 8)
   const timelineEntries = (state.timeline || []).slice(-8);
 
-  // Trajectory points for the line graph
-  const trajectory = (state.evidence?.belief_trajectory ?? state.belief?.trajectory ?? [])
+  // Live real-time analysis points from streaming WebSocket frames
+  const livePoints = (state.liveAnalysisPoints || []).map((p) => ({
+    t: Number(p.tEnd.toFixed(1)),
+    p_spoof: p.spoofProbability ?? 0,
+    confidence: p.confidence ?? 0.8,
+  }));
+
+  // Trajectory points from REST evidence
+  const restTrajectory = (state.evidence?.belief_trajectory ?? state.belief?.trajectory ?? [])
     .slice(-60)
     .map((p) => ({
       t: Number(p.t.toFixed(1)),
@@ -82,10 +102,12 @@ export const LiveDetectionSection: React.FC = () => {
       confidence: p.confidence,
     }));
 
-  // Fallback trajectory point if none from server yet
+  // Trajectory dataset for the line graph
   const chartData =
-    trajectory.length > 0
-      ? trajectory
+    livePoints.length > 0
+      ? livePoints
+      : restTrajectory.length > 0
+      ? restTrajectory
       : score !== null
       ? [{ t: 0, p_spoof: score, confidence: confidence ?? 0.8 }]
       : [];
@@ -358,15 +380,17 @@ export const LiveDetectionSection: React.FC = () => {
           <RiskGauge
             score={score}
             band={band}
-            label={band ? bandLabel(band) : undefined}
+            label={band ? bandLabel(band, score) : undefined}
             action={action}
             confidence={confidence}
             isEvaluating={isCurrentlyActive && score === null}
             detail={
               isCurrentlyActive
-                ? 'LIVE ACOUSTIC EVALUATION'
+                ? score !== null && score >= 0.60
+                  ? 'SYNTHETIC SIGNATURE DETECTED'
+                  : 'LIVE ACOUSTIC EVALUATION'
                 : band === 'CRITICAL' || band === 'HIGH'
-                ? 'LIVE ACOUSTIC EVALUATION'
+                ? 'SYNTHETIC SIGNATURE DETECTED'
                 : 'NOMINAL AUTHENTIC VOICE'
             }
           />

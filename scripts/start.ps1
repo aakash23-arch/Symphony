@@ -26,9 +26,14 @@ if (Test-Path ".run\backend.pid") {
     }
 }
 
+$pythonExe = "python"
+if (Test-Path "$RootDir\.venv\Scripts\python.exe") {
+    $pythonExe = "$RootDir\.venv\Scripts\python.exe"
+}
+
 if (-not $backendRunning) {
     Write-Host "Starting backend API server on http://localhost:8000..."
-    $backendProcess = Start-Process python -ArgumentList "-m", "uvicorn", "voiceshield.api.app:app", "--host", "127.0.0.1", "--port", "8000" -RedirectStandardOutput ".run\backend.log" -RedirectStandardError ".run\backend.err.log" -PassThru -NoNewWindow
+    $backendProcess = Start-Process $pythonExe -ArgumentList "-m", "uvicorn", "voiceshield.api.app:app", "--host", "127.0.0.1", "--port", "8000" -RedirectStandardOutput ".run\backend.log" -RedirectStandardError ".run\backend.err.log" -PassThru -NoNewWindow
     Set-Content -Path ".run\backend.pid" -Value $backendProcess.Id
 }
 

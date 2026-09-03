@@ -22,12 +22,17 @@ interface RiskGaugeProps {
   className?: string;
 }
 
-const BAND_COLOR_MAP: Record<RiskBand, { stroke: string; text: string; bg: string; glow: string }> = {
+const BAND_COLOR_MAP: Record<string, { stroke: string; text: string; bg: string; glow: string }> = {
   LOW: { stroke: '#059669', text: 'text-emerald-600', bg: 'bg-emerald-50 text-emerald-700', glow: 'rgba(5, 150, 105, 0.4)' },
+  GENUINE: { stroke: '#059669', text: 'text-emerald-600', bg: 'bg-emerald-50 text-emerald-700', glow: 'rgba(5, 150, 105, 0.4)' },
   MEDIUM: { stroke: '#D97706', text: 'text-amber-600', bg: 'bg-amber-50 text-amber-700', glow: 'rgba(217, 119, 6, 0.4)' },
-  HIGH: { stroke: '#EA580C', text: 'text-orange-600', bg: 'bg-orange-50 text-orange-700', glow: 'rgba(234, 88, 12, 0.4)' },
-  CRITICAL: { stroke: '#DC2626', text: 'text-red-600', bg: 'bg-red-50 text-red-700', glow: 'rgba(220, 38, 38, 0.45)' },
+  SUSPICIOUS: { stroke: '#D97706', text: 'text-amber-600', bg: 'bg-amber-50 text-amber-700', glow: 'rgba(217, 119, 6, 0.4)' },
+  ELEVATED: { stroke: '#D97706', text: 'text-amber-600', bg: 'bg-amber-50 text-amber-700', glow: 'rgba(217, 119, 6, 0.4)' },
   UNCERTAIN: { stroke: '#7C3AED', text: 'text-purple-600', bg: 'bg-purple-50 text-purple-700', glow: 'rgba(124, 58, 237, 0.4)' },
+  HIGH: { stroke: '#EA580C', text: 'text-orange-600', bg: 'bg-orange-50 text-orange-700', glow: 'rgba(234, 88, 12, 0.4)' },
+  SYNTHETIC: { stroke: '#EA580C', text: 'text-orange-600', bg: 'bg-orange-50 text-orange-700', glow: 'rgba(234, 88, 12, 0.4)' },
+  CRITICAL: { stroke: '#DC2626', text: 'text-red-600', bg: 'bg-red-50 text-red-700', glow: 'rgba(220, 38, 38, 0.45)' },
+  SYNTHETIC_HIGH_CONFIDENCE: { stroke: '#DC2626', text: 'text-red-600', bg: 'bg-red-50 text-red-700', glow: 'rgba(220, 38, 38, 0.45)' },
 };
 
 export const RiskGauge: React.FC<RiskGaugeProps> = ({
@@ -40,8 +45,21 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({
   detail,
   className,
 }) => {
-  const currentBand = band ?? 'LOW';
-  const bandStyle = BAND_COLOR_MAP[currentBand] || BAND_COLOR_MAP.LOW;
+  const effectiveBandKey = (
+    band ?? (score != null ? (score >= 0.75 ? 'CRITICAL' : score >= 0.60 ? 'HIGH' : score >= 0.35 ? 'UNCERTAIN' : 'LOW') : 'LOW')
+  ).toUpperCase();
+
+  const bandStyle =
+    BAND_COLOR_MAP[effectiveBandKey] ||
+    (effectiveBandKey.includes('CRIT')
+      ? BAND_COLOR_MAP.CRITICAL
+      : effectiveBandKey.includes('HIGH') || effectiveBandKey.includes('SYNTH')
+      ? BAND_COLOR_MAP.HIGH
+      : effectiveBandKey.includes('UNCERT')
+      ? BAND_COLOR_MAP.UNCERTAIN
+      : effectiveBandKey.includes('SUSP') || effectiveBandKey.includes('MED')
+      ? BAND_COLOR_MAP.SUSPICIOUS
+      : BAND_COLOR_MAP.LOW);
 
   const radius = 90;
   const center = 115;
@@ -61,7 +79,13 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({
         : 'LOW'
       : 'LOW';
 
-  const actionText = action || (band === 'CRITICAL' || band === 'HIGH' ? 'ESCALATE' : 'ALLOW');
+  const actionText =
+    action ||
+    (effectiveBandKey.includes('CRIT') || effectiveBandKey.includes('HIGH')
+      ? 'ESCALATE'
+      : effectiveBandKey.includes('UNCERT')
+      ? 'STEP_UP'
+      : 'ALLOW');
 
   return (
     <div className={cn('relative flex flex-col items-center justify-center py-4 px-6 overflow-hidden', className)}>
@@ -159,7 +183,7 @@ export const RiskGauge: React.FC<RiskGaugeProps> = ({
                 </span>
               </div>
               <span className={cn('font-mono text-[0.6875rem] font-bold uppercase tracking-wider mt-1', bandStyle.text)}>
-                {label || (band ? bandLabel(band) : 'CRITICAL THREAT')}
+                {label || bandLabel(effectiveBandKey, score)}
               </span>
               <span className="font-mono text-[0.5625rem] text-fg-tertiary uppercase tracking-wider mt-0.5">
                 {detail || 'LIVE ACOUSTIC EVALUATION'}
