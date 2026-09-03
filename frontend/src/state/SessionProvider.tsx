@@ -431,13 +431,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
         // Initiate real audio playback in the browser for scenario call evaluation
         if (audioRef.current) {
-          audioRef.current.pause();
+          try {
+            audioRef.current.pause();
+          } catch {
+            // ignore
+          }
           audioRef.current = null;
         }
         try {
-          const audio = new Audio(`/api/demo/audio/${options.fixture}.wav`);
+          // Use direct static asset path served by frontend / Vite with fallback
+          const audioSrc = `/audio/${options.fixture}.wav`;
+          const audio = new Audio(audioSrc);
           audio.muted = audioMuted;
-          audio.crossOrigin = 'anonymous';
+          audio.preload = 'auto';
 
           setAudioCurrentTime(0);
           setAudioDuration(0);
@@ -467,9 +473,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
               analyser.fftSize = 64;
               analyser.smoothingTimeConstant = 0.8;
 
-              const source = ctx.createMediaElementSource(audio);
-              source.connect(analyser);
-              analyser.connect(ctx.destination);
+              try {
+                const source = ctx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(ctx.destination);
+              } catch (srcErr) {
+                console.warn('Audio node connection note:', srcErr);
+              }
 
               analyserRef.current = analyser;
             }
@@ -477,8 +487,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             console.warn('Web Audio API Analyser setup notice:', err);
           }
 
-          audio.onerror = () => {
-            if (mountedRef.current) {
+          audio.onerror = (e) => {
+            console.warn('Audio playback error on primary source, trying fallback:', e);
+            if (audio.src !== `${window.location.origin}/api/demo/audio/${options.fixture}.wav`) {
+              audio.src = `/api/demo/audio/${options.fixture}.wav`;
+              void audio.play().catch(() => {});
+            } else if (mountedRef.current) {
               setAudioPlaying(false);
               safeDispatch({ type: 'AUDIO_FINISHED' });
             }
@@ -495,12 +509,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
               .then(() => {
                 if (mountedRef.current) setAudioPlaying(true);
               })
-              .catch(() => {
+              .catch((playErr) => {
+                console.warn('Audio autoplay blocked or failed:', playErr);
                 if (mountedRef.current) setAudioPlaying(false);
               });
           }
           audioRef.current = audio;
-        } catch {
+        } catch (audioInitErr) {
+          console.warn('Audio initialization notice:', audioInitErr);
           if (mountedRef.current) setAudioPlaying(false);
         }
       } catch (error: unknown) {

@@ -8,6 +8,7 @@ import {
   Square,
   Volume2,
   VolumeX,
+  Languages,
 } from 'lucide-react';
 
 import { Spinner } from '../components/PanelStates';
@@ -29,6 +30,8 @@ export interface DemoScenario {
   sectionIndex: string;
   name: string;
   badge: string;
+  language: string;
+  languageDetail: string;
   summary: string;
   fixture: ReplayFixture;
   callerName: string;
@@ -53,10 +56,12 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
     id: 'case-01-authentic',
     sectionIndex: '01',
-    name: 'AUTHENTIC HUMAN VOICE',
-    badge: 'Genuine Call',
+    name: 'INDIAN ACCENT ENGLISH',
+    badge: 'Indian English',
+    language: 'Indian English',
+    languageDetail: 'Natural Indian English accent',
     summary:
-      'Enrolled CFO initiating an authorized ₹25,00,000 corporate disbursement over a clean PSTN channel.',
+      'Corporate treasury officer initiating an authorized ₹25,00,000 disbursement in natural Indian English over a clean PSTN line.',
     fixture: 'case_01_authentic_human',
     callerName: 'CFO (Ananya Sharma)',
     callerRef: '+91 22 6123 4567',
@@ -81,7 +86,7 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       voip_mobile_indicator: 'MOBILE',
       reputation: 0.98,
       age_days: 1825,
-      language: 'en',
+      language: 'en-IN',
     },
     transaction: {
       caller_identity: 'cfo.ananya_sharma',
@@ -95,10 +100,12 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
     id: 'case-02-cloned',
     sectionIndex: '02',
-    name: 'AI / VOICE-CLONED VOICE',
-    badge: 'Synthetic Attack',
+    name: 'HINDI + ENGLISH CODE-SWITCH',
+    badge: 'Hindi + English',
+    language: 'Hindi / English',
+    languageDetail: 'Code-switch detected',
     summary:
-      'AI voice clone impersonating executive CFO demanding an urgent ₹45,00,000 wire to an unverified offshore payee.',
+      'AI voice clone impersonating executive demanding an urgent ₹45,00,000 offshore wire with natural Hindi and English code-switching.',
     fixture: 'case_02_cloned_synthetic',
     callerName: 'CFO (Voice Clone Attack)',
     callerRef: '+91 99999 88888',
@@ -123,7 +130,7 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       voip_mobile_indicator: 'VOIP',
       reputation: 0.12,
       age_days: 2,
-      language: 'en',
+      language: 'hi-IN',
     },
     transaction: {
       caller_identity: 'cfo.ananya_sharma',
@@ -137,12 +144,14 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
   {
     id: 'case-03-adversarial',
     sectionIndex: '03',
-    name: 'ADVERSARIAL MANIPULATION',
-    badge: 'Noise & Tamper',
+    name: 'MARATHI + HINDI CODE-SWITCH',
+    badge: 'Marathi + Hindi',
+    language: 'Marathi / Hindi',
+    languageDetail: 'Code-switch detected',
     summary:
-      'Adversarially perturbed voice call over degraded channel attempting spoof transfer of ₹12,50,000.',
+      'Regional bilingual Marathi-Hindi voice call over degraded telephone channel attempting transfer of ₹12,50,000.',
     fixture: 'case_03_adversarial_manipulated',
-    callerName: 'Unknown / Distorted Channel',
+    callerName: 'Treasury Desk (Bilingual Line)',
     callerRef: '+91 88888 77777',
     expectedOutcome: {
       label: 'UNCERTAIN / STEP_UP VERIFICATION',
@@ -154,9 +163,9 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       verified_identity: null,
       identity_mismatch: false,
       enrollment_status: 'NOT_ENROLLED',
-      known_contact: 'RARE_CONTACT',
+      known_contact: 'UNKNOWN',
       transaction_type: 'WIRE_TRANSFER',
-      beneficiary_novelty: 'RECENT',
+      beneficiary_novelty: 'UNKNOWN',
       urgency: true,
       secrecy: false,
       callback_refusal: false,
@@ -165,13 +174,13 @@ export const MANDATED_SCENARIOS: DemoScenario[] = [
       voip_mobile_indicator: 'UNKNOWN',
       reputation: 0.50,
       age_days: 30,
-      language: 'en',
+      language: 'mr-IN',
     },
     transaction: {
       caller_identity: 'treasury.officer',
       amount: '1250000.00',
       beneficiary: 'Zenith Logistics & Commercial Corp',
-      beneficiary_novelty: 'RECENT',
+      beneficiary_novelty: 'UNKNOWN',
       currency: 'INR',
       transaction_type: 'WIRE_TRANSFER',
     },
@@ -219,7 +228,7 @@ export const DemoControl: React.FC = () => {
   return (
     <section
       aria-label="Demo Mode Control Panel"
-      className="relative overflow-hidden border border-border bg-surface p-5 transition-all"
+      className="relative overflow-hidden border border-border bg-surface p-5 transition-all shadow-sm"
     >
       {/* Hidden select dropdown to ensure 100% automated test suite compatibility */}
       <select
@@ -247,11 +256,11 @@ export const DemoControl: React.FC = () => {
                 SCENARIO COMMAND MATRIX
               </span>
               <span className="border border-border bg-surface px-2 py-0.5 font-mono text-[0.625rem] font-semibold text-fg-primary">
-                L1–L5 INGRESS
+                MULTILINGUAL EVALUATION
               </span>
             </div>
             <p className="mt-0.5 text-xs text-fg-secondary">
-              Select an adversarial scenario to stream through the neural forensic pipeline.
+              Select an Indian accent or code-switched scenario to stream through the neural forensic pipeline.
             </p>
           </div>
         </div>
@@ -325,7 +334,7 @@ export const DemoControl: React.FC = () => {
             <span className="font-mono text-micro uppercase tracking-wider text-fg-tertiary">
               Select Evaluation Case
             </span>
-            <span className="font-mono text-micro text-fg-tertiary">3 SIH CASES</span>
+            <span className="font-mono text-micro text-fg-tertiary">3 MULTILINGUAL CASES</span>
           </div>
 
           <div className="space-y-2">
@@ -364,21 +373,26 @@ export const DemoControl: React.FC = () => {
 
                     <span
                       className={cn(
-                        'rounded-md px-2 py-0.5 font-mono text-[0.625rem] font-medium border',
+                        'rounded px-2 py-0.5 font-mono text-[0.625rem] font-semibold border',
                         item.expectedOutcome.band === 'LOW' &&
-                          'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+                          'bg-emerald-50 text-emerald-700 border-emerald-500/30',
                         item.expectedOutcome.band === 'HIGH' &&
-                          'bg-red-500/10 text-red-400 border-red-500/30',
+                          'bg-red-50 text-red-700 border-red-500/30',
                         item.expectedOutcome.band === 'UNCERTAIN' &&
-                          'bg-amber-500/10 text-amber-400 border-amber-500/30',
+                          'bg-amber-50 text-amber-700 border-amber-500/30',
                       )}
                     >
                       {item.badge}
                     </span>
                   </div>
-                  <p className="mt-1.5 pl-7 text-[0.75rem] text-fg-tertiary line-clamp-1">
-                    {item.summary}
-                  </p>
+                  <div className="mt-1.5 pl-7 flex items-center justify-between gap-2 text-[0.75rem]">
+                    <p className="text-fg-tertiary line-clamp-1 flex-1">
+                      {item.summary}
+                    </p>
+                    <span className="font-mono text-micro text-fg-secondary font-semibold shrink-0">
+                      {item.language}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -393,7 +407,7 @@ export const DemoControl: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-micro text-fg-primary font-bold">
-                    CASE {scenario.sectionIndex}
+                    DEMO {scenario.sectionIndex}
                   </span>
                   <h3 className="text-sm font-bold text-fg">{scenario.name}</h3>
                 </div>
@@ -401,9 +415,9 @@ export const DemoControl: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-1.5 border border-border bg-surface px-2.5 py-1">
-                <Volume2 className="h-3.5 w-3.5 text-fg-tertiary" />
+                <Languages className="h-3.5 w-3.5 text-fg-tertiary" />
                 <span className="font-mono text-micro text-fg-secondary">
-                  Asset: <strong className="text-fg">{`${scenario.fixture}.wav`}</strong>
+                  Language: <strong className="text-fg">{scenario.language}</strong>
                 </span>
               </div>
             </div>
@@ -430,19 +444,12 @@ export const DemoControl: React.FC = () => {
 
               <div className="border border-border p-2.5">
                 <span className="font-mono text-micro uppercase text-fg-tertiary">
-                  Target Outcome
+                  Language & Speech
                 </span>
-                <p
-                  className={cn(
-                    'mt-0.5 text-xs font-bold',
-                    scenario.expectedOutcome.band === 'LOW' && 'text-emerald-400',
-                    scenario.expectedOutcome.band === 'HIGH' && 'text-red-400',
-                    scenario.expectedOutcome.band === 'UNCERTAIN' && 'text-amber-400',
-                  )}
-                >
-                  {scenario.expectedOutcome.label}
+                <p className="mt-0.5 text-xs font-bold text-fg-primary">
+                  {scenario.language}
                 </p>
-                <p className="text-micro text-fg-tertiary">Produced live by models</p>
+                <p className="text-micro text-fg-tertiary">{scenario.languageDetail}</p>
               </div>
             </div>
 
@@ -488,4 +495,3 @@ export const DemoControl: React.FC = () => {
     </section>
   );
 };
-

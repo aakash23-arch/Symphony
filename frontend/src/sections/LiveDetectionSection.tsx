@@ -38,15 +38,13 @@ export const LiveDetectionSection: React.FC = () => {
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-12 lg:pt-16 space-y-12 relative z-10">
         
-        {/* CASE SELECTION & CONTROLS */}
-        <div className="space-y-6">
-          <DemoControl />
-        </div>
+        {/* Scenario Selection Matrix Header */}
+        <DemoControl />
 
-        {/* LIVE INFERENCE INSTRUMENTATION & PANELS */}
-        <AnimatePresence>
-          {(isStreaming || decision) && (
-            <motion.div 
+        {/* Live Audio Ingestion & Telemetry Section */}
+        <AnimatePresence mode="wait">
+          {isStreaming && (
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-8"
@@ -63,7 +61,8 @@ export const LiveDetectionSection: React.FC = () => {
                       ? audioPlaying || state.isAnalyzing
                         ? 'ACTIVE STREAMING'
                         : 'STREAM COMPLETE'
-                      : 'OFFLINE'}</div>
+                      : 'OFFLINE'}
+                  </div>
                 </div>
 
                 <div className="border border-border p-4 bg-surface shadow-sm">
@@ -118,7 +117,7 @@ export const LiveDetectionSection: React.FC = () => {
 
               {activeTab === 'overview' ? (
                 <>
-                  {/* Real-time Spectrogram & Signal Processing Visualizer */}
+                  {/* Real-time Spectrogram & Signal Processing Visualizer with live frames and result */}
                   <div className="border border-border bg-surface p-6 shadow-sm">
                     <SignalVisualizer />
                   </div>
@@ -212,7 +211,7 @@ export const LiveDetectionSection: React.FC = () => {
         {state.error && (
           <div className="border border-red-500 bg-surface p-4 text-red-600 font-mono text-sm max-w-2xl mx-auto mt-8">
             <ErrorState code={state.error.code} message={state.error.message} />
-            <button onClick={reset} className="mt-4 border border-red-500 px-3 py-1 hover:bg-red-50">
+            <button onClick={reset} className="mt-4 border border-red-500 px-3 py-1 hover:bg-red-50 font-bold">
               TRY AGAIN
             </button>
           </div>
