@@ -52,12 +52,12 @@ export const EvidenceCards: React.FC<EvidenceCardsProps> = ({
   const contextVal =
     contextIncreasing.length > 0
       ? Math.min(
-          1.0,
-          contextIncreasing.reduce((acc, curr) => acc + curr.points, 0) / 100
-        )
+        1.0,
+        contextIncreasing.reduce((acc, curr) => acc + curr.points, 0) / 100
+      )
       : contributions && contributions.length > 0
-      ? 0.15
-      : null;
+        ? 0.15
+        : null;
 
   const cards = [
     {

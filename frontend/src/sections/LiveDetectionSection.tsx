@@ -107,10 +107,10 @@ export const LiveDetectionSection: React.FC = () => {
     livePoints.length > 0
       ? livePoints
       : restTrajectory.length > 0
-      ? restTrajectory
-      : score !== null
-      ? [{ t: 0, p_spoof: score, confidence: confidence ?? 0.8 }]
-      : [];
+        ? restTrajectory
+        : score !== null
+          ? [{ t: 0, p_spoof: score, confidence: confidence ?? 0.8 }]
+          : [];
 
   // High-performance pointer tracking for subtle ambient spotlight
   useEffect(() => {
@@ -390,8 +390,8 @@ export const LiveDetectionSection: React.FC = () => {
                   ? 'SYNTHETIC SIGNATURE DETECTED'
                   : 'LIVE ACOUSTIC EVALUATION'
                 : band === 'CRITICAL' || band === 'HIGH'
-                ? 'SYNTHETIC SIGNATURE DETECTED'
-                : 'NOMINAL AUTHENTIC VOICE'
+                  ? 'SYNTHETIC SIGNATURE DETECTED'
+                  : 'NOMINAL AUTHENTIC VOICE'
             }
           />
         </div>
