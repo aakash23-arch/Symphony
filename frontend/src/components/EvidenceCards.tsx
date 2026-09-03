@@ -129,7 +129,7 @@ export const EvidenceCards: React.FC<EvidenceCardsProps> = ({
             <div
               key={card.id}
               className={cn(
-                'border border-border bg-surface p-4 flex flex-col justify-between shadow-sm transition-all hover:border-border-strong',
+                'group relative border border-border bg-surface p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all duration-300 hover:border-fg/20 hover:shadow-[0_4px_20px_rgba(0,0,0,0.035)]',
                 isLoading && !hasVal && 'opacity-80'
               )}
             >

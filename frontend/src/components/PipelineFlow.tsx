@@ -6,7 +6,6 @@ import {
   GitMerge,
   Shield,
   CheckCircle2,
-  ChevronRight,
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '../lib/cn';
@@ -98,7 +97,7 @@ export const PipelineFlow: React.FC<PipelineFlowProps> = (props) => {
   const { className } = props;
 
   return (
-    <div className={cn('border border-border bg-surface p-4 shadow-sm', className)}>
+    <div className={cn('group relative border border-border bg-surface p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-fg/20 hover:shadow-[0_4px_24px_rgba(0,0,0,0.035)] transition-all duration-300', className)}>
       {/* Top Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border/80 text-micro-label font-mono uppercase tracking-widest text-fg-tertiary">
         <div className="flex items-center gap-2">
@@ -112,58 +111,100 @@ export const PipelineFlow: React.FC<PipelineFlowProps> = (props) => {
       </div>
 
       {/* Horizontal Steps Grid */}
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {PIPELINE_STEPS.map((step, idx) => {
           const active = step.isActive(props);
           const completed = step.isComplete(props);
+          const isAudio = step.id === 'audio';
+          const isDecision = step.id === 'decision';
+          const isAssurance = step.id === 'assurance';
           const Icon = step.icon;
+
+          // Red theme for Audio & Decision; Emerald theme for Intake, Analysis, Fusion
+          const isRedStep = isAudio || isDecision;
+          const showCheck = completed || active;
 
           return (
             <div key={step.id} className="relative flex items-center">
               <div
                 className={cn(
-                  'w-full flex flex-col items-center text-center p-3 border transition-all duration-200',
-                  active && 'border-fg bg-fg text-white shadow-sm ring-1 ring-fg',
-                  completed && !active && 'border-emerald-500/40 bg-emerald-50/50 text-emerald-950',
-                  !active && !completed && 'border-border bg-surface-elevated/40 text-fg-tertiary'
+                  'w-full flex flex-col items-center text-center p-3 rounded-lg border transition-all duration-300 relative',
+                  isDecision && (active || completed)
+                    ? 'border-red-400 bg-red-50/50 shadow-md shadow-red-500/10'
+                    : isAudio && (active || completed)
+                    ? 'border-red-300/80 bg-red-50/40 shadow-sm'
+                    : completed
+                    ? 'border-emerald-300/80 bg-emerald-50/40 text-emerald-950'
+                    : active
+                    ? 'border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500 shadow-sm'
+                    : 'border-border/80 bg-surface-elevated/30 text-fg-tertiary'
                 )}
               >
+                {/* Top Right Status Badge (✔) */}
+                {showCheck && !isAssurance && (
+                  <span
+                    className={cn(
+                      'absolute top-2 right-2 h-3.5 w-3.5 rounded-full flex items-center justify-center text-[0.55rem] font-bold text-white shadow-xs',
+                      isRedStep ? 'bg-red-600' : 'bg-emerald-600'
+                    )}
+                  >
+                    ✓
+                  </span>
+                )}
+
                 <div className="mb-2">
                   <Icon
                     className={cn(
                       'h-4 w-4',
-                      active && 'text-white animate-pulse',
-                      completed && !active && 'text-emerald-600',
-                      !active && !completed && 'text-fg-tertiary'
+                      isRedStep
+                        ? 'text-red-600'
+                        : completed || active
+                        ? 'text-emerald-600'
+                        : 'text-fg-tertiary'
                     )}
                   />
                 </div>
+
                 <div
                   className={cn(
                     'font-mono text-xs font-bold truncate max-w-full',
-                    active && 'text-white',
-                    completed && !active && 'text-emerald-900',
-                    !active && !completed && 'text-fg-secondary'
+                    isRedStep ? 'text-fg' : completed || active ? 'text-fg' : 'text-fg-secondary'
                   )}
                 >
                   {step.name}
                 </div>
+
                 <div
                   className={cn(
-                    'font-mono text-[0.625rem] mt-0.5 truncate max-w-full',
-                    active && 'text-white/80',
-                    completed && !active && 'text-emerald-700/80',
-                    !active && !completed && 'text-fg-muted'
+                    'font-mono text-[0.625rem] mt-0.5 truncate max-w-full font-medium',
+                    isDecision && (active || completed)
+                      ? 'text-red-600 font-semibold'
+                      : isRedStep
+                      ? 'text-fg-secondary'
+                      : completed || active
+                      ? 'text-fg-secondary'
+                      : 'text-fg-muted'
                   )}
                 >
                   {step.subtitle}
                 </div>
+
+                {/* Decorative Audio Waveform on Audio step */}
+                {isAudio && (active || completed) && (
+                  <div className="flex items-center gap-0.5 mt-1.5 text-red-500">
+                    <span className="h-1 w-0.5 bg-current rounded-full" />
+                    <span className="h-1.5 w-0.5 bg-current rounded-full" />
+                    <span className="h-2 w-0.5 bg-current rounded-full" />
+                    <span className="h-1 w-0.5 bg-current rounded-full" />
+                    <span className="h-2.5 w-0.5 bg-current rounded-full" />
+                  </div>
+                )}
               </div>
 
               {/* Arrow Connector on desktop */}
               {idx < PIPELINE_STEPS.length - 1 && (
-                <div className="hidden lg:flex absolute -right-2 z-10 items-center justify-center text-fg-tertiary">
-                  <ChevronRight className="h-3.5 w-3.5" />
+                <div className="hidden lg:flex absolute -right-2.5 z-10 items-center justify-center text-red-400 font-bold text-xs">
+                  →
                 </div>
               )}
             </div>

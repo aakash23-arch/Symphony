@@ -1,5 +1,4 @@
 import { ArrowUpRight } from 'lucide-react';
-import { ConnectionDot } from '../components/ConnectionDot';
 import { useSession } from '../state/useSession';
 import { MagneticButton } from '../design-system/MagneticButton';
 
@@ -17,8 +16,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   viewMode = 'narrative',
   onToggleView,
 }) => {
-  const { state, stopSession, reset, busy } = useSession();
-  const isStreaming = Boolean(state.sessionId && state.sourceType);
+  const { stopSession, busy } = useSession();
 
   const scrollTo = (id: string) => {
     if (viewMode === 'console' && onToggleView) {
@@ -104,55 +102,45 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   // CONSOLE DEMO HEADER (Phase 9)
   // ---------------------------------------------------------------------------
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background transition-all">
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md transition-all">
+      <div className="max-w-[1600px] mx-auto flex items-center justify-between px-6 py-3.5">
         
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <span className="font-sans text-base font-black tracking-tight text-fg">
             SYMPHONY
           </span>
-          <ConnectionDot connection={state.connection} attempt={state.reconnectAttempt} />
+          <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-600">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            LIVE
+          </span>
         </div>
 
         {/* Middle: Title */}
-        <div className="absolute left-1/2 -translate-x-1/2 font-mono text-micro-label uppercase text-fg font-bold tracking-widest hidden sm:block">
+        <div className="font-mono text-xs uppercase text-fg font-bold tracking-widest hidden sm:block">
           LIVE DETECTION
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-4">
-          {/* Quick Active Session Reset / Stop */}
-          {state.sessionId && (
-            <div className="flex items-center gap-1.5 mr-2">
-              {isStreaming ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void stopSession()}
-                  className="border border-red-500 bg-surface px-2 py-1 font-mono text-[0.625rem] uppercase font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
-                >
-                  Stop
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="border border-border bg-surface px-2 py-1 font-mono text-[0.625rem] uppercase font-bold text-fg-secondary hover:text-fg"
-                >
-                  Reset
-                </button>
-              )}
-            </div>
-          )}
+        <div className="flex items-center gap-3">
+          {/* Quick Active Session Stop */}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void stopSession()}
+            className="inline-flex items-center gap-1.5 border border-red-500/80 bg-white px-3 py-1 font-mono text-xs uppercase font-bold text-red-600 rounded-md hover:bg-red-50 disabled:opacity-50 transition-colors shadow-sm"
+          >
+            <span className="h-2 w-2 bg-red-600 rounded-xs" />
+            <span>STOP</span>
+          </button>
 
           {onToggleView && (
             <button
               type="button"
               onClick={() => onToggleView('narrative')}
-              className="inline-flex items-center gap-2 font-mono text-micro-label font-bold uppercase tracking-wider text-fg-secondary hover:text-fg transition-colors"
+              className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-wider text-fg-secondary hover:text-fg transition-colors"
             >
-              <ArrowUpRight className="h-3.5 w-3.5 rotate-[180deg]" />
+              <span>←</span>
               <span>BACK TO STORY</span>
             </button>
           )}
