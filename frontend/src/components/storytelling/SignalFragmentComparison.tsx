@@ -50,11 +50,10 @@ export const SignalFragmentComparison: React.FC = () => {
 
       <div className="border-t border-border p-6 flex items-center justify-between gap-4 flex-wrap">
         <p className="text-sm text-fg-secondary max-w-xl">
-          The published state of the art doesn't degrade on Indian speech — it inverts. Symphony fine-tunes
-          on Indic-language data specifically to close this gap.
+          State-of-the-art architectures fail dramatically when tested against real-world Indian accents and multilingual code-switching. Symphony is engineered with Indic-language fine-tuning specifically to eliminate this critical vulnerability.
         </p>
         <span className="font-mono text-xs text-fg-tertiary uppercase tracking-widest shrink-0">
-          Source: IndicSynth (ACL 2025)
+          Source: IndicSynth Benchmark (ACL 2025)
         </span>
       </div>
     </div>

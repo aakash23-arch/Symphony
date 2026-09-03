@@ -82,8 +82,7 @@ export const ForensicsSection: React.FC = () => {
             Not the whole call — <span className="serif-italic font-normal normal-case text-fg-secondary">just the splice.</span>
           </h3>
           <p className="text-fg-secondary mt-3">
-            A real attacker doesn't clone an entire conversation — they splice one cloned phrase into an
-            otherwise genuine call. Symphony localizes the synthetic seconds instead of scoring the whole call.
+            Sophisticated attackers rarely clone an entire conversation — they splice a brief, high-urgency cloned phrase into an otherwise genuine executive call. Symphony pinpoints the exact synthetic milliseconds instead of scoring the whole call as a blunt average.
           </p>
         </div>
         <SystemTimeline items={PATTERN_TIMELINE} maxHeight="max-h-none" />
@@ -100,8 +99,8 @@ export const ForensicsSection: React.FC = () => {
               Demo scenario
             </div>
             <p className="text-sm text-fg-secondary max-w-2xl">
-              A cloned "CEO" voice, sent over a noisy G.711 line, tells an employee:
-              <span className="italic text-fg"> "Transfer ₹25 lakh immediately. Do not call me back — I'm in a meeting."</span>
+              A cloned executive voice, transmitted over a noisy G.711 cellular line, instructs a finance manager:
+              <span className="italic text-fg font-semibold"> "Approve the ₹25 lakh vendor disbursement immediately. Do not call me back — I am in a board review."</span>
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 p-6 border-b border-border">

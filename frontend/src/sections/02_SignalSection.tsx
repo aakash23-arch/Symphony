@@ -35,12 +35,11 @@ export const SignalSection: React.FC = () => {
           </h2>
 
           <p className="text-lg sm:text-xl text-fg-secondary font-normal leading-relaxed max-w-md">
-            Every call is codec-profiled and quality-scored before a single expert sees it — a degraded 8kHz
-            phone line is treated differently from a clean 16kHz stream.
+            Every incoming voice stream is instantaneously codec-profiled and quality-normalized before forensic scoring — ensuring degraded 8kHz cellular lines and clean 16kHz audio are evaluated with uncompromised precision.
           </p>
 
           <div className="font-mono text-sm text-fg-tertiary pt-2">
-            First provisional signal in <span className="text-fg font-bold">&lt;500ms</span>
+            First provisional risk assessment in <span className="text-fg font-bold">&lt; 500ms</span>
           </div>
         </motion.div>
 
