@@ -427,7 +427,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // frame.processed telemetry is never replayed.
         openSocket(sessionId);
         await api.startSession(sessionId);
-        await api.startReplay(sessionId, options.fixture);
+        await api.startReplay(sessionId, options.fixture, 1.0, 1);
 
         // Initiate real audio playback in the browser for scenario call evaluation
         if (audioRef.current) {
@@ -501,6 +501,10 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (mountedRef.current) {
               setAudioPlaying(false);
               safeDispatch({ type: 'AUDIO_FINISHED' });
+              const currentSid = sessionIdRef.current;
+              if (currentSid) {
+                void api.stopSession(currentSid).catch(() => {});
+              }
             }
           };
           const playPromise = audio.play();
@@ -535,10 +539,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const stopSession = useCallback(async () => {
     if (audioRef.current) {
-      audioRef.current.pause();
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      } catch {
+        // ignore
+      }
       audioRef.current = null;
     }
     setAudioPlaying(false);
+    safeDispatch({ type: 'AUDIO_FINISHED' });
 
     const sessionId = sessionIdRef.current;
     if (!sessionId) return;

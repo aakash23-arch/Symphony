@@ -51,7 +51,8 @@ export const LiveDetectionSection: React.FC = () => {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>(MANDATED_SCENARIOS[0].id);
 
   const isStreaming = Boolean(state.sessionId && state.sourceType);
-  const isComplete = Boolean(state.sessionId && isTerminal(state));
+  const isCurrentlyActive = audioPlaying || state.isAnalyzing;
+  const isComplete = Boolean(state.sessionId && !isCurrentlyActive && (state.decision || isTerminal(state)));
   const decision = state.decision;
   const risk = decision?.risk;
   const liveBelief = state.beliefLive;
@@ -184,12 +185,12 @@ export const LiveDetectionSection: React.FC = () => {
                   isComplete ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-500/40">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      COMPLETE
+                      ANALYSIS COMPLETE
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-500/40 animate-pulse">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      LIVE
+                      LIVE / ANALYZING
                     </span>
                   )
                 ) : (
@@ -212,7 +213,7 @@ export const LiveDetectionSection: React.FC = () => {
                   <button
                     key={scen.id}
                     type="button"
-                    disabled={isStreaming && !isComplete && busy}
+                    disabled={isCurrentlyActive && busy}
                     onClick={() => handleStartScenario(scen.id)}
                     className={cn(
                       'px-2.5 py-1 text-[0.6875rem] font-bold uppercase transition-all border flex items-center gap-1.5',
@@ -240,12 +241,12 @@ export const LiveDetectionSection: React.FC = () => {
                 </button>
               )}
 
-              {isStreaming && !isComplete ? (
+              {isCurrentlyActive ? (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => void stopSession()}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-[0.6875rem] font-bold transition-all"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-[0.6875rem] font-bold transition-all shadow-sm"
                 >
                   {busy ? <Spinner /> : <Square className="h-3 w-3 fill-current" />}
                   STOP CALL
@@ -284,9 +285,11 @@ export const LiveDetectionSection: React.FC = () => {
             label={band ? bandLabel(band) : undefined}
             action={action}
             confidence={confidence}
-            isEvaluating={isStreaming && score === null}
+            isEvaluating={isCurrentlyActive && score === null}
             detail={
-              band === 'CRITICAL' || band === 'HIGH'
+              isCurrentlyActive
+                ? 'LIVE ACOUSTIC EVALUATION IN PROGRESS'
+                : band === 'CRITICAL' || band === 'HIGH'
                 ? 'POSSIBLE VOICE IMPERSONATION'
                 : band === 'UNCERTAIN'
                 ? 'DEGRADED CHANNEL / STEP-UP REQUIRED'
@@ -299,7 +302,7 @@ export const LiveDetectionSection: React.FC = () => {
             3. SYSTEM PIPELINE (6-Stage Horizontal Flow)
             ========================================================================= */}
         <PipelineFlow
-          isStreaming={isStreaming}
+          isStreaming={isCurrentlyActive}
           framesPublished={state.framesPublished}
           framesScored={state.framesScored}
           hasEvidence={Boolean(state.evidence)}

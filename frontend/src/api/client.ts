@@ -105,7 +105,7 @@ export const startReplay = (
   id: string,
   fixture: ReplayFixture,
   speed = 1.0,
-  repeat = 8,
+  repeat = 1,
 ) => request<ReplayResponse>(`/api/sessions/${id}/replay`, json({ fixture, speed, repeat }));
 
 export const postContext = (id: string, context: Record<string, unknown>) =>

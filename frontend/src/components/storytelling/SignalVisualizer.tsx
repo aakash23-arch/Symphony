@@ -507,18 +507,18 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
       {/* ----------------------------------------------------------------------- */}
       {/* PROGRESSIVE LIVE ANALYSIS STREAM (Appears as audio evaluates)           */}
       {/* ----------------------------------------------------------------------- */}
-      {(state.liveAnalysisPoints.length > 0 || state.isAnalyzing) && (
+      {(state.liveAnalysisPoints.length > 0 || isAudioActive) && (
         <div className="mt-5 border-t border-border pt-4 space-y-3">
           <div className="flex items-center justify-between font-mono text-xs">
             <div className="flex items-center gap-2">
               <span
                 className={cn(
                   'h-2 w-2 rounded-full',
-                  state.isAnalyzing ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-600',
+                  isAudioActive ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-600',
                 )}
               />
               <span className="font-bold uppercase tracking-wider text-fg-primary">
-                {state.isAnalyzing ? 'LIVE / ANALYZING' : 'FINAL / ANALYSIS COMPLETE'}
+                {isAudioActive ? 'LIVE / ANALYZING' : 'FINAL / ANALYSIS COMPLETE'}
               </span>
             </div>
             <span className="text-micro text-fg-tertiary">
@@ -593,9 +593,9 @@ export const SignalVisualizer: React.FC<SignalVisualizerProps> = ({
       )}
 
       {/* ----------------------------------------------------------------------- */}
-      {/* AUTHORITATIVE FINAL RESULT CARD (Appears when audio stops)              */}
+      {/* AUTHORITATIVE FINAL RESULT CARD (Appears when audio finishes playing)   */}
       {/* ----------------------------------------------------------------------- */}
-      {!state.isAnalyzing && state.decision && (
+      {!isAudioActive && state.decision && (
         <div className="mt-5 border-t border-border pt-4 animate-slide-up">
           <div className="flex items-center justify-between mb-3 font-mono text-xs">
             <span className="font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-1.5">
