@@ -1,223 +1,591 @@
-import React from 'react';
-import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
-import { DemoControl } from '../panels/DemoControl';
-import { ErrorState } from '../components/PanelStates';
-import { bandLabel, bandTokens, formatUnit } from '../lib/risk';
+import React, { useState } from 'react';
+import {
+  PhoneCall,
+  ShieldCheck,
+  Building2,
+  Languages,
+  FileCheck,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Play,
+  Square,
+  Activity,
+  Layers,
+} from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from 'recharts';
+
 import { useSession } from '../state/useSession';
 import { cn } from '../lib/cn';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MagneticButton } from '../design-system/MagneticButton';
+import { bandLabel, bandTokens, formatUnit } from '../lib/risk';
+import { formatClock } from '../lib/format';
+import { isTerminal } from '../state/sessionReducer';
+import type { TimelineEntry } from '../types/contracts';
+
+import { RiskGauge } from '../components/RiskGauge';
+import { PipelineFlow } from '../components/PipelineFlow';
+import { EvidenceCards } from '../components/EvidenceCards';
+import { SignalVisualizer } from '../components/storytelling/SignalVisualizer';
+import { DemoControl, MANDATED_SCENARIOS } from '../panels/DemoControl';
 import { EvidencePanel } from '../panels/EvidencePanel';
 import { RiskPanel } from '../panels/RiskPanel';
 import { TransactionPanel } from '../panels/TransactionPanel';
-import type { TimelineEntry } from '../types/contracts';
+import { ErrorState, Spinner } from '../components/PanelStates';
+import { ForensicDossierModal } from '../components/ForensicDossierModal';
 
 export const LiveDetectionSection: React.FC = () => {
-  const { state, reset, audioPlaying } = useSession();
-  const [activeTab, setActiveTab] = React.useState<'overview' | 'dossier'>('overview');
-  
+  const {
+    state,
+    health,
+    reset,
+    startDemo,
+    stopSession,
+    busy,
+    audioPlaying,
+    audioMuted,
+    toggleMute,
+  } = useSession();
+
+  const [activeTab, setActiveTab] = useState<'visualizer' | 'dossier' | 'matrix'>('visualizer');
+  const [showDossierModal, setShowDossierModal] = useState(false);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(MANDATED_SCENARIOS[0].id);
+
   const isStreaming = Boolean(state.sessionId && state.sourceType);
+  const isComplete = Boolean(state.sessionId && isTerminal(state));
   const decision = state.decision;
   const risk = decision?.risk;
-  const band = risk ? bandTokens[risk.risk_band] : null;
   const liveBelief = state.beliefLive;
 
-  // Real live timeline entries from session state
-  const timelineEntries = (state.timeline || []).slice(-6);
+  const currentScenario =
+    MANDATED_SCENARIOS.find((s) => s.id === (state.scenarioId || selectedScenarioId)) ||
+    MANDATED_SCENARIOS[0];
 
-  // Active models & live forensic metrics
-  const activeExpertCount = state.evidence?.experts.filter(e => e.status === 'OK').length ?? (isStreaming ? 1 : 0);
-  const liveConfidence = liveBelief?.confidence ?? risk?.risk_confidence ?? null;
-  const liveSpoofProb = liveBelief?.P_spoof ?? (risk?.risk_score ?? null);
+  // Active risk & decision scores
+  const score = risk?.risk_score ?? liveBelief?.P_spoof ?? null;
+  const band = risk?.risk_band ?? (liveBelief?.band as any) ?? null;
+  const action = decision?.action ?? null;
+  const confidence = risk?.risk_confidence ?? liveBelief?.confidence ?? null;
+
+  // Timeline entries (most recent 8)
+  const timelineEntries = (state.timeline || []).slice(-8);
+
+  // Trajectory points for the line graph
+  const trajectory = (state.evidence?.belief_trajectory ?? state.belief?.trajectory ?? [])
+    .slice(-60)
+    .map((p) => ({
+      t: Number(p.t.toFixed(1)),
+      p_spoof: p.p_spoof,
+      confidence: p.confidence,
+    }));
+
+  // Fallback trajectory point if none from server yet
+  const chartData =
+    trajectory.length > 0
+      ? trajectory
+      : score !== null
+      ? [{ t: 0, p_spoof: score, confidence: confidence ?? 0.8 }]
+      : [];
+
+  const handleStartScenario = (scenarioId: string) => {
+    setSelectedScenarioId(scenarioId);
+    const scen = MANDATED_SCENARIOS.find((s) => s.id === scenarioId) ?? MANDATED_SCENARIOS[0];
+    void startDemo({
+      fixture: scen.fixture,
+      callerRef: scen.callerRef,
+      scenarioId: scen.id,
+      context: scen.context,
+      transaction: scen.transaction,
+    });
+  };
 
   return (
-    <section id="live-detection" className="w-full min-h-screen bg-background pb-24 relative overflow-hidden">
-      
-      {/* Instrumentation Room Grid Background */}
+    <section
+      id="live-detection"
+      className="w-full min-h-screen bg-background pb-24 relative overflow-hidden"
+    >
+      {/* Background Instrumentation Grid */}
       <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-12 lg:pt-16 space-y-12 relative z-10">
-        
-        {/* Scenario Selection Matrix Header */}
-        <DemoControl />
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-8 lg:pt-12 space-y-6 relative z-10">
+        {/* =========================================================================
+            1. INCOMING CALL CONTEXT & DEMO CONTROL STRIP
+            ========================================================================= */}
+        <div className="border border-border bg-surface shadow-sm transition-all">
+          <div className="p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            {/* Left: Caller Identity & Verification Badges */}
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface-elevated text-fg-primary">
+                <PhoneCall className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-micro-label uppercase tracking-widest text-fg-tertiary">
+                    INCOMING EXECUTIVE CALL
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5 mt-0.5">
+                  <h2 className="text-base font-bold text-fg-primary truncate">
+                    {currentScenario.callerName}
+                  </h2>
+                  <span className="text-xs text-fg-secondary truncate hidden sm:inline">
+                    {state.callerRef || currentScenario.callerRef}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[0.625rem] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-500/30">
+                    <ShieldCheck className="h-3 w-3" />
+                    Registered Contact
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[0.625rem] font-mono font-semibold bg-surface-elevated text-fg-secondary border border-border">
+                    <Building2 className="h-3 w-3" />
+                    Enterprise Voice
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        {/* Live Audio Ingestion & Telemetry Section */}
-        <AnimatePresence mode="wait">
-          {isStreaming && (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
-            >
-              {/* Top Readout Indicators (100% Bound to Live Telemetry) */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-micro-label uppercase">
-                <div className="border border-border p-4 bg-surface shadow-sm">
-                  <div className="text-fg-tertiary mb-2">SIGNAL STREAM</div>
-                  <div className="text-fg font-bold flex items-center gap-2">
-                    {isStreaming && (audioPlaying || state.isAnalyzing) && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            {/* Middle: Language & Code-Switching Detection */}
+            <div className="hidden lg:flex flex-col items-center justify-center px-6 border-x border-border/80 text-center">
+              <div className="flex items-center gap-1.5 font-mono text-xs font-semibold text-fg">
+                <Languages className="h-3.5 w-3.5 text-fg-tertiary" />
+                <span>
+                  {state.languages.length > 0
+                    ? state.languages.join(' / ')
+                    : currentScenario.language}
+                </span>
+              </div>
+              <span className="font-mono text-[0.6875rem] text-fg-tertiary mt-1">
+                {currentScenario.languageDetail}
+              </span>
+            </div>
+
+            {/* Right: Transaction Context & Live Stream Status */}
+            <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-border/60">
+              <div>
+                <span className="font-mono text-micro-label uppercase tracking-widest text-fg-tertiary block">
+                  TRANSACTION AMOUNT
+                </span>
+                <div className="font-mono text-lg sm:text-xl font-bold text-fg tracking-tight tnum mt-0.5">
+                  {currentScenario.transaction?.amount
+                    ? `₹ ${Number(currentScenario.transaction.amount).toLocaleString('en-IN')}`
+                    : '₹ 25,00,000'}
+                </div>
+                <span className="font-mono text-[0.6875rem] text-fg-tertiary block truncate max-w-[200px]">
+                  Beneficiary:{' '}
+                  <strong className="text-fg-secondary">
+                    {currentScenario.transaction?.beneficiary || 'New Account'}
+                  </strong>
+                </span>
+              </div>
+
+              {/* Status Pill */}
+              <div className="flex flex-col items-end gap-1.5">
+                {isStreaming ? (
+                  isComplete ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-500/40">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      COMPLETE
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-500/40 animate-pulse">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      LIVE
+                    </span>
+                  )
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-semibold bg-surface-elevated text-fg-tertiary border border-border">
+                    IDLE READY
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Demo Switcher & Audio Controls Strip */}
+          <div className="bg-surface-elevated/50 px-4 sm:px-5 py-2.5 border-t border-border flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-fg-tertiary text-micro-label uppercase font-semibold">
+                DEMO RECORDINGS:
+              </span>
+              <div className="flex gap-1.5 flex-wrap">
+                {MANDATED_SCENARIOS.map((scen) => (
+                  <button
+                    key={scen.id}
+                    type="button"
+                    disabled={isStreaming && !isComplete && busy}
+                    onClick={() => handleStartScenario(scen.id)}
+                    className={cn(
+                      'px-2.5 py-1 text-[0.6875rem] font-bold uppercase transition-all border flex items-center gap-1.5',
+                      (state.scenarioId === scen.id || (!state.scenarioId && selectedScenarioId === scen.id))
+                        ? 'border-fg bg-fg text-background shadow-sm'
+                        : 'border-border bg-surface text-fg-secondary hover:border-fg hover:text-fg'
                     )}
-                    {isStreaming
-                      ? audioPlaying || state.isAnalyzing
-                        ? 'ACTIVE STREAMING'
-                        : 'STREAM COMPLETE'
-                      : 'OFFLINE'}
-                  </div>
-                </div>
-
-                <div className="border border-border p-4 bg-surface shadow-sm">
-                  <div className="text-fg-tertiary mb-2">NEURAL EXPERTS</div>
-                  <div className="text-fg font-bold">
-                    {activeExpertCount > 0 ? `${activeExpertCount} ACTIVE` : 'ANALYSING'}
-                  </div>
-                </div>
-
-                <div className="border border-border p-4 bg-surface shadow-sm">
-                  <div className="text-fg-tertiary mb-2">EVIDENCE CONFIDENCE</div>
-                  <div className="text-fg font-bold">
-                    {liveConfidence !== null ? `${Math.round(liveConfidence * 100)}%` : 'COMPUTING'}
-                  </div>
-                </div>
-
-                <div className="border border-border p-4 bg-surface shadow-sm">
-                  <div className="text-fg-tertiary mb-2">INFERRED RISK</div>
-                  <div className={cn("font-bold", band?.text || 'text-fg')}>
-                    {risk ? bandLabel(risk.risk_band) : (liveBelief?.band ?? 'EVALUATING')}
-                  </div>
-                </div>
+                  >
+                    <span>DEMO {scen.sectionIndex}</span>
+                    <span className="opacity-75">({scen.badge})</span>
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* View Selector Tabs */}
-              <div className="flex items-center gap-2 border-b border-border pb-2">
+            <div className="flex items-center gap-2">
+              {audioPlaying && (
                 <button
                   type="button"
-                  onClick={() => setActiveTab('overview')}
-                  className={cn(
-                    "px-4 py-2 font-mono text-xs font-bold uppercase transition-all border",
-                    activeTab === 'overview'
-                      ? "border-fg bg-fg text-background"
-                      : "border-transparent text-fg-secondary hover:border-border hover:bg-surface"
-                  )}
+                  onClick={toggleMute}
+                  className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-emerald-700 hover:text-emerald-800"
                 >
-                  Live Spectrogram & Signal Flow
+                  {audioMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                  <span>{audioMuted ? 'MUTED' : 'AUDIO PLAYING'}</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('dossier')}
-                  className={cn(
-                    "px-4 py-2 font-mono text-xs font-bold uppercase transition-all border",
-                    activeTab === 'dossier'
-                      ? "border-fg bg-fg text-background"
-                      : "border-transparent text-fg-secondary hover:border-border hover:bg-surface"
-                  )}
-                >
-                  Full Forensic Dossier & Policy Matrix
-                </button>
-              </div>
-
-              {activeTab === 'overview' ? (
-                <>
-                  {/* Real-time Spectrogram & Signal Processing Visualizer with live frames and result */}
-                  <div className="border border-border bg-surface p-6 shadow-sm">
-                    <SignalVisualizer />
-                  </div>
-
-                  {/* Real-time Evidence Stream & Live Decision Card */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Live Event Stream from Analysis Loop */}
-                    <div className="border border-border bg-surface p-6 font-mono text-xs shadow-sm">
-                      <div className="text-fg-tertiary uppercase mb-4 tracking-widest border-b border-border pb-3 flex justify-between items-center">
-                        <span>LIVE AUDIT TIMELINE</span>
-                        <span className="text-micro text-fg-secondary">{timelineEntries.length} EVENTS</span>
-                      </div>
-                      <div className="space-y-3 max-h-[280px] overflow-y-auto">
-                        {timelineEntries.length > 0 ? (
-                          timelineEntries.map((ev: TimelineEntry, i: number) => (
-                            <div key={i} className="flex gap-3 items-start border-b border-border/40 pb-2">
-                              <span className="text-fg-tertiary shrink-0 font-bold">[{ev.kind}]</span>
-                              <span className="text-fg-secondary">{ev.label} — {ev.detail || 'Processed'}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-fg-tertiary py-8 text-center italic">
-                            Streaming audio into forensic neural pipeline...
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Independent Pipeline Decision Card */}
-                    <div className="border border-border bg-surface p-6 flex flex-col justify-between shadow-sm">
-                      <div>
-                        <div className="text-fg-tertiary uppercase mb-4 tracking-widest border-b border-border pb-3 font-mono text-xs">
-                          INFERRED POLICY VERDICT
-                        </div>
-                        {decision ? (
-                          <div className="space-y-4">
-                            <div className={cn("text-3xl font-black uppercase tracking-wider", band?.text)}>
-                              {bandLabel(risk?.risk_band || 'LOW')}
-                            </div>
-                            <div className="font-mono text-xs text-fg-secondary space-y-1">
-                              <div>POLICY ACTION: <strong className="text-fg font-bold">{decision.action}</strong></div>
-                              <div>MATCHED RULE: <span className="text-fg-tertiary">{decision.matched_policy || 'Standard Baseline'}</span></div>
-                              {liveSpoofProb !== null && (
-                                <div>P(SPOOF): <strong className="text-fg font-mono">{formatUnit(liveSpoofProb)}</strong></div>
-                              )}
-                            </div>
-                            <p className="text-xs text-fg-secondary mt-2 border-t border-border pt-3">
-                              {decision.reason_codes?.length
-                                ? `Policy rule [${decision.matched_policy}] evaluated: ${decision.reason_codes.join(', ')}.`
-                                : `Inference complete. Forensic signals processed with ${decision.action} action enforcement.`}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="py-12 text-center text-fg-tertiary font-mono text-xs">
-                            <span className="inline-block animate-pulse">Running PyTorch neural acoustic inference...</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-border flex items-center justify-end gap-3">
-                        <MagneticButton 
-                          onClick={() => setActiveTab('dossier')} 
-                          className="border border-border bg-surface px-4 py-2 font-mono text-micro-label uppercase font-bold text-fg hover:bg-border/50"
-                        >
-                          OPEN DOSSIER
-                        </MagneticButton>
-                        <MagneticButton 
-                          onClick={reset} 
-                          className="border border-fg bg-fg px-4 py-2 font-mono text-micro-label uppercase font-bold text-background hover:bg-fg/90"
-                        >
-                          RESET / TEST ANOTHER
-                        </MagneticButton>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                /* Full Production Forensic & Risk Panels */
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <EvidencePanel />
-                  <div className="space-y-8">
-                    <RiskPanel />
-                    <TransactionPanel />
-                  </div>
-                </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
+              {isStreaming && !isComplete ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void stopSession()}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-[0.6875rem] font-bold transition-all"
+                >
+                  {busy ? <Spinner /> : <Square className="h-3 w-3 fill-current" />}
+                  STOP CALL
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => handleStartScenario(selectedScenarioId)}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-fg hover:bg-fg/90 text-white text-[0.6875rem] font-bold transition-all shadow-sm"
+                >
+                  {busy ? <Spinner /> : <Play className="h-3 w-3 fill-current" />}
+                  PLAY RECORDING
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={reset}
+                className="inline-flex items-center gap-1 px-2.5 py-1 border border-border bg-surface hover:bg-surface-elevated text-fg-secondary text-[0.6875rem] font-medium"
+              >
+                <RotateCcw className="h-3 w-3" />
+                RESET
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            2. CENTRAL COMPOSITE RISK GAUGE CARD
+            ========================================================================= */}
+        <div className="border border-border bg-surface shadow-sm p-6 sm:p-8">
+          <RiskGauge
+            score={score}
+            band={band}
+            label={band ? bandLabel(band) : undefined}
+            action={action}
+            confidence={confidence}
+            isEvaluating={isStreaming && score === null}
+            detail={
+              band === 'CRITICAL' || band === 'HIGH'
+                ? 'POSSIBLE VOICE IMPERSONATION'
+                : band === 'UNCERTAIN'
+                ? 'DEGRADED CHANNEL / STEP-UP REQUIRED'
+                : 'NOMINAL AUTHENTIC VOICE'
+            }
+          />
+        </div>
+
+        {/* =========================================================================
+            3. SYSTEM PIPELINE (6-Stage Horizontal Flow)
+            ========================================================================= */}
+        <PipelineFlow
+          isStreaming={isStreaming}
+          framesPublished={state.framesPublished}
+          framesScored={state.framesScored}
+          hasEvidence={Boolean(state.evidence)}
+          hasDecision={Boolean(state.decision)}
+          isComplete={isComplete}
+        />
+
+        {/* =========================================================================
+            4. INDEPENDENT EVIDENCE SOURCE CARDS (Acoustic, Prosody, Speaker, Context)
+            ========================================================================= */}
+        <EvidenceCards
+          experts={state.evidence?.experts ?? []}
+          contributions={state.decision?.risk?.contributions ?? []}
+          isLoading={isStreaming && !state.evidence}
+        />
+
+        {/* =========================================================================
+            5. FORENSIC DUAL PANE: RISK TRAJECTORY & LIVE EVENT STREAM
+            ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left: Voice Risk Trajectory Line Chart */}
+          <div className="lg:col-span-7 border border-border bg-surface p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-border/80">
+                <div>
+                  <span className="font-mono text-micro-label uppercase tracking-widest text-fg-tertiary block">
+                    TEMPORAL FORENSIC BELIEF
+                  </span>
+                  <h3 className="text-sm font-bold text-fg mt-0.5">
+                    Voice Risk Trajectory
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3 font-mono text-[0.625rem] text-fg-tertiary">
+                  <div className="flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-fg" />
+                    <span>P(Spoof)</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="h-0.5 w-3 bg-red-500 inline-block" />
+                    <span>Policy Threshold (0.70)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart Container */}
+              <div className="h-56 mt-4 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid stroke="#EBEBEA" strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="t"
+                      tickFormatter={(v: number) => `${v}s`}
+                      stroke="#888888"
+                      fontSize={10}
+                      fontFamily="monospace"
+                      tickLine={false}
+                    />
+                    <YAxis
+                      domain={[0, 1]}
+                      ticks={[0, 0.25, 0.5, 0.75, 1.0]}
+                      stroke="#888888"
+                      fontSize={10}
+                      fontFamily="monospace"
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="border border-border bg-surface p-2 font-mono text-xs shadow-lg">
+                              <div>Time: {data.t}s</div>
+                              <div className="font-bold text-fg">
+                                P(Spoof): {formatUnit(data.p_spoof)}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    {/* Policy Threshold Reference Line */}
+                    <ReferenceLine
+                      y={0.70}
+                      stroke="#DC2626"
+                      strokeDasharray="4 4"
+                      strokeWidth={1.5}
+                      label={{
+                        value: 'THRESHOLD 0.70',
+                        position: 'right',
+                        fill: '#DC2626',
+                        fontSize: 9,
+                        fontFamily: 'monospace',
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="p_spoof"
+                      stroke="#0A0A0A"
+                      strokeWidth={2}
+                      dot={false}
+                      isAnimationActive={false}
+                      connectNulls={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between font-mono text-[0.6875rem] text-fg-tertiary">
+              <span>ACCUMULATED FRAMES: {state.framesScored}</span>
+              <span>SCALE: 0.00–1.00 UNCALIBRATED</span>
+            </div>
+          </div>
+
+          {/* Right: Live Event Stream Audit Log */}
+          <div className="lg:col-span-5 border border-border bg-surface p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-border/80">
+                <span className="font-mono text-micro-label uppercase tracking-widest text-fg-tertiary">
+                  LIVE EVENT STREAM
+                </span>
+                <span className="font-mono text-[0.625rem] text-fg-secondary">
+                  {timelineEntries.length} EVENTS RECORDED
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2.5 max-h-[230px] overflow-y-auto pr-1">
+                {timelineEntries.length > 0 ? (
+                  timelineEntries.map((ev: TimelineEntry, idx: number) => (
+                    <div
+                      key={ev.seq ?? idx}
+                      className="flex items-start gap-2.5 text-xs font-mono border-b border-border/40 pb-2 last:border-0"
+                    >
+                      <span className="text-fg-tertiary shrink-0 text-[0.6875rem]">
+                        [{formatClock(ev.timestamp) || `+${ev.t_offset_s ?? 0}s`}]
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-fg-primary text-[0.6875rem]">
+                            {ev.kind}
+                          </span>
+                          {ev.risk_band && (
+                            <span className={cn('text-[0.625rem] font-bold px-1 rounded', bandTokens[ev.risk_band]?.text)}>
+                              {ev.risk_band}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-fg-secondary text-[0.6875rem] truncate mt-0.5">
+                          {ev.label} {ev.detail ? `· ${ev.detail}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center text-fg-tertiary font-mono text-xs">
+                    <span className="inline-block animate-pulse">
+                      Awaiting live acoustic stream telemetry...
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
+              <span className="font-mono text-[0.6875rem] text-fg-tertiary">
+                SHA-256 HASH CHAIN: {state.evidence?.hash_chained ? 'VERIFIED' : 'PENDING'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowDossierModal(true)}
+                className="font-mono text-[0.6875rem] font-bold text-fg hover:underline inline-flex items-center gap-1"
+              >
+                <FileCheck className="h-3.5 w-3.5" />
+                EXPORT DOSSIER
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            6. INTERACTIVE SPECTROGRAM, FULL DOSSIER & SCENARIO MATRIX ACCORDION
+            ========================================================================= */}
+        <div className="border border-border bg-surface shadow-sm">
+          {/* Tab Selector Bar */}
+          <div className="flex items-center border-b border-border px-4 py-2 gap-2 bg-surface-elevated/40">
+            <button
+              type="button"
+              onClick={() => setActiveTab('visualizer')}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all border',
+                activeTab === 'visualizer'
+                  ? 'border-fg bg-fg text-background shadow-sm'
+                  : 'border-transparent text-fg-secondary hover:border-border hover:bg-surface'
+              )}
+            >
+              <Activity className="h-3.5 w-3.5" />
+              Harmonic Spectrogram & Signal Flow
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('dossier')}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all border',
+                activeTab === 'dossier'
+                  ? 'border-fg bg-fg text-background shadow-sm'
+                  : 'border-transparent text-fg-secondary hover:border-border hover:bg-surface'
+              )}
+            >
+              <FileCheck className="h-3.5 w-3.5" />
+              Full Forensic Dossier & Policy Matrix
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('matrix')}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-1.5 font-mono text-xs font-bold uppercase transition-all border',
+                activeTab === 'matrix'
+                  ? 'border-fg bg-fg text-background shadow-sm'
+                  : 'border-transparent text-fg-secondary hover:border-border hover:bg-surface'
+              )}
+            >
+              <Layers className="h-3.5 w-3.5" />
+              Detailed Scenario Matrix Inspector
+            </button>
+          </div>
+
+          <div className="p-5 sm:p-6">
+            {activeTab === 'visualizer' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-border/80">
+                  <div>
+                    <span className="font-mono text-micro-label uppercase tracking-widest text-fg-tertiary block">
+                      SPECTRAL DENSITY & HARMONIC OSCILLOSCOPE
+                    </span>
+                    <h3 className="text-sm font-bold text-fg mt-0.5">
+                      Real-Time Voice Signal & Progressive Frame Ingestion
+                    </h3>
+                  </div>
+                  <span className="font-mono text-micro text-fg-tertiary">
+                    32 FREQUENCY BINS (0–8000 HZ)
+                  </span>
+                </div>
+                <SignalVisualizer />
+              </div>
+            )}
+
+            {activeTab === 'dossier' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <EvidencePanel />
+                <div className="space-y-8">
+                  <RiskPanel />
+                  <TransactionPanel />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'matrix' && (
+              <DemoControl />
+            )}
+          </div>
+        </div>
+
+        {/* Global Error Notice */}
         {state.error && (
-          <div className="border border-red-500 bg-surface p-4 text-red-600 font-mono text-sm max-w-2xl mx-auto mt-8">
+          <div className="border border-red-500 bg-surface p-4 text-red-600 font-mono text-sm max-w-2xl mx-auto mt-6 shadow-sm">
             <ErrorState code={state.error.code} message={state.error.message} />
-            <button onClick={reset} className="mt-4 border border-red-500 px-3 py-1 hover:bg-red-50 font-bold">
-              TRY AGAIN
+            <button
+              type="button"
+              onClick={reset}
+              className="mt-4 border border-red-500 px-3 py-1 hover:bg-red-50 font-bold"
+            >
+              RESET AND RETRY
             </button>
           </div>
         )}
-
       </div>
+
+      {/* Full-Screen Forensic Dossier Modal */}
+      {showDossierModal && (
+        <ForensicDossierModal
+          state={state}
+          health={health}
+          onClose={() => setShowDossierModal(false)}
+        />
+      )}
     </section>
   );
 };
